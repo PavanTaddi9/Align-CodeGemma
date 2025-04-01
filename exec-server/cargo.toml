@@ -1,0 +1,9 @@
+[package]
+name = "code_exec_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.6.18"                     
+serde = { version = "1.0.200", features = ["derive"] }  
+tokio = { version = "1.29.1", features = ["full"] }  
