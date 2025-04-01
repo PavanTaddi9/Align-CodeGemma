@@ -1,0 +1,518 @@
+[
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n    np.testing.assert_allclose(jax.jit(fusable_matmul)(x, y), mm_ref(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_activation(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_relu(x, y):\n        x = fusable_matmul(x, y)\n        x = jnp.maximum(x, 0.0)\n        return x\n    np.testing.assert_allclose(matmul_relu(x, y), jax.nn.relu(mm_ref(x, y)), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_bias(self, dtype):\n    if dtype == 'bfloat16' and (not jtu.is_device_tpu_at_least(5)):\n        self.skipTest('bfloat16 bcast not supported on TPU generations < 5')\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n    b = jax.random.normal(k2, (1, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_bias(x, y, b):\n        x = fusable_matmul(x, y).astype(dtype) + b\n        x = jnp.maximum(x, 0.0)\n        return x\n    np.testing.assert_allclose(matmul_bias(x, y, b), jax.nn.relu(mm_ref(x, y).astype(dtype) + b), atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_dynamic_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i):\n        x = fusable_matmul(x, y[i])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y, 1), mm_ref(x, y[1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_dynamic_slice_bias(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (3, 512, 512), dtype)\n    b = jax.random.normal(k2, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, b, i, j):\n        x = fusable_matmul(x, y[j]).astype(dtype) + b[i]\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y, b, 1, 2), mm_ref(x, y[2]).astype(dtype) + b[1], atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multi_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1, 1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1, 1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1][1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1, 1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_dynamic_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i, j):\n        x = fusable_matmul(x, y[i][j])\n        return x\n    for i in range(2):\n        for j in range(3):\n            np.testing.assert_allclose(matmul_slice(x, y, i, j), mm_ref(x, y[i, j]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_mixed_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (4, 2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i, j):\n        x = fusable_matmul(x, y[2][i, j])\n        return x\n    for i in range(2):\n        for j in range(3):\n            np.testing.assert_allclose(matmul_slice(x, y, i, j), mm_ref(x, y[2, i, j]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_mixed_slices_and_bias(self, dtype):\n    if dtype == 'bfloat16' and (not jtu.is_device_tpu_at_least(5)):\n        self.skipTest('bfloat16 bcast not supported on TPU generations < 5')\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (4, 4, 512, 512), dtype)\n    y = jax.random.normal(k1, (4, 2, 3, 512, 512), dtype)\n    b = jax.random.normal(k2, (4, 4, 1, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, b, i, j, k):\n        x = fusable_matmul(x[k][3], y[2][i, j]).astype(dtype)\n        return x + b[i, j]\n\n    @jit_no_excess_precision\n    def matmul_slice_ref(x, y, b, i, j, k):\n        x = mm_ref(x[k][3], y[2][i, j]).astype(dtype)\n        return x + b[i, j]\n    for i in range(2):\n        for j in range(3):\n            for k in range(4):\n                np.testing.assert_allclose(matmul_slice(x, y, b, i, j, k), matmul_slice_ref(x, y, b, i, j, k), atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_input_concat_output(self, dtype):\n    self.skipTest('select_n doesnt support more than 3 elements')\n    k0, k1, k2, k3 = jax.random.split(jax.random.key(0), 4)\n    x = jax.random.normal(k0, (128, 128), dtype)\n    y1 = jax.random.normal(k1, (128, 256), dtype)\n    y2 = jax.random.normal(k2, (128, 256), dtype)\n    y3 = jax.random.normal(k3, (128, 256), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys):\n        y = jnp.concatenate(ys, axis=1)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jax.jit\n    def matmul_concat_ref(x, ys):\n        y = jnp.concatenate(ys, axis=1)\n        return mm_ref(x, y)\n    ys = [y1, y2, y3]\n    np.testing.assert_allclose(matmul_concat(x, ys), matmul_concat_ref(x, ys), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_input_concat_contract(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys):\n        y = jnp.concatenate(ys, axis=0)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, ys):\n        y = jnp.concatenate(ys, axis=0)\n        return mm_ref(x, y)\n    ys = [y1, y2]\n    np.testing.assert_allclose(matmul_concat(x, ys), matmul_concat_ref(x, ys), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_double_concat(self, dtype):\n    k0, k1, k2, k3 = jax.random.split(jax.random.key(0), 4)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (128, 128), dtype)\n    y3 = jax.random.normal(k3, (256, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys, y3):\n        y = jnp.concatenate(ys, axis=0)\n        y = jnp.concatenate([y, y3], axis=1)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, ys, y3):\n        y = jnp.concatenate(ys, axis=0)\n        y = jnp.concatenate([y, y3], axis=1)\n        return mm_ref(x, y)\n    ys = [y1, y2]\n    np.testing.assert_allclose(matmul_concat(x, ys, y3), matmul_concat_ref(x, ys, y3), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_slice_concat(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=0)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=0)\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2), matmul_concat_ref(x, y1, y2), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_slice_concat_slice(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (3, 128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 3, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=1)[1]\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=1)[1]\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2), matmul_concat_ref(x, y1, y2), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_dynamic_slice_concat(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (2, 128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 2, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2, i, j):\n        y = jnp.concatenate([y1, y2[i]], axis=1)[j]\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2, i, j):\n        y = jnp.concatenate([y1, y2[i]], axis=1)[j]\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2, 3, 1), matmul_concat_ref(x, y1, y2, 3, 1), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_no_following_ops(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (512, 256), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.T)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    np.testing.assert_allclose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_then_add(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (512, 256), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.T + 1.0)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_after_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (2, 512, 256), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y[1].T)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_before_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (2, 512, 256), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.swapaxes(-1, -2)[1])\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_major_dim(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (2, 3, 256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.swapaxes(0, 1)[1, 0])\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_transpose(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.T.T)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_add_transpose(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, jnp.tanh((y.T + 1).T))\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jit_no_excess_precision(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_lhs_transpose(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (256, 512), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x.T, y)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_lhs_transpose_add(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (256, 512), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x.T + 1, y)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_out_transpose(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (256, 256), dtype)\n    y = jax.random.normal(k1, (256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z.T\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_out_transpose_mul(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (256, 256), dtype)\n    y = jax.random.normal(k1, (256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z.T * 2\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_matmul_bf16_out(self):\n    if not jtu.is_device_tpu_at_least(4):\n        self.skipTest('TPU v4+ required')\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 256), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, fusable_matmul))\n    ref = functools.partial(matmul, dot_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_matmul_bf16_activation(self):\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 256), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return jnp.exp(jnp.tanh(z))\n    ref = functools.partial(matmul, dot_ref)\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, fusable_matmul))\n    out = jax.jit(impl)(x, y)\n    self.assertAllClose(out, out_ref, atol=0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_matmul_f32_out_simple(self):\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 256), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z\n    ref = functools.partial(matmul, mm_ref)\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bk=256, bn=128)))\n    out = jax.jit(impl)(x, y)\n    atol = 0\n    if jtu.is_device_tpu_at_least(6):\n        atol = 1e-06\n    self.assertAllClose(out, out_ref, atol=atol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_matmul_f32_out_fused_downcast(self):\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (2048, 2048), dtype)\n    y = jax.random.normal(k1, (2048, 2048), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z.astype(x.dtype)\n    bm = 512\n    bk = 256\n    bn = 1024\n    ref = functools.partial(matmul, functools.partial(dot_ref, bm=bm, bk=bk, bn=bn))\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=bm, bk=bk, bn=bn)))\n    out = jax.jit(impl)(x, y)\n    self.assertArraysEqual(out, out_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_matmul_out_bf16_with_f32_activation(self):\n    if not jtu.is_device_tpu_at_least(4):\n        self.skipTest('TPU v4+ required')\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (2048, 2048), dtype)\n    y = jax.random.normal(k1, (2048, 2048), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return jnp.exp(jnp.tanh(z)).astype(x.dtype)\n    bm = 512\n    bk = 256\n    bn = 1024\n    ref = functools.partial(matmul, functools.partial(dot_ref, bm=bm, bk=bk, bn=bn))\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=bm, bk=bk, bn=bn)))\n    out = jax.jit(impl)(x, y)\n    self.assertArraysEqual(out, out_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_matmul_out_bf16_with_bf16_activation(self):\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (2048, 2048), dtype)\n    y = jax.random.normal(k1, (2048, 2048), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return jnp.exp(jnp.tanh(z)).astype(x.dtype)\n    bm = 512\n    bk = 256\n    bn = 1024\n    ref = functools.partial(matmul, functools.partial(dot_ref, bm=bm, bk=bk, bn=bn))\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=bm, bk=bk, bn=bn)))\n    out = jax.jit(impl)(x, y)\n    self.assertArraysEqual(out, out_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_no_following_ops(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (512, 256), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.T)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    np.testing.assert_allclose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_then_add(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (512, 256), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.T + 1.0)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_after_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (2, 512, 256), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y[1].T)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_before_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (2, 512, 256), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.swapaxes(-1, -2)[1])\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_major_dim(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (2, 3, 256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.swapaxes(0, 1)[1, 0])\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_transpose(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y.T.T)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_rhs_transpose_add_transpose(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y = jax.random.normal(k1, (256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, jnp.tanh((y.T + 1).T))\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jit_no_excess_precision(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_lhs_transpose(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (256, 512), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x.T, y)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_lhs_transpose_add(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (256, 512), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x.T + 1, y)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_out_transpose(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (256, 256), dtype)\n    y = jax.random.normal(k1, (256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z.T\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_out_transpose_mul(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (256, 256), dtype)\n    y = jax.random.normal(k1, (256, 512), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z.T * 2\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bn=256)))\n    ref = functools.partial(matmul, mm_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "def test_matmul_bf16_out(self):\n    if not jtu.is_device_tpu_at_least(4):\n        self.skipTest('TPU v4+ required')\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 256), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z\n    impl = fuser.fuse(functools.partial(matmul, fusable_matmul))\n    ref = functools.partial(matmul, dot_ref)\n    self.assertAllClose(jax.jit(impl)(x, y), jax.jit(ref)(x, y), atol=0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "def test_matmul_bf16_activation(self):\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 256), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return jnp.exp(jnp.tanh(z))\n    ref = functools.partial(matmul, dot_ref)\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, fusable_matmul))\n    out = jax.jit(impl)(x, y)\n    self.assertAllClose(out, out_ref, atol=0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "def test_matmul_f32_out_simple(self):\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 256), dtype)\n    y = jax.random.normal(k1, (256, 384), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z\n    ref = functools.partial(matmul, mm_ref)\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bk=256, bn=128)))\n    out = jax.jit(impl)(x, y)\n    atol = 0\n    if jtu.is_device_tpu_at_least(6):\n        atol = 1e-06\n    self.assertAllClose(out, out_ref, atol=atol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "def test_matmul_f32_out_fused_downcast(self):\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (2048, 2048), dtype)\n    y = jax.random.normal(k1, (2048, 2048), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return z.astype(x.dtype)\n    bm = 512\n    bk = 256\n    bn = 1024\n    ref = functools.partial(matmul, functools.partial(dot_ref, bm=bm, bk=bk, bn=bn))\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=bm, bk=bk, bn=bn)))\n    out = jax.jit(impl)(x, y)\n    self.assertArraysEqual(out, out_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "def test_matmul_out_bf16_with_f32_activation(self):\n    if not jtu.is_device_tpu_at_least(4):\n        self.skipTest('TPU v4+ required')\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (2048, 2048), dtype)\n    y = jax.random.normal(k1, (2048, 2048), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return jnp.exp(jnp.tanh(z)).astype(x.dtype)\n    bm = 512\n    bk = 256\n    bn = 1024\n    ref = functools.partial(matmul, functools.partial(dot_ref, bm=bm, bk=bk, bn=bn))\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=bm, bk=bk, bn=bn)))\n    out = jax.jit(impl)(x, y)\n    self.assertArraysEqual(out, out_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "def test_matmul_out_bf16_with_bf16_activation(self):\n    dtype = jnp.bfloat16\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (2048, 2048), dtype)\n    y = jax.random.normal(k1, (2048, 2048), dtype)\n\n    def matmul(impl, x, y):\n        z = impl(x, y)\n        return jnp.exp(jnp.tanh(z)).astype(x.dtype)\n    bm = 512\n    bk = 256\n    bn = 1024\n    ref = functools.partial(matmul, functools.partial(dot_ref, bm=bm, bk=bk, bn=bn))\n    out_ref = jit_no_excess_precision(ref)(x, y)\n    impl = fuser.fuse(functools.partial(matmul, functools.partial(fusable_matmul, bm=bm, bk=bk, bn=bn)))\n    out = jax.jit(impl)(x, y)\n    self.assertArraysEqual(out, out_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def impl(x):\n    return spec.call((x, jnp.zeros_like(x)))[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_activation(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_relu(x, y):\n        x = fusable_matmul(x, y)\n        x = jnp.maximum(x, 0.0)\n        return x\n    np.testing.assert_allclose(matmul_relu(x, y), jax.nn.relu(mm_ref(x, y)), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jax.custom_jvp\ndef relu(x):\n    return jnp.maximum(x, 0)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_bias(self, dtype):\n    if dtype == 'bfloat16' and (not jtu.is_device_tpu_at_least(5)):\n        self.skipTest('bfloat16 bcast not supported on TPU generations < 5')\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n    b = jax.random.normal(k2, (1, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_bias(x, y, b):\n        x = fusable_matmul(x, y).astype(dtype) + b\n        x = jnp.maximum(x, 0.0)\n        return x\n    np.testing.assert_allclose(matmul_bias(x, y, b), jax.nn.relu(mm_ref(x, y).astype(dtype) + b), atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jax.custom_jvp\ndef relu(x):\n    return jnp.maximum(x, 0)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n    np.testing.assert_allclose(jax.jit(fusable_matmul)(x, y), mm_ref(x, y), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_activation(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_relu(x, y):\n        x = fusable_matmul(x, y)\n        x = jnp.maximum(x, 0.0)\n        return x\n    np.testing.assert_allclose(matmul_relu(x, y), jax.nn.relu(mm_ref(x, y)), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_bias(self, dtype):\n    if dtype == 'bfloat16' and (not jtu.is_device_tpu_at_least(5)):\n        self.skipTest('bfloat16 bcast not supported on TPU generations < 5')\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n    b = jax.random.normal(k2, (1, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_bias(x, y, b):\n        x = fusable_matmul(x, y).astype(dtype) + b\n        x = jnp.maximum(x, 0.0)\n        return x\n    np.testing.assert_allclose(matmul_bias(x, y, b), jax.nn.relu(mm_ref(x, y).astype(dtype) + b), atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_dynamic_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i):\n        x = fusable_matmul(x, y[i])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y, 1), mm_ref(x, y[1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_dynamic_slice_bias(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (3, 512, 512), dtype)\n    b = jax.random.normal(k2, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, b, i, j):\n        x = fusable_matmul(x, y[j]).astype(dtype) + b[i]\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y, b, 1, 2), mm_ref(x, y[2]).astype(dtype) + b[1], atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multi_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1, 1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1, 1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1][1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1, 1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_dynamic_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i, j):\n        x = fusable_matmul(x, y[i][j])\n        return x\n    for i in range(2):\n        for j in range(3):\n            np.testing.assert_allclose(matmul_slice(x, y, i, j), mm_ref(x, y[i, j]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_mixed_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (4, 2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i, j):\n        x = fusable_matmul(x, y[2][i, j])\n        return x\n    for i in range(2):\n        for j in range(3):\n            np.testing.assert_allclose(matmul_slice(x, y, i, j), mm_ref(x, y[2, i, j]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_mixed_slices_and_bias(self, dtype):\n    if dtype == 'bfloat16' and (not jtu.is_device_tpu_at_least(5)):\n        self.skipTest('bfloat16 bcast not supported on TPU generations < 5')\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (4, 4, 512, 512), dtype)\n    y = jax.random.normal(k1, (4, 2, 3, 512, 512), dtype)\n    b = jax.random.normal(k2, (4, 4, 1, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, b, i, j, k):\n        x = fusable_matmul(x[k][3], y[2][i, j]).astype(dtype)\n        return x + b[i, j]\n\n    @jit_no_excess_precision\n    def matmul_slice_ref(x, y, b, i, j, k):\n        x = mm_ref(x[k][3], y[2][i, j]).astype(dtype)\n        return x + b[i, j]\n    for i in range(2):\n        for j in range(3):\n            for k in range(4):\n                np.testing.assert_allclose(matmul_slice(x, y, b, i, j, k), matmul_slice_ref(x, y, b, i, j, k), atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_input_concat_output(self, dtype):\n    self.skipTest('select_n doesnt support more than 3 elements')\n    k0, k1, k2, k3 = jax.random.split(jax.random.key(0), 4)\n    x = jax.random.normal(k0, (128, 128), dtype)\n    y1 = jax.random.normal(k1, (128, 256), dtype)\n    y2 = jax.random.normal(k2, (128, 256), dtype)\n    y3 = jax.random.normal(k3, (128, 256), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys):\n        y = jnp.concatenate(ys, axis=1)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jax.jit\n    def matmul_concat_ref(x, ys):\n        y = jnp.concatenate(ys, axis=1)\n        return mm_ref(x, y)\n    ys = [y1, y2, y3]\n    np.testing.assert_allclose(matmul_concat(x, ys), matmul_concat_ref(x, ys), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_input_concat_contract(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys):\n        y = jnp.concatenate(ys, axis=0)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, ys):\n        y = jnp.concatenate(ys, axis=0)\n        return mm_ref(x, y)\n    ys = [y1, y2]\n    np.testing.assert_allclose(matmul_concat(x, ys), matmul_concat_ref(x, ys), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_double_concat(self, dtype):\n    k0, k1, k2, k3 = jax.random.split(jax.random.key(0), 4)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (128, 128), dtype)\n    y3 = jax.random.normal(k3, (256, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys, y3):\n        y = jnp.concatenate(ys, axis=0)\n        y = jnp.concatenate([y, y3], axis=1)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, ys, y3):\n        y = jnp.concatenate(ys, axis=0)\n        y = jnp.concatenate([y, y3], axis=1)\n        return mm_ref(x, y)\n    ys = [y1, y2]\n    np.testing.assert_allclose(matmul_concat(x, ys, y3), matmul_concat_ref(x, ys, y3), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_slice_concat(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=0)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=0)\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2), matmul_concat_ref(x, y1, y2), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_slice_concat_slice(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (3, 128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 3, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=1)[1]\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=1)[1]\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2), matmul_concat_ref(x, y1, y2), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_dynamic_slice_concat(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (2, 128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 2, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2, i, j):\n        y = jnp.concatenate([y1, y2[i]], axis=1)[j]\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2, i, j):\n        y = jnp.concatenate([y1, y2[i]], axis=1)[j]\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2, 3, 1), matmul_concat_ref(x, y1, y2, 3, 1), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "@jit_no_excess_precision\ndef mm_ref(x, y):\n    return jnp.dot(x, y, preferred_element_type=jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_activation(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_relu(x, y):\n        x = fusable_matmul(x, y)\n        x = jnp.maximum(x, 0.0)\n        return x\n    np.testing.assert_allclose(matmul_relu(x, y), jax.nn.relu(mm_ref(x, y)), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_bias(self, dtype):\n    if dtype == 'bfloat16' and (not jtu.is_device_tpu_at_least(5)):\n        self.skipTest('bfloat16 bcast not supported on TPU generations < 5')\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (512, 512), dtype)\n    b = jax.random.normal(k2, (1, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_bias(x, y, b):\n        x = fusable_matmul(x, y).astype(dtype) + b\n        x = jnp.maximum(x, 0.0)\n        return x\n    np.testing.assert_allclose(matmul_bias(x, y, b), jax.nn.relu(mm_ref(x, y).astype(dtype) + b), atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_dynamic_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i):\n        x = fusable_matmul(x, y[i])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y, 1), mm_ref(x, y[1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_dynamic_slice_bias(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (3, 512, 512), dtype)\n    b = jax.random.normal(k2, (2, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, b, i, j):\n        x = fusable_matmul(x, y[j]).astype(dtype) + b[i]\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y, b, 1, 2), mm_ref(x, y[2]).astype(dtype) + b[1], atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multi_slice(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1, 1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1, 1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y):\n        x = fusable_matmul(x, y[1][1])\n        return x\n    np.testing.assert_allclose(matmul_slice(x, y), mm_ref(x, y[1, 1]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_dynamic_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i, j):\n        x = fusable_matmul(x, y[i][j])\n        return x\n    for i in range(2):\n        for j in range(3):\n            np.testing.assert_allclose(matmul_slice(x, y, i, j), mm_ref(x, y[i, j]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_mixed_slices(self, dtype):\n    k0, k1 = jax.random.split(jax.random.key(0), 2)\n    x = jax.random.normal(k0, (512, 512), dtype)\n    y = jax.random.normal(k1, (4, 2, 3, 512, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, i, j):\n        x = fusable_matmul(x, y[2][i, j])\n        return x\n    for i in range(2):\n        for j in range(3):\n            np.testing.assert_allclose(matmul_slice(x, y, i, j), mm_ref(x, y[2, i, j]), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_with_multiple_mixed_slices_and_bias(self, dtype):\n    if dtype == 'bfloat16' and (not jtu.is_device_tpu_at_least(5)):\n        self.skipTest('bfloat16 bcast not supported on TPU generations < 5')\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (4, 4, 512, 512), dtype)\n    y = jax.random.normal(k1, (4, 2, 3, 512, 512), dtype)\n    b = jax.random.normal(k2, (4, 4, 1, 512), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_slice(x, y, b, i, j, k):\n        x = fusable_matmul(x[k][3], y[2][i, j]).astype(dtype)\n        return x + b[i, j]\n\n    @jit_no_excess_precision\n    def matmul_slice_ref(x, y, b, i, j, k):\n        x = mm_ref(x[k][3], y[2][i, j]).astype(dtype)\n        return x + b[i, j]\n    for i in range(2):\n        for j in range(3):\n            for k in range(4):\n                np.testing.assert_allclose(matmul_slice(x, y, b, i, j, k), matmul_slice_ref(x, y, b, i, j, k), atol=5e-05 if dtype == 'float32' else 0.5)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_input_concat_output(self, dtype):\n    self.skipTest('select_n doesnt support more than 3 elements')\n    k0, k1, k2, k3 = jax.random.split(jax.random.key(0), 4)\n    x = jax.random.normal(k0, (128, 128), dtype)\n    y1 = jax.random.normal(k1, (128, 256), dtype)\n    y2 = jax.random.normal(k2, (128, 256), dtype)\n    y3 = jax.random.normal(k3, (128, 256), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys):\n        y = jnp.concatenate(ys, axis=1)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jax.jit\n    def matmul_concat_ref(x, ys):\n        y = jnp.concatenate(ys, axis=1)\n        return mm_ref(x, y)\n    ys = [y1, y2, y3]\n    np.testing.assert_allclose(matmul_concat(x, ys), matmul_concat_ref(x, ys), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_input_concat_contract(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys):\n        y = jnp.concatenate(ys, axis=0)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, ys):\n        y = jnp.concatenate(ys, axis=0)\n        return mm_ref(x, y)\n    ys = [y1, y2]\n    np.testing.assert_allclose(matmul_concat(x, ys), matmul_concat_ref(x, ys), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_double_concat(self, dtype):\n    k0, k1, k2, k3 = jax.random.split(jax.random.key(0), 4)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (128, 128), dtype)\n    y3 = jax.random.normal(k3, (256, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, ys, y3):\n        y = jnp.concatenate(ys, axis=0)\n        y = jnp.concatenate([y, y3], axis=1)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, ys, y3):\n        y = jnp.concatenate(ys, axis=0)\n        y = jnp.concatenate([y, y3], axis=1)\n        return mm_ref(x, y)\n    ys = [y1, y2]\n    np.testing.assert_allclose(matmul_concat(x, ys, y3), matmul_concat_ref(x, ys, y3), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_slice_concat(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=0)\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=0)\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2), matmul_concat_ref(x, y1, y2), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_slice_concat_slice(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (3, 128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 3, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=1)[1]\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2):\n        y = jnp.concatenate([y1, y2[3]], axis=1)[1]\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2), matmul_concat_ref(x, y1, y2), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters('float32', 'bfloat16')\ndef test_matmul_dynamic_slice_concat(self, dtype):\n    k0, k1, k2 = jax.random.split(jax.random.key(0), 3)\n    x = jax.random.normal(k0, (128, 256), dtype)\n    y1 = jax.random.normal(k1, (2, 128, 128), dtype)\n    y2 = jax.random.normal(k2, (4, 2, 128, 128), dtype)\n\n    @jax.jit\n    @fuser.fuse\n    def matmul_concat(x, y1, y2, i, j):\n        y = jnp.concatenate([y1, y2[i]], axis=1)[j]\n        x = fusable_matmul(x, y)\n        return x\n\n    @jit_no_excess_precision\n    def matmul_concat_ref(x, y1, y2, i, j):\n        y = jnp.concatenate([y1, y2[i]], axis=1)[j]\n        return mm_ref(x, y)\n    np.testing.assert_allclose(matmul_concat(x, y1, y2, 3, 1), matmul_concat_ref(x, y1, y2, 3, 1), atol=5e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_fusable_matmul_test.py",
+    "function": "def fusable_matmul(x: jax.Array, y: jax.Array, *, bm: int=128, bk: int=128, bn: int=128, debug: bool=False, interpret: bool=False) -> jax.Array:\n    return fuser.fusable(functools.partial(_fusable_matmul, bm=bm, bk=bk, bn=bn, interpret=interpret, debug=debug))(x, y)"
+  }
+]

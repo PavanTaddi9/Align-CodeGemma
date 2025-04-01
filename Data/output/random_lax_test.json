@@ -1,0 +1,293 @@
+[
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def testPoissonZeros(self):\n    key = self.make_key(0)\n    lam = jnp.concatenate([jnp.zeros(10), 20 * jnp.ones(10)])\n    samples = random.poisson(key, lam, shape=(2, 20))\n    self.assertArraysEqual(samples[:, :10], jnp.zeros_like(samples[:, :10]))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testMultivariateNormalCovariance(self):\n    N = 100000\n    mean = jnp.zeros(4)\n    cov = jnp.array([[0.19, 0.0, -0.13, 0.0], [0.0, 0.29, 0.0, -0.23], [-0.13, 0.0, 0.39, 0.0], [0.0, -0.23, 0.0, 0.49]], dtype=mean.dtype)\n    out_np = self.rng().multivariate_normal(mean, cov, N)\n    key = self.make_key(0)\n    with jax.numpy_rank_promotion('allow'):\n        out_jnp = random.multivariate_normal(key, mean=mean, cov=cov, shape=(N,))\n    var_np = out_np.var(axis=0)\n    var_jnp = out_jnp.var(axis=0)\n    self.assertAllClose(var_np, var_jnp, rtol=0.01, atol=0.01, check_dtypes=False)\n    var_np = np.cov(out_np, rowvar=False)\n    var_jnp = np.cov(out_jnp, rowvar=False)\n    self.assertAllClose(var_np, var_jnp, rtol=0.01, atol=0.01, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.sample_product(method=['cholesky', 'eigh', 'svd'])\n@jtu.skip_on_devices('gpu', 'tpu')\ndef testMultivariateNormalSingularCovariance(self, method):\n    mu = jnp.zeros((2,))\n    sigma = jnp.ones((2, 2))\n    key = self.make_key(0)\n    result = random.multivariate_normal(key, mean=mu, cov=sigma, shape=(10,), method=method)\n    self.assertAllClose(result[:, 0], result[:, 1], atol=0.001, rtol=0.001)\n    if method == 'cholesky':\n        self.assertTrue(np.all(np.isnan(result)))\n    else:\n        self.assertFalse(np.any(np.isnan(result)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testRandomBroadcast(self):\n    \"\"\"Issue 4033\"\"\"\n    key = lambda: self.make_key(0)\n    shape = (10, 2)\n    with jax.numpy_rank_promotion('allow'):\n        x1 = random.uniform(key(), shape, minval=jnp.zeros(2), maxval=jnp.ones(2))\n        x2 = random.randint(key(), shape, jnp.array([0, 1]), jnp.array([1, 2]))\n    assert x1.shape == shape\n    assert x2.shape == shape",
+    "assertions": [
+      "assert x1.shape == shape",
+      "assert x2.shape == shape"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_grad_of_prng_key(self):\n    key = self.make_key(73)\n    with self.assertRaisesRegex(TypeError, 'grad requires real- or complex-valued inputs'):\n        jax.grad(lambda x: 1.0)(key)\n    out = jax.grad(lambda x: 1.0, allow_int=True)(key)\n    self.assertArraysEqual(out, np.zeros(key.shape, jax.dtypes.float0))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jax.debug_key_reuse(False)\ndef test_vmap_split_not_mapped_key(self):\n    key = self.make_key(73)\n    single_split_key = random.split(key)\n    vmapped_keys = vmap(lambda _: random.split(key))(jnp.zeros(3))\n    self.assertEqual(vmapped_keys.shape, (3, 2, *key.shape))\n    for vk in vmapped_keys:\n        self.assertArraysEqual(random.key_data(vk), random.key_data(single_split_key))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_grad_of_prng_key(self):\n    key = self.make_key(73)\n    with self.assertRaisesRegex(TypeError, 'grad requires real- or complex-valued inputs'):\n        jax.grad(lambda x: 1.0)(key)\n    out = jax.grad(lambda x: 1.0, allow_int=True)(key)\n    self.assertArraysEqual(out, np.zeros(key.shape, jax.dtypes.float0))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=float_dtypes)\ndef testNormal(self, dtype):\n    key = lambda: self.make_key(0)\n    rand = lambda key: random.normal(key, (10000,), dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.norm().cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def norm(x):\n    norm = np.linalg.norm(x, axis=(-2, -1))\n    return norm / ((inner_dimension + 1) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=complex_dtypes)\ndef testNormalComplex(self, dtype):\n    key = lambda: self.make_key(0)\n    rand = lambda key: random.normal(key, (10000,), dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(jnp.real(samples), scipy.stats.norm(scale=1 / np.sqrt(2)).cdf)\n        self._CheckKolmogorovSmirnovCDF(jnp.imag(samples), scipy.stats.norm(scale=1 / np.sqrt(2)).cdf)\n        self.assertEqual(dtype, samples.dtype)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def norm(x):\n    norm = np.linalg.norm(x, axis=(-2, -1))\n    return norm / ((inner_dimension + 1) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dim=[1, 3, 5], dtype=float_dtypes, method=['svd', 'eigh', 'cholesky'])\ndef testMultivariateNormal(self, dim, dtype, method):\n    r = self.rng()\n    mean = r.randn(dim)\n    cov_factor = r.randn(dim, dim)\n    cov = np.dot(cov_factor, cov_factor.T) + dim * np.eye(dim)\n    key = lambda: self.make_key(0)\n    rand = partial(random.multivariate_normal, mean=mean, cov=cov, shape=(10000,), method=method)\n    crand = jax.jit(rand)\n    with jax.numpy_rank_promotion('allow'):\n        uncompiled_samples = np.asarray(rand(key()), np.float64)\n        compiled_samples = np.asarray(crand(key()), np.float64)\n    inv_scale = scipy.linalg.lapack.dtrtri(np.linalg.cholesky(cov), lower=True)[0]\n    for samples in [uncompiled_samples, compiled_samples]:\n        centered = samples - mean\n        whitened = np.einsum('nj,ij->ni', centered, inv_scale)\n        self._CheckKolmogorovSmirnovCDF(whitened.ravel(), scipy.stats.norm().cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def norm(x):\n    norm = np.linalg.norm(x, axis=(-2, -1))\n    return norm / ((inner_dimension + 1) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=float_dtypes)\ndef testNormal(self, dtype):\n    key = lambda: self.make_key(0)\n    rand = lambda key: random.normal(key, (10000,), dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.norm().cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def norm(x):\n    norm = np.linalg.norm(x, axis=(-2, -1))\n    return norm / ((n + 1) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=complex_dtypes)\ndef testNormalComplex(self, dtype):\n    key = lambda: self.make_key(0)\n    rand = lambda key: random.normal(key, (10000,), dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(jnp.real(samples), scipy.stats.norm(scale=1 / np.sqrt(2)).cdf)\n        self._CheckKolmogorovSmirnovCDF(jnp.imag(samples), scipy.stats.norm(scale=1 / np.sqrt(2)).cdf)\n        self.assertEqual(dtype, samples.dtype)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def norm(x):\n    norm = np.linalg.norm(x, axis=(-2, -1))\n    return norm / ((n + 1) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dim=[1, 3, 5], dtype=float_dtypes, method=['svd', 'eigh', 'cholesky'])\ndef testMultivariateNormal(self, dim, dtype, method):\n    r = self.rng()\n    mean = r.randn(dim)\n    cov_factor = r.randn(dim, dim)\n    cov = np.dot(cov_factor, cov_factor.T) + dim * np.eye(dim)\n    key = lambda: self.make_key(0)\n    rand = partial(random.multivariate_normal, mean=mean, cov=cov, shape=(10000,), method=method)\n    crand = jax.jit(rand)\n    with jax.numpy_rank_promotion('allow'):\n        uncompiled_samples = np.asarray(rand(key()), np.float64)\n        compiled_samples = np.asarray(crand(key()), np.float64)\n    inv_scale = scipy.linalg.lapack.dtrtri(np.linalg.cholesky(cov), lower=True)[0]\n    for samples in [uncompiled_samples, compiled_samples]:\n        centered = samples - mean\n        whitened = np.einsum('nj,ij->ni', centered, inv_scale)\n        self._CheckKolmogorovSmirnovCDF(whitened.ravel(), scipy.stats.norm().cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def norm(x):\n    norm = np.linalg.norm(x, axis=(-2, -1))\n    return norm / ((n + 1) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@jtu.sample_product(num=(None, 6, (6,), (2, 3), (2, 3, 4)))\ndef test_split_size_shape(self, num):\n    key = self.make_key(0)\n    if num is None:\n        key_split = jax.random.split(key)\n    else:\n        key_split = jax.random.split(key, num)\n    if num is None:\n        self.assertEqual(key_split.shape, (2, *key.shape))\n    elif type(num) is tuple:\n        self.assertEqual(key_split.shape, (*num, *key.shape))\n    else:\n        self.assertEqual(key_split.shape, (num, *key.shape))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def testLowProbabilityGumbel(self):\n    dtype = jnp.bfloat16\n    nmant = jnp.finfo(dtype).nmant\n    probs = [x * 2 ** (-nmant) for x in [0.125, 0.75, 1.25, 2.125]]\n    num_samples = 1024 * 128\n    num_groups = 128\n    key = jax.random.key(0)\n\n    def compute_counts(key):\n        v = jax.random.gumbel(key, (num_samples, 1), dtype=dtype, mode='high')\n        thresholds = np.array([[-np.log(-np.log(1 - x)) for x in probs]], dtype=dtype)\n        return (v > thresholds).sum(axis=0)\n    pts = [float(x) for x in jax.lax.map(compute_counts, jax.random.split(key, num_groups)).sum(axis=0)]\n    cdf_probs = [x / (num_samples * num_groups) for x in pts]\n    np.testing.assert_allclose(cdf_probs, probs, rtol=0.25, atol=0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_batched_key_errors(self):\n    keys = lambda: jax.random.split(self.make_key(0))\n    msg = '{} accepts a single key, but was given a key array of shape.*'\n    with self.assertRaisesRegex(ValueError, msg.format('bits')):\n        jax.random.bits(keys(), shape=(2,))\n    with self.assertRaisesRegex(ValueError, msg.format('chisquare')):\n        jax.random.chisquare(keys(), 1.0, shape=(2,))\n    with self.assertRaisesRegex(ValueError, msg.format('dirichlet')):\n        jax.random.dirichlet(keys(), jnp.arange(2.0), shape=(2,))\n    with self.assertRaisesRegex(ValueError, msg.format('gamma')):\n        jax.random.gamma(keys(), 1.0, shape=(2,))\n    with self.assertRaisesRegex(ValueError, msg.format('loggamma')):\n        jax.random.loggamma(keys(), 1.0, shape=(2,))\n    with self.assertRaisesRegex(ValueError, msg.format('fold_in')):\n        jax.random.fold_in(keys(), 0)\n    with self.assertRaisesRegex(ValueError, msg.format('split')):\n        jax.random.split(keys())\n    with self.assertNoWarnings():\n        jax.random.key_data(keys())\n        jax.random.key_impl(keys())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_split_shape(self):\n    key = self.make_key(73)\n    keys = random.split(key, 10)\n    self.assertEqual(keys.shape, (10,))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_vmap_fold_in_shape(self):\n    keys = lambda: random.split(self.make_key(73), 2)\n    msgs = jnp.arange(3)\n    out = vmap(lambda i: random.fold_in(keys()[0], i))(msgs)\n    self.assertEqual(out.shape, (3,))\n    out = vmap(lambda k: random.fold_in(k, msgs[0]))(keys())\n    self.assertEqual(out.shape, (2,))\n    out = vmap(random.fold_in, in_axes=(None, 0))(keys()[0], msgs)\n    self.assertEqual(out.shape, (3,))\n    out = vmap(random.fold_in, in_axes=(0, None))(keys(), msgs[0])\n    self.assertEqual(out.shape, (2,))\n    msgs = jnp.arange(2)\n    out = vmap(random.fold_in)(keys(), msgs)\n    self.assertEqual(out.shape, (2,))\n    keys = lambda: random.split(self.make_key(73), 2 * 3).reshape((2, 3))\n    msgs = jnp.arange(2 * 3).reshape((2, 3))\n    out = vmap(vmap(random.fold_in), in_axes=(0, 1))(keys(), msgs.T)\n    self.assertEqual(out.shape, (2, 3))\n    out = vmap(vmap(random.fold_in), in_axes=(1, 0))(keys(), msgs.T)\n    self.assertEqual(out.shape, (3, 2))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jax.debug_key_reuse(False)\ndef test_vmap_split_mapped_key(self):\n    key = self.make_key(73)\n    mapped_keys = random.split(key, num=3)\n    forloop_keys = [random.split(k) for k in mapped_keys]\n    vmapped_keys = vmap(random.split)(mapped_keys)\n    self.assertEqual(vmapped_keys.shape, (3, 2))\n    for fk, vk in zip(forloop_keys, vmapped_keys):\n        self.assertArraysEqual(random.key_data(fk), random.key_data(vk))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_split_shape(self):\n    key = self.make_key(73)\n    keys = random.split(key, 10)\n    self.assertEqual(keys.shape, (10, *key.shape))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jax.debug_key_reuse(False)\ndef test_vmap_fold_in_shape(self):\n    keys = random.split(self.make_key(73), 2)\n    msgs = jnp.arange(3)\n    out = vmap(lambda i: random.fold_in(keys[0], i))(msgs)\n    self.assertEqual(out.shape, (3, *keys[0].shape))\n    out = vmap(random.fold_in, in_axes=(None, 0))(keys[0], msgs)\n    self.assertEqual(out.shape, (3, *keys[0].shape))\n    out = vmap(lambda k: random.fold_in(k, msgs[0]))(keys)\n    self.assertEqual(out.shape, keys.shape)\n    out = vmap(random.fold_in, in_axes=(0, None))(keys, msgs[0])\n    self.assertEqual(out.shape, keys.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jax.debug_key_reuse(False)\ndef test_vmap_split_not_mapped_key(self):\n    key = self.make_key(73)\n    single_split_key = random.split(key)\n    vmapped_keys = vmap(lambda _: random.split(key))(jnp.zeros(3))\n    self.assertEqual(vmapped_keys.shape, (3, 2, *key.shape))\n    for vk in vmapped_keys:\n        self.assertArraysEqual(random.key_data(vk), random.key_data(single_split_key))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jax.debug_key_reuse(False)\ndef test_vmap_split_mapped_key_shape(self):\n    key = self.make_key(73)\n    mapped_keys = random.split(key, num=3)\n    vmapped_keys = vmap(random.split)(mapped_keys)\n    self.assertEqual(vmapped_keys.shape, (3, 2, *key.shape))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jax.debug_key_reuse(False)\ndef test_vmap_split_mapped_key_values(self):\n    key = self.make_key(73)\n    mapped_keys = random.split(key, num=3)\n    vmapped_keys = vmap(random.split)(mapped_keys)\n    ref_keys = [random.split(k) for k in mapped_keys]\n    for rk, vk in zip(ref_keys, vmapped_keys):\n        self.assertArraysEqual(random.key_data(rk), random.key_data(vk))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jax.debug_key_reuse(False)\ndef test_vmap_random_bits_shape(self):\n    rand_fun = lambda key, shape=(): random.randint(key, shape, 0, 100)\n    key = self.make_key(73)\n    mapped_keys = random.split(key, num=3)\n    rand_nums = vmap(rand_fun)(mapped_keys)\n    self.assertEqual(rand_nums.shape, (3,))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('tpu')\n@jax.debug_key_reuse(False)\ndef test_vmap_random_bits_value(self):\n    rand_fun = lambda key, shape=(): random.randint(key, shape, 0, 100)\n    key = self.make_key(73)\n    mapped_keys = random.split(key, num=3)\n    rand_nums = vmap(rand_fun)(mapped_keys)\n    ref_nums = rand_fun(mapped_keys[0], shape=(3,))\n    self.assertArraysEqual(rand_nums, ref_nums)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_vmap_random_bits_distribution(self):\n    dtype = jnp.float32\n    keys = lambda: jax.random.split(self.make_key(0), 10)\n\n    def rand(key):\n        nums = jax.vmap(lambda key: random.uniform(key, (1000,), dtype))(key)\n        return nums.flatten()\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(keys())\n    compiled_samples = crand(keys())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckCollisions(samples, jnp.finfo(dtype).nmant)\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.uniform().cdf, pval=0.005)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('tpu')\n@jax.debug_key_reuse(False)\ndef test_vmap_split_mapped_key_values(self):\n    key = self.make_key(73)\n    mapped_keys = random.split(key, num=3)\n    vmapped_keys = vmap(random.split)(mapped_keys)\n    ref_keys = random.split(mapped_keys[0], (3, 2))\n    self.assertArraysEqual(random.key_data(vmapped_keys), random.key_data(ref_keys))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "def f(pred):\n\n    def true_fun():\n        x_ref[()] = 1.0\n\n    def false_fun():\n        x_ref[()] = 2.0\n    jax.lax.cond(pred, true_fun, false_fun)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@functools.partial(pjit.pjit, in_shardings=jax.sharding.PartitionSpec(None), out_shardings=jax.sharding.PartitionSpec('x'))\ndef f():\n    return jnp.zeros([32, 10])"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.jit\ndef f(x, r):\n    x = x.at[:, 0].set(x[:, 0] / r)\n    return x"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@partial(jnp.vectorize, excluded={1})\ndef f(x, y):\n    assert x.ndim == 0\n    assert y == 'foo'\n    return x"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.pmap\ndef f(x, y):\n    return x * y"
+  },
+  {
+    "test_code": "@jtu.sample_product(dfnum=[1.0, 2.0, 10.0, 100.0], dfden=[1.0, 2.0, 10.0, 100.0], dtype=jtu.dtypes.floating)\ndef testF(self, dfnum, dfden, dtype):\n    key = lambda: self.make_key(9)\n    rand = lambda key: random.f(key, dfnum, dfden, shape=(10000,), dtype=dtype)\n    crand = jax.jit(rand)\n    uncompiled_samples = rand(key())\n    compiled_samples = crand(key())\n    for samples in [uncompiled_samples, compiled_samples]:\n        self._CheckKolmogorovSmirnovCDF(samples, scipy.stats.f(dfnum, dfden).cdf)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/random_lax_test.py",
+    "function": "@jax.jit\ndef f(x, y):\n    return jax.vmap(shard_alike, in_axes=(0, 1))(x, y)"
+  }
+]

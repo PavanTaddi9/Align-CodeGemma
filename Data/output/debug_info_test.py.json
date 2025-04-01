@@ -1,0 +1,1242 @@
+[
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_custom_vmap(self):\n    tracer_spy = TracerSpy()\n\n    @jax.custom_batching.custom_vmap\n    def my_f(xdict):\n        x = xdict['x']\n        tracer_spy.append(x)\n        return dict(a=jnp.sin(x))\n\n    @my_f.def_vmap\n    def my_rule(axis_size, in_batched, xys):\n        xs = xys['x']\n        tracer_spy.append(xs)\n        xs_batched, = in_batched\n        self.assertEqual(xs_batched['x'], True)\n        self.assertEqual(axis_size, xs.shape[0])\n        return (dict(a=jnp.cos(xs)), dict(a=xs_batched['x']))\n    xy = dict(x=np.ones((8,), dtype=np.float32), y=np.zeros((8,), dtype=np.float32))\n    self._check_tracers_and_jaxprs(jax.jit(jax.vmap(my_f)), xy, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=jit, fun=my_f, arg_names=xdict['x'],xdict['y'], result_paths=result['a']\"], expected_tracer_debug_infos=[\"traced_for=custom_vmap fun, fun=my_f, arg_names=xdict['x'],xdict['y'], from xdict['x']\", \"traced_for=jit, fun=my_f, arg_names=xdict['x'],xdict['y'], from xdict['x']\"])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_vmap_of_nested_jit(self):\n    tracer_spy = TracerSpy()\n\n    def my_f(x, y):\n        tracer_spy.append(x)\n\n        def my_g(u, v):\n            tracer_spy.append(u)\n            return dict(c=u * v, d=v)\n        return jax.jit(my_g)(y, x)['c']\n    self._check_tracers_and_jaxprs(jax.jit(jax.vmap(my_f)), np.ones((8,), dtype=np.float32), np.zeros((8,), dtype=np.float32), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=my_f, arg_names=x,y, result_paths=result', \"traced_for=jit, fun=my_g, arg_names=u,v, result_paths=result['c']\"], expected_tracer_debug_infos=['None', 'traced_for=jit, fun=my_g, arg_names=u,v, from u'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=('n',))\ndef fun(x):\n    return jnp.sum(x)"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef fn(n, x):\n    return lax.broadcast_in_dim(x, (n,), ())"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_remat_concrete_error(self):\n\n    @jax.remat\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(3.0)\n\n    @functools.partial(jax.remat, static_argnums=(0,))\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(jnp.array(3.0))\n\n    @jax.remat\n    def g(x):\n        jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n        return lax.sin(x)\n    try:\n        g(jnp.array(3.0))\n    except core.ConcretizationTypeError as e:\n        msg = str(e)\n    self.assertNotIn('static_argnums', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_cond(self):\n    tracer_spy = TracerSpy()\n\n    def my_f(x):\n\n        def my_true_branch(a, b):\n            tracer_spy.append(a)\n            return a + b\n\n        def my_false_branch(c, d):\n            tracer_spy.append(c)\n            return c - d\n        return lax.cond(x >= 0, my_true_branch, my_false_branch, x, x)\n    self._check_tracers_and_jaxprs(jax.jit(my_f), 0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=my_f, arg_names=x, result_paths=result', 'traced_for=cond, fun=my_false_branch, arg_names=c,d, result_paths=result', 'traced_for=cond, fun=my_true_branch, arg_names=a,b, result_paths=result'], expected_tracer_debug_infos=['traced_for=cond, fun=my_true_branch, arg_names=a,b, from a', 'traced_for=cond, fun=my_false_branch, arg_names=c,d, from c'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_grad_cond_with_remat(self):\n    tracer_spy = TracerSpy()\n\n    def my_f(x, y):\n\n        def my_true_branch(a, b):\n            tracer_spy.append(a)\n            return (a + 1, a + b)\n\n        def my_false_branch(c, d):\n            tracer_spy.append(c)\n            return (c - 1, c - d)\n\n        def my_g(x, y):\n            x1, y1 = lax.cond(x >= 0, my_true_branch, my_false_branch, x, y)\n            tracer_spy.append(x1)\n            return (x1, y1)\n        x2, y2 = jax.remat(my_g)(x, y)\n        return y2 + lax.sin(x2)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(my_f)), 1.0, 2.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=my_f, arg_names=x,y, result_paths=result', 'traced_for=cond, fun=my_true_branch, arg_names=, result_paths=,', 'traced_for=cond, fun=my_false_branch, arg_names=, result_paths=,', 'traced_for=cond, fun=my_true_branch, arg_names=a,b, result_paths=result[0],result[1]', 'traced_for=cond, fun=my_false_branch, arg_names=c,d, result_paths=result[0],result[1]', 'traced_for=checkpoint / remat, fun=my_g, arg_names=,, result_paths=,'], expected_tracer_debug_infos=['traced_for=cond, fun=my_true_branch, arg_names=a,b, from a', 'traced_for=cond, fun=my_false_branch, arg_names=c,d, from c', 'traced_for=checkpoint / remat, fun=my_g, arg_names=x,y, from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef fun(x, y):\n    return cond(x < 3, None, lambda _: 2.0 * jnp.sin(y), x, lambda x: 2.0 * x)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_remat_concrete_error(self):\n\n    @jax.remat\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(3.0)\n\n    @functools.partial(jax.remat, static_argnums=(0,))\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(jnp.array(3.0))\n\n    @jax.remat\n    def g(x):\n        jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n        return lax.sin(x)\n    try:\n        g(jnp.array(3.0))\n    except core.ConcretizationTypeError as e:\n        msg = str(e)\n    self.assertNotIn('static_argnums', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\ndef fn(a, b):\n    m1, v1 = a\n    m2, v2 = b\n    return (m1 + m2, jsp.linalg.solve(m1, v2) + jsp.linalg.solve(m2, v1))"
+  },
+  {
+    "test_code": "def test_grad_scan(self):\n    tracer_spy = TracerSpy()\n\n    def f(c, a):\n        tracer_spy.append(c)\n        d = 0.75\n        b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n        c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n        return (c, b)\n    as_ = jnp.arange(6.0).reshape((3, 2))\n    c = jnp.array(1, dtype=as_.dtype)\n\n    @jax.jit\n    def my_f(x, as_):\n        tracer_spy.append(x)\n\n        def to_remat(a, b):\n            return for_loop.scan(f, a, b)\n        return jax.remat(to_remat)(c, as_)\n\n    def the_grad(c, as_):\n        tracer_spy.append(c)\n        _, pullback = jax.vjp(my_f, c, as_)\n        return pullback((c, np.arange(3, dtype=c.dtype)))\n    self._check_tracers_and_jaxprs(jax.jit(the_grad), c, as_, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=the_grad, arg_names=c,as_, result_paths=result[0],result[1]', 'traced_for=jit, fun=my_f, arg_names=x,as_, result_paths=,,', 'traced_for=for_loop, fun=f, arg_names=i,refs[0],refs[1],refs[2], result_paths=', 'traced_for=for_loop, fun=f, arg_names=,,, result_paths=,', 'traced_for=for_loop, fun=f, arg_names=,,,,,, result_paths=,', 'traced_for=for_loop, fun=f, arg_names=,,,,,,,,,,, result_paths=', 'traced_for=for_loop, fun=f, arg_names=,,,,,,,,,,,,,,, result_paths=,', 'traced_for=checkpoint / remat, fun=to_remat, arg_names=,,, result_paths=,', 'traced_for=jit, fun=my_f, arg_names=,,x,as_, result_paths='], expected_tracer_debug_infos=['traced_for=jit, fun=the_grad, arg_names=c,as_, from c', 'traced_for=scan, fun=f, arg_names=c,a, from c', 'traced_for=jit, fun=my_f, arg_names=x,as_, from x', 'traced_for=for_loop, fun=f, arg_names=i,refs[0],refs[1],refs[2], from refs[0]'], expected_lowering_lines=[re.compile('.*func.func public @main\\\\(%arg0: tensor<f..> loc\\\\(\\\\\"c\\\\\"\\\\)'), re.compile('.*func.func public @main\\\\(.*, %arg1: tensor<3x2xf..> loc\\\\(\\\\\"as_\\\\\"\\\\)'), re.compile('.*func.func public @main\\\\(.* -> .*tensor<f..> {jax.result_info = \\\\\"result\\\\[0\\\\]\\\\\"'), re.compile('.*func.func public @main\\\\(.* -> .*tensor<3x2xf..> {jax.result_info = \\\\\"result\\\\[1\\\\]\\\\\"'), re.compile('.*func.func private @None')])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_scan(self):\n    tracer_spy = TracerSpy()\n\n    def my_f(x):\n\n        def my_scan_body(carry, inp):\n            tracer_spy.append(carry)\n            return (carry + inp, carry)\n        return lax.scan(my_scan_body, 0, x)\n    self._check_tracers_and_jaxprs(jax.jit(my_f), np.arange(8, dtype=np.int32), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=my_f, arg_names=x, result_paths=result[0],result[1]', 'traced_for=scan, fun=my_scan_body, arg_names=carry,inp, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=scan, fun=my_scan_body, arg_names=carry,inp, from carry'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "def test_remat_concrete_error(self):\n\n    @jax.remat\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(3.0)\n\n    @functools.partial(jax.remat, static_argnums=(0,))\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(jnp.array(3.0))\n\n    @jax.remat\n    def g(x):\n        jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n        return lax.sin(x)\n    try:\n        g(jnp.array(3.0))\n    except core.ConcretizationTypeError as e:\n        msg = str(e)\n    self.assertNotIn('static_argnums', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "def test_remat_concrete_error(self):\n\n    @jax.remat\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(3.0)\n\n    @functools.partial(jax.remat, static_argnums=(0,))\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(jnp.array(3.0))\n\n    @jax.remat\n    def g(x):\n        jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n        return lax.sin(x)\n    try:\n        g(jnp.array(3.0))\n    except core.ConcretizationTypeError as e:\n        msg = str(e)\n    self.assertNotIn('static_argnums', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def fun():\n    return jax.ffi.ffi_call('test', jax.ShapeDtypeStruct((), np.int64))()"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def fun(x, t):\n    return jnp.sum(jnp.power(jnp.maximum(x, 0.0), 2)) + t"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@partial(jax.jit, backend=backend)\ndef fun(x, y):\n    return jnp.matmul(x, y)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "def test_remat_concrete_error(self):\n\n    @jax.remat\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(3.0)\n\n    @functools.partial(jax.remat, static_argnums=(0,))\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(jnp.array(3.0))\n\n    @jax.remat\n    def g(x):\n        jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n        return lax.sin(x)\n    try:\n        g(jnp.array(3.0))\n    except core.ConcretizationTypeError as e:\n        msg = str(e)\n    self.assertNotIn('static_argnums', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "def test_remat_concrete_error(self):\n\n    @jax.remat\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(3.0)\n\n    @functools.partial(jax.remat, static_argnums=(0,))\n    def g(x):\n        if x > 0:\n            return lax.sin(x)\n        else:\n            return lax.cos(x)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, 'static_argnums'):\n        g(jnp.array(3.0))\n\n    @jax.remat\n    def g(x):\n        jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n        return lax.sin(x)\n    try:\n        g(jnp.array(3.0))\n    except core.ConcretizationTypeError as e:\n        msg = str(e)\n    self.assertNotIn('static_argnums', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "def test_custom_transpose(self):\n\n    class _custom_transpose:\n\n        def __init__(self, out_types, fun):\n            self.out_types = out_types\n            self.fun = custom_transpose.custom_transpose(fun)\n\n        def __getattr__(self, name):\n            return getattr(self.fun, name)\n\n        def __call__(self, *args):\n            return self.fun(self.out_types, *args)\n\n    def custom_transpose_with_example_out(example_out):\n        return functools.partial(_custom_transpose, jax.tree.map(lambda x: core.get_aval(x).to_tangent_aval(), example_out))\n    tracer_spy = TracerSpy()\n\n    def my_f_with_cond(i, x):\n\n        def my_f(x):\n            tracer_spy.append(x)\n\n            @custom_transpose_with_example_out(jnp.ones(2))\n            def fn(r, x):\n                tracer_spy.append(r)\n                tracer_spy.append(x['c'])\n                return dict(b=x['c'] / r)\n\n            @fn.def_transpose\n            def fn_tp(r, t):\n                tracer_spy.append(r)\n                return dict(c=2 * t / r)\n            return x['c'] + fn(jnp.ones(2) * 3.0, x)\n        return lax.cond(i > 0, my_f, lambda x: x['c'], dict(c=x))\n    x = jnp.ones(2) * 6.0\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: jax.linear_transpose(functools.partial(my_f_with_cond, 7.0), x)), x, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=[\"traced_for=cond, fun=my_f, arg_names=x['c'], result_paths=result\", \"traced_for=cond, fun=<lambda>, arg_names=x['c'], result_paths=result\", 'traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result[0][0][0],result[0][0][1]'], expected_tracer_debug_infos=[\"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from r\", \"traced_for=custom_transpose fun, fun=fn, arg_names=r,x['c'], from x['c']\", 'traced_for=custom_transpose transpose_fun, fun=fn_tp, arg_names=r,t, from r'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "def test_cond(self):\n    tracer_spy = TracerSpy()\n\n    def my_f(x):\n\n        def my_true_branch(a, b):\n            tracer_spy.append(a)\n            return a + b\n\n        def my_false_branch(c, d):\n            tracer_spy.append(c)\n            return c - d\n        return lax.cond(x >= 0, my_true_branch, my_false_branch, x, x)\n    self._check_tracers_and_jaxprs(jax.jit(my_f), 0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=my_f, arg_names=x, result_paths=result', 'traced_for=cond, fun=my_false_branch, arg_names=c,d, result_paths=result', 'traced_for=cond, fun=my_true_branch, arg_names=a,b, result_paths=result'], expected_tracer_debug_infos=['traced_for=cond, fun=my_true_branch, arg_names=a,b, from a', 'traced_for=cond, fun=my_false_branch, arg_names=c,d, from c'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "def test_grad_cond_with_remat(self):\n    tracer_spy = TracerSpy()\n\n    def my_f(x, y):\n\n        def my_true_branch(a, b):\n            tracer_spy.append(a)\n            return (a + 1, a + b)\n\n        def my_false_branch(c, d):\n            tracer_spy.append(c)\n            return (c - 1, c - d)\n\n        def my_g(x, y):\n            x1, y1 = lax.cond(x >= 0, my_true_branch, my_false_branch, x, y)\n            tracer_spy.append(x1)\n            return (x1, y1)\n        x2, y2 = jax.remat(my_g)(x, y)\n        return y2 + lax.sin(x2)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(my_f)), 1.0, 2.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=my_f, arg_names=x,y, result_paths=result', 'traced_for=cond, fun=my_true_branch, arg_names=, result_paths=,', 'traced_for=cond, fun=my_false_branch, arg_names=, result_paths=,', 'traced_for=cond, fun=my_true_branch, arg_names=a,b, result_paths=result[0],result[1]', 'traced_for=cond, fun=my_false_branch, arg_names=c,d, result_paths=result[0],result[1]', 'traced_for=checkpoint / remat, fun=my_g, arg_names=,, result_paths=,'], expected_tracer_debug_infos=['traced_for=cond, fun=my_true_branch, arg_names=a,b, from a', 'traced_for=cond, fun=my_false_branch, arg_names=c,d, from c', 'traced_for=checkpoint / remat, fun=my_g, arg_names=x,y, from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_arg_names_cache_miss_explanations(self):\n\n    @jax.jit\n    def f(x, y):\n        return jnp.sin(x) * y['hi']\n    x = jnp.float32(1.0)\n    y = {'hi': jnp.arange(3.0, dtype='float32')}\n    expected_log_len = 1 if not is_persistent_cache_enabled() else 3\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y)\n            f(x, y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('TRACING CACHE MISS', msg)\n    self.assertIn('never seen function', msg)\n    y_ = {'hi': jnp.arange(4, dtype='float32')}\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(x, y_)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen input type signature', msg)\n    self.assertIn('closest seen input type signature has 1 mismatches', msg)\n    self.assertIn('seen f32[3], but now given f32[4]', msg)\n    if not config.enable_x64.value:\n        with config.explain_cache_misses(True):\n            with self.assertLogs(level='WARNING') as cm:\n                f(1.0, y)\n        self.assertLen(cm.output, expected_log_len)\n        msg = cm.output[0]\n        self.assertIn('weak_type=True', msg)\n        self.assertIn('https://jax.readthedocs.io/en/latest/type_promotion.html#weak-types', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(1, y=y)\n    self.assertLen(cm.output, expected_log_len)\n    msg = cm.output[0]\n    self.assertIn('never seen passing 1 positional args and 1 keyword args', msg)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            with jax.numpy_rank_promotion('warn'):\n                f(x, y)\n    self.assertTrue(1 <= len(cm.output) <= expected_log_len)\n    msg = cm.output[0]\n    self.assertIn(\"tracing context doesn't match\", msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\n@unittest.skip('Test fails, probably due to caching')\ndef test_arg_names_cache_miss_explanations_unpacks_transforms(self):\n\n    @jax.jit\n    def f(key):\n        return jax.random.truncated_normal(key, 1, 1, dtype=jax.numpy.float32)\n    with config.explain_cache_misses(True):\n        with self.assertLogs(level='WARNING') as cm:\n            f(jax.random.key(seed=123))\n    if is_persistent_cache_enabled():\n        self.assertTrue(10 <= len(cm.output) <= 15)\n        self.assertTrue(any(('TRACING CACHE MISS' in msg for msg in cm.output)))\n    else:\n        self.assertLen(cm.output, 5)\n        for msg in cm.output:\n            self.assertIn('TRACING CACHE MISS', msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_unary(self):\n\n    @jax.jit\n    def f(x):\n        if x > 0:\n            return x\n        else:\n            return 0\n    msg = 'on the value of the argument x'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_binary(self):\n\n    @jax.jit\n    def f(x, y):\n        if x > y:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_ternary(self):\n\n    @jax.jit\n    def f(x, y, z):\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments x and z'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, z=3)\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_varargs(self):\n\n    @jax.jit\n    def f(*args):\n        x, y, z = args\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments args'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(1, 2, 3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_kwargs(self):\n\n    @jax.jit\n    def f(**kwargs):\n        x, y, z = (kwargs['x'], kwargs['y'], kwargs['z'])\n        if x > z:\n            return x\n        else:\n            return y\n    msg = 'on the values of the arguments kwargs'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f(x=1, y=2, z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_arg_pytree(self):\n\n    @jax.jit\n    def f(xy, z):\n        x, y = xy\n        if x > 0:\n            return x\n        else:\n            return y\n    msg = 'on the value of the argument xy'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f((1, 2), z=3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const(self):\n\n    @jax.jit\n    def f():\n        assert jnp.add(1, 1) > 0\n    msg = 'on these lines'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert jnp.add(1, 1) > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_because_const_2(self):\n\n    @jax.jit\n    def f():\n        result = sum((jnp.add(1, 1) for _ in range(6)))\n        assert result > 0\n    msg = 'Additional originating lines are not shown.'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        f()",
+    "assertions": [
+      "assert result > 0"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_concrete_error_with_nested_call(self):\n\n    @jax.jit\n    def f(x, y):\n        if y:\n            return x\n\n    @jax.jit\n    def g(x):\n        return f(x, True)\n    msg = 'on the value of the argument y'\n    with self.assertRaisesRegex(core.ConcretizationTypeError, msg):\n        g(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_custom_vjp_nondiff_args(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.custom_vjp, nondiff_argnums=(0,))\n    def app(f, xy):\n        tracer_spy.append(xy[0])\n        return f(xy)\n\n    def app_fwd(f, xy):\n        tracer_spy.append(xy[0])\n        return (app(f, xy), jnp.cos(xy[0]))\n\n    def app_rev(f, cos_x0, g):\n        tracer_spy.append(cos_x0)\n        tracer_spy.append(g)\n        return ((cos_x0 * g, cos_x0),)\n    app.defvjp(app_fwd, app_rev)\n    self._check_tracers_and_jaxprs(jax.jit(jax.grad(lambda xy: app(lambda x: 2 * x[0], xy))), (3.0, 3.0), tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], result_paths=result[0],result[1]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], result_paths=result'], expected_tracer_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=custom_vjp fun, fun=app, arg_names=xy[0],xy[1], from xy[0]', 'traced_for=jit, fun=<lambda>, arg_names=xy[0],xy[1], from None'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_custom_dce_static_argnums(self):\n    tracer_spy = TracerSpy()\n\n    @functools.partial(jax.experimental.custom_dce.custom_dce, static_argnums=(0,))\n    def my_g(f, x):\n        tracer_spy.append(x)\n        return (f(x), 10 * f(x))\n\n    @my_g.def_dce\n    def my_g_dce(f, used_outs, x):\n        tracer_spy.append(x)\n        self.assertTrue(callable(f))\n        return [2 * v if used else None for used, v in zip(used_outs, my_g(f, x))]\n\n    def my_f(x):\n        return jnp.exp(x)\n    self._check_tracers_and_jaxprs(jax.jit(lambda x: my_g(my_f, x)[0]), 0.0, tracer_spy=tracer_spy, expected_jaxpr_debug_infos=['traced_for=jit, fun=<lambda>, arg_names=x, result_paths=result', 'traced_for=custom_dce, fun=my_g, arg_names=x, result_paths=result[0],result[1]'], expected_tracer_debug_infos=['traced_for=custom_dce, fun=my_g, arg_names=x, from x'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debug_info_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  }
+]

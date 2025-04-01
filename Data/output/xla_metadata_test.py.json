@@ -1,0 +1,386 @@
+[
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "def test_axpy(self):\n\n    @jax.jit\n    def axpy(a, x, y):\n        with set_xla_metadata(a='b'):\n            return a * x + y\n    for line in axpy.lower(1.0, 2.0, 3.0).as_text().split('\\n'):\n        if 'stablehlo.multiply' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'stablehlo.add' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_while_condition_body(self):\n\n    @jax.jit\n    def f_condition(x):\n        with set_xla_metadata(a='b'):\n            return x < 10\n\n    @jax.jit\n    def f_body(x):\n        with set_xla_metadata(a='c'):\n            return x + 1\n\n    @jax.jit\n    def while_fn(a):\n        return jax.lax.while_loop(f_condition, f_body, a)\n    for line in while_fn.lower(1.0).as_text().split('\\n'):\n        if 'stablehlo.compare' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'stablehlo.add' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"c\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_grad_outside_ctx(self):\n\n    @jax.jit\n    def f(x):\n        with set_xla_metadata(a='b'):\n            return x ** 3 + x ** 2 + jnp.sin(x)\n    grad_fn = jax.jit(jax.grad(f))\n    for line in grad_fn.lower(1.0).as_text().split('\\n'):\n        if 'stablehlo.cosine' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'call @integer_pow' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_multiple_instructions(self):\n\n    @jax.jit\n    def f(x, a):\n        y = jnp.matmul(x, x)\n        with set_xla_metadata(a='b'):\n            return y + a\n    for line in f.lower(jnp.arange(5.0), 1.0).as_text().split('\\n'):\n        if 'stablehlo.dot_general' in line:\n            self.assertNotIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'stablehlo.add' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.remat\ndef g(x):\n    jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n    return lax.sin(x)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.pmap\ndef g(z):\n    return f(z, z + 77)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g(x):\n    z = x * 2\n    return shard_alike(x, z)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_jvp\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "def test_f_nonjitted(self):\n\n    def f_add(a, b):\n        return lax.add(a, b)\n    arg1 = jnp.arange(2)\n    with set_xla_metadata(a='b'):\n        self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', jax.jit(f_add).lower(arg1, arg1).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@staticmethod\ndef add(dt, x, y):\n    fromscale = partial(jax.lax.convert_element_type, new_dtype=dt.float_dtype)\n    toscale = partial(jax.lax.convert_element_type, new_dtype=dt)\n    return toscale(jax.lax.max(fromscale(x), fromscale(y)))"
+  },
+  {
+    "test_code": "def test_attr_caching_nonjit(self):\n\n    def f_add(a, b):\n        return lax.add(a, b)\n    arg1 = jnp.arange(2)\n    arg2 = jnp.arange(2) + 1\n    arg3 = jnp.arange(2) + 2\n    with set_xla_metadata(b='c'):\n        self.assertIn('mhlo.frontend_attributes = {b = \"c\"}', jax.jit(f_add).lower(arg1, arg1).as_text())\n    self.assertNotIn('mhlo.frontend_attributes', jax.jit(f_add).lower(arg2, arg2).as_text())\n    with set_xla_metadata(c='d'):\n        self.assertIn('mhlo.frontend_attributes = {c = \"d\"}', jax.jit(f_add).lower(arg3, arg3).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@staticmethod\ndef add(dt, x, y):\n    fromscale = partial(jax.lax.convert_element_type, new_dtype=dt.float_dtype)\n    toscale = partial(jax.lax.convert_element_type, new_dtype=dt)\n    return toscale(jax.lax.max(fromscale(x), fromscale(y)))"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('x', 'y'), out_specs=out_spec)\ndef g(x):\n    result = lax.psum(x, axis_name=reduce_along)\n\n    def check_rep(result):\n        self.assertEqual(jax.experimental.shard_map.get_replication(result), set(reduce_along))\n        return result\n    result = check_rep(result)\n    result = jax.vmap(check_rep)(result)\n    return result"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g(x):\n    return jax.pure_callback(lambda x: x, x, x)"
+  },
+  {
+    "test_code": "def test_grad(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            return jax.grad(lambda x: x ** 3 + y ** 2 + jnp.sin(x))(x)\n    f_jaxpr = jax.make_jaxpr(f)(1.0, 2.0)\n    eqns = f_jaxpr.eqns\n    for eq in eqns[1:]:\n        self.assertDictEqual(eq.ctx.attributes, {'a': 'b'})\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jax.pure_callback(np.sin, x, x)"
+  },
+  {
+    "test_code": "def test_grad_outside_ctx(self):\n\n    @jax.jit\n    def f(x):\n        with set_xla_metadata(a='b'):\n            return x ** 3 + x ** 2 + jnp.sin(x)\n    grad_fn = jax.jit(jax.grad(f))\n    for line in grad_fn.lower(1.0).as_text().split('\\n'):\n        if 'stablehlo.cosine' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'call @integer_pow' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jax.pure_callback(np.sin, x, x)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g(a, b):\n    an, ai = a\n    bn, bi = b\n    which = an >= bn\n    return (jnp.where(which, an, bn), jnp.where(which, ai, bi))"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@partial(jax.profiler.annotate_function, name='aname')\ndef g(x):\n    return x + 2"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@partial(jax.jit, donate_argnums=0, out_shardings=Layout(DLL.AUTO))\ndef g(x):\n    return x * 2"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g():\n    x = x_ref[...] * y_ref[...]\n    y_ref[...] = x * 2\n    x_ref[...] = y_ref[...] + x_ref[...]"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g(ys, _):\n    y, _ = ys\n    y = checkpoint_name(jnp.sin(y), 'y')\n    z = checkpoint_name(jnp.sin(y), 'z')\n    z = jax.lax.with_sharding_constraint(z, s)\n    z = z.T\n    w = checkpoint_name(jnp.sin(z), 'w')\n    return ((w.T, jnp.sum(w)), None)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@functools.partial(jax.jit, static_argnums=[1])\ndef g(x, c):\n    return c * jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_f_jitted(self):\n\n    @jax.jit\n    def f(a, b):\n        with set_xla_metadata(a='b'):\n            return a + b\n    f_jaxpr = jax.make_jaxpr(f)(1, 2)\n    eqns = f_jaxpr.eqns\n    for eq in eqns[1:]:\n        self.assertDictEqual(eq.ctx.attributes, {'a': 'b'})\n    f_lowered_text = f.lower(1.0, 2.0).as_text()\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', f_lowered_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_f_jitted_bool_attributes(self):\n\n    @jax.jit\n    def f(a, b):\n        with set_xla_metadata(a=True):\n            return a + b\n    f_lowered_text = f.lower(1.0, 2.0).as_text()\n    self.assertIn('mhlo.frontend_attributes = {a = \"true\"}', f_lowered_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_f_jitted_int_attributes(self):\n\n    @jax.jit\n    def f(a, b):\n        with set_xla_metadata(a=10):\n            return a + b\n    f_lowered_text = f.lower(1.0, 2.0).as_text()\n    self.assertIn('mhlo.frontend_attributes = {a = \"10\"}', f_lowered_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_f_nonjitted(self):\n\n    def f_add(a, b):\n        return lax.add(a, b)\n    arg1 = jnp.arange(2)\n    with set_xla_metadata(a='b'):\n        self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', jax.jit(f_add).lower(arg1, arg1).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_f_attributes_overwrite(self):\n\n    @jax.jit\n    def g(a, b):\n        return a * b\n    with set_xla_metadata(a='b'):\n\n        @jax.jit\n        def f(a, b):\n            with set_xla_metadata(a='c'):\n                return a + b\n        f_lowered_text = f.lower(1.0, 2.0).as_text()\n        self.assertIn('mhlo.frontend_attributes = {a = \"c\"}', f_lowered_text)\n        self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', g.lower(1.0, 2.0).as_text())\n    self.assertNotIn('mhlo.frontend_attributes', g.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_f_attributes_merge(self):\n    with set_xla_metadata(key1='val1'):\n\n        @jax.jit\n        def f(a, b):\n            with set_xla_metadata(key2='val2'):\n                return a + b\n        f_lowered_text = f.lower(1.0, 2.0).as_text()\n        self.assertIn('mhlo.frontend_attributes = {key1 = \"val1\", key2 = \"val2\"}', f_lowered_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_attr_caching_jit(self):\n\n    @jax.jit\n    def f_add_jit(a, b):\n        return a + b\n    with set_xla_metadata(b='c'):\n        f_add_lowered1 = f_add_jit.lower(2.0, 3.0).as_text()\n    f_add_lowered2 = f_add_jit.lower(1.0, 2.0).as_text()\n    with set_xla_metadata(c='d'):\n        f_add_lowered3 = f_add_jit.lower(4.0, 5.0).as_text()\n    self.assertIn('mhlo.frontend_attributes = {b = \"c\"}', f_add_lowered1)\n    self.assertNotIn('mhlo.frontend_attributes = {}', f_add_lowered2)\n    self.assertNotIn('mhlo.frontend_attributes = {b = \"c\"}', f_add_lowered2)\n    self.assertNotIn('mhlo.frontend_attributes = {c = \"d\"}', f_add_lowered2)\n    self.assertIn('mhlo.frontend_attributes = {c = \"d\"}', f_add_lowered3)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_attr_caching_nonjit(self):\n\n    def f_add(a, b):\n        return lax.add(a, b)\n    arg1 = jnp.arange(2)\n    arg2 = jnp.arange(2) + 1\n    arg3 = jnp.arange(2) + 2\n    with set_xla_metadata(b='c'):\n        self.assertIn('mhlo.frontend_attributes = {b = \"c\"}', jax.jit(f_add).lower(arg1, arg1).as_text())\n    self.assertNotIn('mhlo.frontend_attributes', jax.jit(f_add).lower(arg2, arg2).as_text())\n    with set_xla_metadata(c='d'):\n        self.assertIn('mhlo.frontend_attributes = {c = \"d\"}', jax.jit(f_add).lower(arg3, arg3).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_axpy(self):\n\n    @jax.jit\n    def axpy(a, x, y):\n        with set_xla_metadata(a='b'):\n            return a * x + y\n    for line in axpy.lower(1.0, 2.0, 3.0).as_text().split('\\n'):\n        if 'stablehlo.multiply' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'stablehlo.add' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_while(self):\n\n    @jax.jit\n    def f(a):\n        with set_xla_metadata(a='b'):\n            return jax.lax.while_loop(lambda x: x < 10, lambda x: x + 1, a)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', f.lower(1.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_while_condition_body(self):\n\n    @jax.jit\n    def f_condition(x):\n        with set_xla_metadata(a='b'):\n            return x < 10\n\n    @jax.jit\n    def f_body(x):\n        with set_xla_metadata(a='c'):\n            return x + 1\n\n    @jax.jit\n    def while_fn(a):\n        return jax.lax.while_loop(f_condition, f_body, a)\n    for line in while_fn.lower(1.0).as_text().split('\\n'):\n        if 'stablehlo.compare' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'stablehlo.add' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"c\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_grad(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            return jax.grad(lambda x: x ** 3 + y ** 2 + jnp.sin(x))(x)\n    f_jaxpr = jax.make_jaxpr(f)(1.0, 2.0)\n    eqns = f_jaxpr.eqns\n    for eq in eqns[1:]:\n        self.assertDictEqual(eq.ctx.attributes, {'a': 'b'})\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_grad_outside_ctx(self):\n\n    @jax.jit\n    def f(x):\n        with set_xla_metadata(a='b'):\n            return x ** 3 + x ** 2 + jnp.sin(x)\n    grad_fn = jax.jit(jax.grad(f))\n    for line in grad_fn.lower(1.0).as_text().split('\\n'):\n        if 'stablehlo.cosine' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'call @integer_pow' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_vmap(self):\n    dct = {'a': 0.0, 'b': jnp.arange(5.0)}\n\n    @jax.jit\n    def f(dct, x):\n        with set_xla_metadata(a='b'):\n            return dct['a'] + dct['b'] + x\n    with set_xla_metadata(a='d'):\n        f_vmap = jax.vmap(f, in_axes=({'a': None, 'b': 0}, None))\n        f_jaxpr = jax.make_jaxpr(f_vmap)(dct, 1.0)\n        eqns = f_jaxpr.eqns\n        for eq in eqns[1:]:\n            self.assertDictEqual(eq.ctx.attributes, {'a': 'd'})\n\n    @jax.jit\n    def f2(x, y):\n        with set_xla_metadata(a='b'):\n            return (x + y, y * 2.0)\n    f_vmap_jaxpr = jax.make_jaxpr(jax.vmap(f2, in_axes=(0, None)))\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', f_vmap_jaxpr.lower(jnp.arange(5.0), 1.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_multiple_instructions(self):\n\n    @jax.jit\n    def f(x, a):\n        y = jnp.matmul(x, x)\n        with set_xla_metadata(a='b'):\n            return y + a\n    for line in f.lower(jnp.arange(5.0), 1.0).as_text().split('\\n'):\n        if 'stablehlo.dot_general' in line:\n            self.assertNotIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'stablehlo.add' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_softmax(self):\n\n    @jax.jit\n    def f(x):\n        with set_xla_metadata(a='b'):\n            return jax.nn.softmax(x)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', f.lower(jnp.arange(5.0)).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jit\ndef g(z):\n    return self.pmap(lambda x: x[jnp.newaxis] * y)(z)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g(y):\n    return y"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g(weights, x, h_0, c_0):\n    W_ih, W_hh, b_ih, b_hh = rnn.unpack_lstm_weights(weights, input_size, hidden_size, num_layers, bidirectional)\n    y_ref, h_n_ref, c_n_ref = rnn.lstm_ref(x, h_0, c_0, W_ih, W_hh, b_ih, b_hh, seq_lengths=seq_lengths, input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, dropout=False, bidirectional=bidirectional)\n    seq_length_mask = jnp.tile(jnp.arange(seq_len, dtype=jnp.int32)[None], [batch_size, 1]) < seq_lengths[:, None]\n    loss = jnp.sum(jnp.where(seq_length_mask[..., None], y_ref, 0.0))\n    return (loss, (y_ref, h_n_ref, c_n_ref))"
+  },
+  {
+    "test_code": "def test_f_nonjitted(self):\n\n    def f_add(a, b):\n        return lax.add(a, b)\n    arg1 = jnp.arange(2)\n    with set_xla_metadata(a='b'):\n        self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', jax.jit(f_add).lower(arg1, arg1).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def add(self, x: jax.Array) -> jax.Array:\n    self.value += np.asarray(x)\n    return jax.device_put(self.value, x.sharding)"
+  },
+  {
+    "test_code": "def test_attr_caching_nonjit(self):\n\n    def f_add(a, b):\n        return lax.add(a, b)\n    arg1 = jnp.arange(2)\n    arg2 = jnp.arange(2) + 1\n    arg3 = jnp.arange(2) + 2\n    with set_xla_metadata(b='c'):\n        self.assertIn('mhlo.frontend_attributes = {b = \"c\"}', jax.jit(f_add).lower(arg1, arg1).as_text())\n    self.assertNotIn('mhlo.frontend_attributes', jax.jit(f_add).lower(arg2, arg2).as_text())\n    with set_xla_metadata(c='d'):\n        self.assertIn('mhlo.frontend_attributes = {c = \"d\"}', jax.jit(f_add).lower(arg3, arg3).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def add(self, x: jax.Array) -> jax.Array:\n    self.value += np.asarray(x)\n    return jax.device_put(self.value, x.sharding)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g(x):\n    return x + 4"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef g(x):\n    return callback_p.bind(x, callback=log_value, effect=log_effect, out_avals=[])"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g(x):\n    branch = jax.named_call(lambda x: x)\n    out = jax.lax.cond(True, branch, branch, x)\n    return out"
+  },
+  {
+    "test_code": "def test_grad(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            return jax.grad(lambda x: x ** 3 + y ** 2 + jnp.sin(x))(x)\n    f_jaxpr = jax.make_jaxpr(f)(1.0, 2.0)\n    eqns = f_jaxpr.eqns\n    for eq in eqns[1:]:\n        self.assertDictEqual(eq.ctx.attributes, {'a': 'b'})\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_vjp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_grad_outside_ctx(self):\n\n    @jax.jit\n    def f(x):\n        with set_xla_metadata(a='b'):\n            return x ** 3 + x ** 2 + jnp.sin(x)\n    grad_fn = jax.jit(jax.grad(f))\n    for line in grad_fn.lower(1.0).as_text().split('\\n'):\n        if 'stablehlo.cosine' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'call @integer_pow' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_vjp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g(x):\n    y0_arr = jnp.array([[x, 0.1], [x, 0.2]])\n    t = jnp.array([0.0, 5.0])\n    y = jax.vmap(lambda y0: odeint(dx_dt, y0, t))(y0_arr)\n    return y[:, -1].sum()"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_vjp\ndef g(x):\n    debug_print('hello: {x}', x=x)\n    return x"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "def g(key1, key2):\n    assert_unconsumed(key1)\n    assert_unconsumed(key2)\n    return jax.random.bits(key1)"
+  },
+  {
+    "test_code": "def test_nested_jit(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            z = x * y\n\n            @jax.jit\n            def g(z):\n                with set_xla_metadata(c='d'):\n                    return z ** 2 + 1\n            return g(z)\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\", c = \"d\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_vjp\ndef g(y):\n    return x * y"
+  },
+  {
+    "test_code": "def test_f_nonjitted(self):\n\n    def f_add(a, b):\n        return lax.add(a, b)\n    arg1 = jnp.arange(2)\n    with set_xla_metadata(a='b'):\n        self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', jax.jit(f_add).lower(arg1, arg1).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef add(x):\n    return x * 2"
+  },
+  {
+    "test_code": "def test_attr_caching_nonjit(self):\n\n    def f_add(a, b):\n        return lax.add(a, b)\n    arg1 = jnp.arange(2)\n    arg2 = jnp.arange(2) + 1\n    arg3 = jnp.arange(2) + 2\n    with set_xla_metadata(b='c'):\n        self.assertIn('mhlo.frontend_attributes = {b = \"c\"}', jax.jit(f_add).lower(arg1, arg1).as_text())\n    self.assertNotIn('mhlo.frontend_attributes', jax.jit(f_add).lower(arg2, arg2).as_text())\n    with set_xla_metadata(c='d'):\n        self.assertIn('mhlo.frontend_attributes = {c = \"d\"}', jax.jit(f_add).lower(arg3, arg3).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.jit\ndef add(x):\n    return x * 2"
+  },
+  {
+    "test_code": "def test_grad(self):\n\n    @jax.jit\n    def f(x, y):\n        with set_xla_metadata(a='b'):\n            return jax.grad(lambda x: x ** 3 + y ** 2 + jnp.sin(x))(x)\n    f_jaxpr = jax.make_jaxpr(f)(1.0, 2.0)\n    eqns = f_jaxpr.eqns\n    for eq in eqns[1:]:\n        self.assertDictEqual(eq.ctx.attributes, {'a': 'b'})\n    self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', f.lower(1.0, 2.0).as_text())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_grad_outside_ctx(self):\n\n    @jax.jit\n    def f(x):\n        with set_xla_metadata(a='b'):\n            return x ** 3 + x ** 2 + jnp.sin(x)\n    grad_fn = jax.jit(jax.grad(f))\n    for line in grad_fn.lower(1.0).as_text().split('\\n'):\n        if 'stablehlo.cosine' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)\n        if 'call @integer_pow' in line:\n            self.assertIn('mhlo.frontend_attributes = {a = \"b\"}', line)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/xla_metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jnp.sin(x)"
+  }
+]

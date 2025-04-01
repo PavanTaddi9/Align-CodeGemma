@@ -1,0 +1,8 @@
+[
+  {
+    "test_code": "def test_is_distributed_initialized(self):\n    port = portpicker.pick_unused_port()\n    cmd = f\"import jax;\\n    assert not jax.distributed.is_initialized();\\n    jax.distributed.initialize('localhost:{port}', 1, 0);\\n    assert jax.distributed.is_initialized();\\n    \".replace('\\n', ' ')\n    result = subprocess.run([sys.executable, '-c', cmd], capture_output=True)\n    self.assertEqual(result.returncode, 0, msg=f'Test failed with:\\n{result.stdout}\\n{result.stderr}')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/distributed_test.py",
+    "function": "def run(pos):\n    maxiter = 1000\n\n    def cond(v):\n        return v[0] < maxiter\n\n    def step(v):\n        i, pos = v\n        jax.debug.callback(print_it, i + 1, maxiter)\n        return (i + 1, pos + 1)\n    val = (jnp.array(0), pos)\n    val = jax.lax.while_loop(cond, step, val)\n    return val[1]"
+  }
+]

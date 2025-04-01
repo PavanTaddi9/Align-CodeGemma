@@ -1,0 +1,932 @@
+[
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, _):\n    return (i + 1, jnp.sum(x[:i + 1]))"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_while_loop(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 10, 'x must be less than 10')\n        return x + 1\n\n    def body(x):\n        return jax.lax.while_loop(lambda x: (x < 10).any(), f, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.arange(4, dtype=jnp.int32)\n    _ = body(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 10'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, _):\n    return (i + 1, jnp.sum(x[:i + 1]))"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, _):\n    return (i + 1, jnp.sum(x[:i + 1]))"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(state):\n    it, x, fx, dfx = state\n    step = jnp.linalg.solve(dfx.reshape((-1, fx.size)), fx.ravel()).reshape(fx.shape)\n    x_next = x - step\n    fx, dfx = (func(x_next), jax.jacobian(func)(x_next))\n    return (it + 1, x_next, fx, dfx)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_while_loop(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 10, 'x must be less than 10')\n        return x + 1\n\n    def body(x):\n        return jax.lax.while_loop(lambda x: (x < 10).any(), f, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.arange(4, dtype=jnp.int32)\n    _ = body(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 10'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(state):\n    it, x, fx, dfx = state\n    step = jnp.linalg.solve(dfx.reshape((-1, fx.size)), fx.ravel()).reshape(fx.shape)\n    x_next = x - step\n    fx, dfx = (func(x_next), jax.jacobian(func)(x_next))\n    return (it + 1, x_next, fx, dfx)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(state):\n    it, x, fx, dfx = state\n    step = jnp.linalg.solve(dfx.reshape((-1, fx.size)), fx.ravel()).reshape(fx.shape)\n    x_next = x - step\n    fx, dfx = (func(x_next), jax.jacobian(func)(x_next))\n    return (it + 1, x_next, fx, dfx)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(carry, x):\n    return (carry, jnp.dot(x, x))"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_while_loop(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 10, 'x must be less than 10')\n        return x + 1\n\n    def body(x):\n        return jax.lax.while_loop(lambda x: (x < 10).any(), f, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.arange(4, dtype=jnp.int32)\n    _ = body(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 10'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(carry, x):\n    return (carry, jnp.dot(x, x))"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(carry, x):\n    return (carry, jnp.dot(x, x))"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, refs):\n    x_ref, y_ref = refs\n    y_ref[i] = s * x_ref[i] * jnp.cos(s)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_while_loop(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 10, 'x must be less than 10')\n        return x + 1\n\n    def body(x):\n        return jax.lax.while_loop(lambda x: (x < 10).any(), f, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.arange(4, dtype=jnp.int32)\n    _ = body(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 10'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, refs):\n    x_ref, y_ref = refs\n    y_ref[i] = s * x_ref[i] * jnp.cos(s)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, refs):\n    x_ref, y_ref = refs\n    y_ref[i] = s * x_ref[i] * jnp.cos(s)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.named_scope('scan_body')\ndef body(carry, x):\n    return (carry * x, carry + x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_while_loop(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 10, 'x must be less than 10')\n        return x + 1\n\n    def body(x):\n        return jax.lax.while_loop(lambda x: (x < 10).any(), f, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.arange(4, dtype=jnp.int32)\n    _ = body(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 10'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.named_scope('scan_body')\ndef body(carry, x):\n    return (carry * x, carry + x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.named_scope('scan_body')\ndef body(carry, x):\n    return (carry * x, carry + x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.remat\ndef g(x):\n    jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n    return lax.sin(x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.remat\ndef g(x):\n    jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n    return lax.sin(x)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(pred):\n\n    def true_fun():\n        x_ref[()] = 1.0\n\n    def false_fun():\n        x_ref[()] = 2.0\n    jax.lax.cond(pred, true_fun, false_fun)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(pred):\n\n    def true_fun():\n        x_ref[()] = 1.0\n\n    def false_fun():\n        x_ref[()] = 2.0\n    jax.lax.cond(pred, true_fun, false_fun)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(pred):\n\n    def true_fun():\n        x_ref[()] = 1.0\n\n    def false_fun():\n        x_ref[()] = 2.0\n    jax.lax.cond(pred, true_fun, false_fun)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(pred):\n\n    def true_fun():\n        x_ref[()] = 1.0\n\n    def false_fun():\n        x_ref[()] = 2.0\n    jax.lax.cond(pred, true_fun, false_fun)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@functools.partial(pjit.pjit, in_shardings=jax.sharding.PartitionSpec(None), out_shardings=jax.sharding.PartitionSpec('x'))\ndef f():\n    return jnp.zeros([32, 10])"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@functools.partial(pjit.pjit, in_shardings=jax.sharding.PartitionSpec(None), out_shardings=jax.sharding.PartitionSpec('x'))\ndef f():\n    return jnp.zeros([32, 10])"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@functools.partial(pjit.pjit, in_shardings=jax.sharding.PartitionSpec(None), out_shardings=jax.sharding.PartitionSpec('x'))\ndef f():\n    return jnp.zeros([32, 10])"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@functools.partial(pjit.pjit, in_shardings=jax.sharding.PartitionSpec(None), out_shardings=jax.sharding.PartitionSpec('x'))\ndef f():\n    return jnp.zeros([32, 10])"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x, r):\n    x = x.at[:, 0].set(x[:, 0] / r)\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x, r):\n    x = x.at[:, 0].set(x[:, 0] / r)\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x, r):\n    x = x.at[:, 0].set(x[:, 0] / r)\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x, r):\n    x = x.at[:, 0].set(x[:, 0] / r)\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, xy):\n    x, y = xy\n    y = y + jax.grad(lambda z: jnp.sum(jnp.maximum(z, 0.0)))(x)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_while_loop(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 10, 'x must be less than 10')\n        return x + 1\n\n    def body(x):\n        return jax.lax.while_loop(lambda x: (x < 10).any(), f, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.arange(4, dtype=jnp.int32)\n    _ = body(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 10'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, xy):\n    x, y = xy\n    y = y + jax.grad(lambda z: jnp.sum(jnp.maximum(z, 0.0)))(x)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, xy):\n    x, y = xy\n    y = y + jax.grad(lambda z: jnp.sum(jnp.maximum(z, 0.0)))(x)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(jnp.vectorize, excluded={1})\ndef f(x, y):\n    assert x.ndim == 0\n    assert y == 'foo'\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(jnp.vectorize, excluded={1})\ndef f(x, y):\n    assert x.ndim == 0\n    assert y == 'foo'\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(jnp.vectorize, excluded={1})\ndef f(x, y):\n    assert x.ndim == 0\n    assert y == 'foo'\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(jnp.vectorize, excluded={1})\ndef f(x, y):\n    assert x.ndim == 0\n    assert y == 'foo'\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.pmap\ndef f(x, y):\n    return x * y"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.pmap\ndef f(x, y):\n    return x * y"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.pmap\ndef f(x, y):\n    return x * y"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.pmap\ndef f(x, y):\n    return x * y"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.pmap\ndef g(z):\n    return f(z, z + 77)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.pmap\ndef g(z):\n    return f(z, z + 77)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x, y):\n    return jax.vmap(shard_alike, in_axes=(0, 1))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x, y):\n    return jax.vmap(shard_alike, in_axes=(0, 1))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x, y):\n    return jax.vmap(shard_alike, in_axes=(0, 1))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef f(x, y):\n    return jax.vmap(shard_alike, in_axes=(0, 1))(x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g(x):\n    z = x * 2\n    return shard_alike(x, z)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g(x):\n    z = x * 2\n    return shard_alike(x, z)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    return random.uniform(self.make_key(3), (308000000, 128), dtype=jnp.bfloat16)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    return random.uniform(self.make_key(3), (308000000, 128), dtype=jnp.bfloat16)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    return random.uniform(self.make_key(3), (308000000, 128), dtype=jnp.bfloat16)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    return random.uniform(self.make_key(3), (308000000, 128), dtype=jnp.bfloat16)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(state):\n    it, x, fx, dfx = state\n    step = jnp.linalg.solve(dfx.reshape((-1, fx.size)), fx.ravel()).reshape(fx.shape)\n    x_next = x - step\n    fx, dfx = (func(x_next), jax.jacobian(func)(x_next))\n    return (it + 1, x_next, fx, dfx)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_while_loop(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 10, 'x must be less than 10')\n        return x + 1\n\n    def body(x):\n        return jax.lax.while_loop(lambda x: (x < 10).any(), f, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.arange(4, dtype=jnp.int32)\n    _ = body(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 10'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(state):\n    it, x, fx, dfx = state\n    step = jnp.linalg.solve(dfx.reshape((-1, fx.size)), fx.ravel()).reshape(fx.shape)\n    x_next = x - step\n    fx, dfx = (func(x_next), jax.jacobian(func)(x_next))\n    return (it + 1, x_next, fx, dfx)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(state):\n    it, x, fx, dfx = state\n    step = jnp.linalg.solve(dfx.reshape((-1, fx.size)), fx.ravel()).reshape(fx.shape)\n    x_next = x - step\n    fx, dfx = (func(x_next), jax.jacobian(func)(x_next))\n    return (it + 1, x_next, fx, dfx)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def cond(x):\n    return jnp.linalg.norm(matvec(x) - b) > tolerance"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.custom_jvp\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.custom_jvp\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    return jax.lax.convert_element_type(x, FooTy())"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    return jax.lax.convert_element_type(x, FooTy())"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    return jax.lax.convert_element_type(x, FooTy())"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    return jax.lax.convert_element_type(x, FooTy())"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    y = x * jnp.arange(3.0).reshape((1, 3))\n    return jnp.take_along_axis(y, idx, -1).sum()"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    y = x * jnp.arange(3.0).reshape((1, 3))\n    return jnp.take_along_axis(y, idx, -1).sum()"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    y = x * jnp.arange(3.0).reshape((1, 3))\n    return jnp.take_along_axis(y, idx, -1).sum()"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f(x):\n    y = x * jnp.arange(3.0).reshape((1, 3))\n    return jnp.take_along_axis(y, idx, -1).sum()"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_cond(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x == 0, 'x must be non-zero in g')\n        return x + 1\n\n    def body(pred, x):\n        return jax.lax.cond(pred, f, g, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.zeros((4,), dtype=jnp.int32)\n    _ = body(jnp.bool_(True), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in f'):\n        error_check.raise_if_error()\n    _ = body(jnp.bool_(False), x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be non-zero in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, xy):\n    x, y = xy\n    y = y + jax.grad(lambda z: jnp.sum(jnp.maximum(z, 0.0)))(x)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_while_loop(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 10, 'x must be less than 10')\n        return x + 1\n\n    def body(x):\n        return jax.lax.while_loop(lambda x: (x < 10).any(), f, x)\n    if jit:\n        body = jax.jit(body)\n    x = jnp.arange(4, dtype=jnp.int32)\n    _ = body(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 10'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, xy):\n    x, y = xy\n    y = y + jax.grad(lambda z: jnp.sum(jnp.maximum(z, 0.0)))(x)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_works_with_scan(self, jit):\n\n    def f(carry, x):\n        error_check.set_error_if(x >= 4, 'x must be less than 4')\n        return (carry + x, x + 1)\n\n    def body(init, xs):\n        return jax.lax.scan(f, init=init, xs=xs)\n    if jit:\n        body = jax.jit(body)\n    init = jnp.int32(0)\n    xs = jnp.arange(5, dtype=jnp.int32)\n    _ = body(init, xs)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 4'):\n        error_check.raise_if_error()\n    xs = jnp.arange(4, dtype=jnp.int32)\n    _ = body(init, xs)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def body(i, xy):\n    x, y = xy\n    y = y + jax.grad(lambda z: jnp.sum(jnp.maximum(z, 0.0)))(x)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('i'), out_specs=P())\ndef f(x):\n    return jax.lax.psum(((w * x) ** 2).sum(), 'i')"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('i'), out_specs=P())\ndef f(x):\n    return jax.lax.psum(((w * x) ** 2).sum(), 'i')"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('i'), out_specs=P())\ndef f(x):\n    return jax.lax.psum(((w * x) ** 2).sum(), 'i')"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('i'), out_specs=P())\ndef f(x):\n    return jax.lax.psum(((w * x) ** 2).sum(), 'i')"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('x', 'y'), out_specs=out_spec)\ndef g(x):\n    result = lax.psum(x, axis_name=reduce_along)\n\n    def check_rep(result):\n        self.assertEqual(jax.experimental.shard_map.get_replication(result), set(reduce_along))\n        return result\n    result = check_rep(result)\n    result = jax.vmap(check_rep)(result)\n    return result"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('x', 'y'), out_specs=out_spec)\ndef g(x):\n    result = lax.psum(x, axis_name=reduce_along)\n\n    def check_rep(result):\n        self.assertEqual(jax.experimental.shard_map.get_replication(result), set(reduce_along))\n        return result\n    result = check_rep(result)\n    result = jax.vmap(check_rep)(result)\n    return result"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_no_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n    x = jnp.full((4,), 1, dtype=jnp.int32)\n    f(x)\n    error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_error_check_should_report_the_first_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x >= 1, 'x must be less than 1 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), 0, dtype=jnp.int32)\n    x = f(x)\n    x = g(x)\n    _ = f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be less than 1 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.product(jit=[True, False])\ndef test_raise_if_error_clears_error(self, jit):\n\n    def f(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in f')\n        return x + 1\n\n    def g(x):\n        error_check.set_error_if(x <= 0, 'x must be greater than 0 in g')\n        return x + 1\n    if jit:\n        f = jax.jit(f)\n        g = jax.jit(g)\n    x = jnp.full((4,), -1, dtype=jnp.int32)\n    f(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in f'):\n        error_check.raise_if_error()\n    error_check.raise_if_error()\n    g(x)\n    with self.assertRaisesRegex(JaxValueError, 'x must be greater than 0 in g'):\n        error_check.raise_if_error()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/error_check_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  }
+]

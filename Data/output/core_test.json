@@ -1,0 +1,697 @@
+[
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=[*jtu.dtypes.all, object, [('i', 'i4'), ('f', 'f4')]])\ndef test_is_valid_jaxtype(self, dtype):\n    arr = np.zeros(10, dtype=dtype)\n    if dtype in jtu.dtypes.all:\n        self.assertTrue(core.valid_jaxtype(arr))\n    else:\n        self.assertFalse(core.valid_jaxtype(arr))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_reference_cycles(self):\n    if jtu.TEST_NUM_THREADS.value > 1:\n        self.skipTest('Test does not work with multiple threads')\n    gc.collect()\n\n    def f(x):\n        return x.sum()\n    fn = partial(linearize, f)\n    params = jnp.zeros([])\n    debug = gc.get_debug()\n    try:\n        fn(params)\n        gc.set_debug(gc.DEBUG_SAVEALL)\n        self.assertEqual(gc.collect(), 0, msg=str(gc.garbage))\n    finally:\n        gc.set_debug(debug)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_reference_cycles_jit(self):\n    if jtu.TEST_NUM_THREADS.value > 1:\n        self.skipTest('Test does not work with multiple threads')\n    gc.collect()\n\n    def f(x):\n        return x.sum()\n    fn = jit(f)\n    params = jnp.zeros([])\n    debug = gc.get_debug()\n    try:\n        fn(params).block_until_ready()\n        gc.set_debug(gc.DEBUG_SAVEALL)\n        self.assertEqual(gc.collect(), 0, msg=str(gc.garbage))\n    finally:\n        gc.set_debug(debug)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_invalid_shape_error_with_jit_tracer_passed(self):\n\n    @jax.jit\n    def g_jit(x):\n        return jnp.zeros(shape=(2, x))\n\n    @jax.vmap\n    def g_vmap(x):\n        return jnp.zeros(shape=(2, x))\n    with self.assertRaisesRegex(TypeError, 'This concrete value was not available in' + ' Python because it depends on'):\n        g_jit(1)\n    with self.assertRaisesRegex(TypeError, 'This BatchTracer with object id'):\n        g_vmap(jnp.ones((1,)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_reference_cycles(self):\n    if jtu.TEST_NUM_THREADS.value > 1:\n        self.skipTest('Test does not work with multiple threads')\n    gc.collect()\n\n    def f(x):\n        return x.sum()\n    fn = partial(linearize, f)\n    params = jnp.zeros([])\n    debug = gc.get_debug()\n    try:\n        fn(params)\n        gc.set_debug(gc.DEBUG_SAVEALL)\n        self.assertEqual(gc.collect(), 0, msg=str(gc.garbage))\n    finally:\n        gc.set_debug(debug)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef fn(n, x):\n    return lax.broadcast_in_dim(x, (n,), ())"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_reference_cycles_jit(self):\n    if jtu.TEST_NUM_THREADS.value > 1:\n        self.skipTest('Test does not work with multiple threads')\n    gc.collect()\n\n    def f(x):\n        return x.sum()\n    fn = jit(f)\n    params = jnp.zeros([])\n    debug = gc.get_debug()\n    try:\n        fn(params).block_until_ready()\n        gc.set_debug(gc.DEBUG_SAVEALL)\n        self.assertEqual(gc.collect(), 0, msg=str(gc.garbage))\n    finally:\n        gc.set_debug(debug)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef fn(n, x):\n    return lax.broadcast_in_dim(x, (n,), ())"
+  },
+  {
+    "test_code": "def test_jvp_zeros(self):\n\n    def foo(x):\n\n        def bar(y):\n            return jnp.sin(x * y)\n        return jvp(bar, (3 * x,), (2 * x,))\n    jtu.check_eq(jit(foo)(0.5), foo(0.5))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def foo(x, y):\n    z = jax.vmap(jax.vmap(jnp.sin))(x) * y\n    return jax.vmap(jax.vmap(jnp.add))(x, z)"
+  },
+  {
+    "test_code": "def test_simple_jit(self):\n\n    def foo(x):\n        if x.shape == ():\n            return x + 1.0\n        else:\n            return x + 2.0\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    x1, y1 = (np.array(1.0), np.array(2.0))\n    assert foo(x1) == y1\n    assert foo2(x1) == y1\n    assert foo3(x1) == y1\n    x2, y2 = (np.array([1.0, 2.0]), np.array([3.0, 4.0]))\n    assert np.all(foo(x2) == y2)\n    assert np.all(foo2(x2) == y2)\n    assert np.all(foo3(x2) == y2)",
+    "assertions": [
+      "assert foo(x1) == y1",
+      "assert foo2(x1) == y1",
+      "assert foo3(x1) == y1",
+      "assert np.all(foo(x2) == y2)",
+      "assert np.all(foo2(x2) == y2)",
+      "assert np.all(foo3(x2) == y2)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def foo(x, y):\n    z = jax.vmap(jax.vmap(jnp.sin))(x) * y\n    return jax.vmap(jax.vmap(jnp.add))(x, z)"
+  },
+  {
+    "test_code": "def test_product_jit(self):\n\n    def foo(x, tup):\n        y, z = tup\n        w = x + z\n        return ((w, {'x': y}), z)\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    args = (1.0, (2.0, 3.0))\n    expected_output = ((4.0, {'x': 2.0}), 3.0)\n    assert foo(*args) == expected_output\n    assert foo2(*args) == expected_output\n    assert foo3(*args) == foo(*args)",
+    "assertions": [
+      "assert foo(*args) == expected_output",
+      "assert foo2(*args) == expected_output",
+      "assert foo3(*args) == foo(*args)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def foo(x, y):\n    z = jax.vmap(jax.vmap(jnp.sin))(x) * y\n    return jax.vmap(jax.vmap(jnp.add))(x, z)"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_reference_cycles(self):\n    if jtu.TEST_NUM_THREADS.value > 1:\n        self.skipTest('Test does not work with multiple threads')\n    gc.collect()\n\n    def f(x):\n        return x.sum()\n    fn = partial(linearize, f)\n    params = jnp.zeros([])\n    debug = gc.get_debug()\n    try:\n        fn(params)\n        gc.set_debug(gc.DEBUG_SAVEALL)\n        self.assertEqual(gc.collect(), 0, msg=str(gc.garbage))\n    finally:\n        gc.set_debug(debug)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.vmap\ndef fn(a, b):\n    m1, v1 = a\n    m2, v2 = b\n    return (m1 + m2, jsp.linalg.solve(m1, v2) + jsp.linalg.solve(m2, v1))"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_reference_cycles_jit(self):\n    if jtu.TEST_NUM_THREADS.value > 1:\n        self.skipTest('Test does not work with multiple threads')\n    gc.collect()\n\n    def f(x):\n        return x.sum()\n    fn = jit(f)\n    params = jnp.zeros([])\n    debug = gc.get_debug()\n    try:\n        fn(params).block_until_ready()\n        gc.set_debug(gc.DEBUG_SAVEALL)\n        self.assertEqual(gc.collect(), 0, msg=str(gc.garbage))\n    finally:\n        gc.set_debug(debug)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.vmap\ndef fn(a, b):\n    m1, v1 = a\n    m2, v2 = b\n    return (m1 + m2, jsp.linalg.solve(m1, v2) + jsp.linalg.solve(m2, v1))"
+  },
+  {
+    "test_code": "def test_dropvar_avals(self):\n\n    def f(x):\n\n        def body(c, _):\n            return (c, None)\n        (x1, x2), _ = jax.lax.scan(body, (x, x), None, length=1)\n        return [x2]\n    aval = core.ShapedArray((), jnp.dtype('int32'))\n    pval = pe.PartialVal.unknown(aval)\n    jaxpr, _, _ = pe.trace_to_jaxpr_nounits(lu.wrap_init(f, debug_info=debug_info('test', f, (0,), {})), [pval], False)\n    dropvar, b = jaxpr.eqns[0].outvars\n    self.assertEqual(dropvar.aval, aval)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_jvp_zeros(self):\n\n    def foo(x):\n\n        def bar(y):\n            return jnp.sin(x * y)\n        return jvp(bar, (3 * x,), (2 * x,))\n    jtu.check_eq(jit(foo)(0.5), foo(0.5))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.custom_vjp\ndef foo(x):\n    return x"
+  },
+  {
+    "test_code": "def test_simple_jit(self):\n\n    def foo(x):\n        if x.shape == ():\n            return x + 1.0\n        else:\n            return x + 2.0\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    x1, y1 = (np.array(1.0), np.array(2.0))\n    assert foo(x1) == y1\n    assert foo2(x1) == y1\n    assert foo3(x1) == y1\n    x2, y2 = (np.array([1.0, 2.0]), np.array([3.0, 4.0]))\n    assert np.all(foo(x2) == y2)\n    assert np.all(foo2(x2) == y2)\n    assert np.all(foo3(x2) == y2)",
+    "assertions": [
+      "assert foo(x1) == y1",
+      "assert foo2(x1) == y1",
+      "assert foo3(x1) == y1",
+      "assert np.all(foo(x2) == y2)",
+      "assert np.all(foo2(x2) == y2)",
+      "assert np.all(foo3(x2) == y2)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.custom_vjp\ndef foo(x):\n    return x"
+  },
+  {
+    "test_code": "def test_product_jit(self):\n\n    def foo(x, tup):\n        y, z = tup\n        w = x + z\n        return ((w, {'x': y}), z)\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    args = (1.0, (2.0, 3.0))\n    expected_output = ((4.0, {'x': 2.0}), 3.0)\n    assert foo(*args) == expected_output\n    assert foo2(*args) == expected_output\n    assert foo3(*args) == foo(*args)",
+    "assertions": [
+      "assert foo(*args) == expected_output",
+      "assert foo2(*args) == expected_output",
+      "assert foo3(*args) == foo(*args)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.custom_vjp\ndef foo(x):\n    return x"
+  },
+  {
+    "test_code": "def test_jit_closure(self):\n\n    def foo(x):\n\n        @jit\n        def bar(y):\n            return x + y\n        return bar(0.0)\n    assert jvp(foo, (1.0,), (2.0,)) == (1.0, 2.0)",
+    "assertions": [
+      "assert jvp(foo, (1.0,), (2.0,)) == (1.0, 2.0)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def bar(x):\n    out = jnp.sin(foo(x))\n    jax_setattr(thing, 'x', 5.0)\n    return out"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def check_close(x, y, tol=0.001):\n    assert jnp.shape(x) == jnp.shape(y)\n    assert jnp.allclose(x, y, rtol=tol, atol=tol), f'Value mismatch:\\n{x}\\n  vs\\n{y}\\n'"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.remat\ndef g(x):\n    jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n    return lax.sin(x)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.remat\ndef g(x):\n    jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n    return lax.sin(x)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.remat\ndef g(x):\n    jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n    return lax.sin(x)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.remat\ndef g(x):\n    jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n    return lax.sin(x)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_reference_cycles(self):\n    if jtu.TEST_NUM_THREADS.value > 1:\n        self.skipTest('Test does not work with multiple threads')\n    gc.collect()\n\n    def f(x):\n        return x.sum()\n    fn = partial(linearize, f)\n    params = jnp.zeros([])\n    debug = gc.get_debug()\n    try:\n        fn(params)\n        gc.set_debug(gc.DEBUG_SAVEALL)\n        self.assertEqual(gc.collect(), 0, msg=str(gc.garbage))\n    finally:\n        gc.set_debug(debug)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@custom_transpose_with_example_out(jnp.ones(2))\ndef fn(r, x):\n    tracer_spy.append(r)\n    tracer_spy.append(x['c'])\n    return dict(b=x['c'] / r)"
+  },
+  {
+    "test_code": "@jtu.thread_unsafe_test()\ndef test_reference_cycles_jit(self):\n    if jtu.TEST_NUM_THREADS.value > 1:\n        self.skipTest('Test does not work with multiple threads')\n    gc.collect()\n\n    def f(x):\n        return x.sum()\n    fn = jit(f)\n    params = jnp.zeros([])\n    debug = gc.get_debug()\n    try:\n        fn(params).block_until_ready()\n        gc.set_debug(gc.DEBUG_SAVEALL)\n        self.assertEqual(gc.collect(), 0, msg=str(gc.garbage))\n    finally:\n        gc.set_debug(debug)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@custom_transpose_with_example_out(jnp.ones(2))\ndef fn(r, x):\n    tracer_spy.append(r)\n    tracer_spy.append(x['c'])\n    return dict(b=x['c'] / r)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f(pred):\n\n    def true_fun():\n        x_ref[()] = 1.0\n\n    def false_fun():\n        x_ref[()] = 2.0\n    jax.lax.cond(pred, true_fun, false_fun)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@functools.partial(pjit.pjit, in_shardings=jax.sharding.PartitionSpec(None), out_shardings=jax.sharding.PartitionSpec('x'))\ndef f():\n    return jnp.zeros([32, 10])"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef f(x, r):\n    x = x.at[:, 0].set(x[:, 0] / r)\n    return x"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "def test_jvp_zeros(self):\n\n    def foo(x):\n\n        def bar(y):\n            return jnp.sin(x * y)\n        return jvp(bar, (3 * x,), (2 * x,))\n    jtu.check_eq(jit(foo)(0.5), foo(0.5))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "def test_simple_jit(self):\n\n    def foo(x):\n        if x.shape == ():\n            return x + 1.0\n        else:\n            return x + 2.0\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    x1, y1 = (np.array(1.0), np.array(2.0))\n    assert foo(x1) == y1\n    assert foo2(x1) == y1\n    assert foo3(x1) == y1\n    x2, y2 = (np.array([1.0, 2.0]), np.array([3.0, 4.0]))\n    assert np.all(foo(x2) == y2)\n    assert np.all(foo2(x2) == y2)\n    assert np.all(foo3(x2) == y2)",
+    "assertions": [
+      "assert foo(x1) == y1",
+      "assert foo2(x1) == y1",
+      "assert foo3(x1) == y1",
+      "assert np.all(foo(x2) == y2)",
+      "assert np.all(foo2(x2) == y2)",
+      "assert np.all(foo3(x2) == y2)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "def test_product_jit(self):\n\n    def foo(x, tup):\n        y, z = tup\n        w = x + z\n        return ((w, {'x': y}), z)\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    args = (1.0, (2.0, 3.0))\n    expected_output = ((4.0, {'x': 2.0}), 3.0)\n    assert foo(*args) == expected_output\n    assert foo2(*args) == expected_output\n    assert foo3(*args) == foo(*args)",
+    "assertions": [
+      "assert foo(*args) == expected_output",
+      "assert foo2(*args) == expected_output",
+      "assert foo3(*args) == foo(*args)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@partial(jnp.vectorize, excluded={1})\ndef f(x, y):\n    assert x.ndim == 0\n    assert y == 'foo'\n    return x"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.pmap\ndef f(x, y):\n    return x * y"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.pmap\ndef g(z):\n    return f(z, z + 77)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.pmap\ndef g(z):\n    return f(z, z + 77)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.pmap\ndef g(z):\n    return f(z, z + 77)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.pmap\ndef g(z):\n    return f(z, z + 77)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef f(x, y):\n    return jax.vmap(shard_alike, in_axes=(0, 1))(x, y)"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    z = x * 2\n    return shard_alike(x, z)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    z = x * 2\n    return shard_alike(x, z)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    z = x * 2\n    return shard_alike(x, z)"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    z = x * 2\n    return shard_alike(x, z)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f():\n    return random.uniform(self.make_key(3), (308000000, 128), dtype=jnp.bfloat16)"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.custom_jvp\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.custom_jvp\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.custom_jvp\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.custom_jvp\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f(x):\n    return jax.lax.convert_element_type(x, FooTy())"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f(x):\n    y = x * jnp.arange(3.0).reshape((1, 3))\n    return jnp.take_along_axis(y, idx, -1).sum()"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "def test_jvp_zeros(self):\n\n    def foo(x):\n\n        def bar(y):\n            return jnp.sin(x * y)\n        return jvp(bar, (3 * x,), (2 * x,))\n    jtu.check_eq(jit(foo)(0.5), foo(0.5))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "def test_simple_jit(self):\n\n    def foo(x):\n        if x.shape == ():\n            return x + 1.0\n        else:\n            return x + 2.0\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    x1, y1 = (np.array(1.0), np.array(2.0))\n    assert foo(x1) == y1\n    assert foo2(x1) == y1\n    assert foo3(x1) == y1\n    x2, y2 = (np.array([1.0, 2.0]), np.array([3.0, 4.0]))\n    assert np.all(foo(x2) == y2)\n    assert np.all(foo2(x2) == y2)\n    assert np.all(foo3(x2) == y2)",
+    "assertions": [
+      "assert foo(x1) == y1",
+      "assert foo2(x1) == y1",
+      "assert foo3(x1) == y1",
+      "assert np.all(foo(x2) == y2)",
+      "assert np.all(foo2(x2) == y2)",
+      "assert np.all(foo3(x2) == y2)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "def test_product_jit(self):\n\n    def foo(x, tup):\n        y, z = tup\n        w = x + z\n        return ((w, {'x': y}), z)\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    args = (1.0, (2.0, 3.0))\n    expected_output = ((4.0, {'x': 2.0}), 3.0)\n    assert foo(*args) == expected_output\n    assert foo2(*args) == expected_output\n    assert foo3(*args) == foo(*args)",
+    "assertions": [
+      "assert foo(*args) == expected_output",
+      "assert foo2(*args) == expected_output",
+      "assert foo3(*args) == foo(*args)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('i'), out_specs=P())\ndef f(x):\n    return jax.lax.psum(((w * x) ** 2).sum(), 'i')"
+  },
+  {
+    "test_code": "def test_input_residual_forwarding(self):\n    x = jnp.arange(3 * 4.0).reshape(3, 4)\n    y = jnp.arange(4 * 3.0).reshape(4, 3)\n    g = jax.jit(jnp.dot)\n\n    def f(y):\n        z, g_lin = jax.linearize(lambda y: g(x, y), y)\n        zdot = g_lin(y)\n        return (z, zdot)\n    jaxpr = jax.make_jaxpr(f)(y)\n    e1, e2 = jaxpr.jaxpr.eqns\n    self.assertLen(e1.outvars, 1)\n    self.assertEqual(e1.outvars[0].aval.shape, (3, 3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('x', 'y'), out_specs=out_spec)\ndef g(x):\n    result = lax.psum(x, axis_name=reduce_along)\n\n    def check_rep(result):\n        self.assertEqual(jax.experimental.shard_map.get_replication(result), set(reduce_along))\n        return result\n    result = check_rep(result)\n    result = jax.vmap(check_rep)(result)\n    return result"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(x, y, z, w):\n            return (x, w)\n        return g(x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (0, 1), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.invars, 1 + 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[1].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.invars[2].aval.shape)\n    self.assertLen(jaxpr.outvars, 2)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[0].aval.shape)\n    self.assertEqual((jaxpr.invars[0],), jaxpr.outvars[1].aval.shape)\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('x', 'y'), out_specs=out_spec)\ndef g(x):\n    result = lax.psum(x, axis_name=reduce_along)\n\n    def check_rep(result):\n        self.assertEqual(jax.experimental.shard_map.get_replication(result), set(reduce_along))\n        return result\n    result = check_rep(result)\n    result = jax.vmap(check_rep)(result)\n    return result"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_staging_nested_including_shape_arg(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n\n    def f(x, y):\n\n        @jax.jit\n        def g(_, x, y, z, w):\n            return (x, w)\n        return g(x.shape[0], x, y, x, y)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, a, b], keep_inputs=[False, True, True])\n    self.assertLen(jaxpr.eqns, 1)\n    eqn = jaxpr.eqns[0]\n    self.assertIsInstance(eqn.primitive, core.CallPrimitive)\n    inner_jaxpr = eqn.params['call_jaxpr']\n    self.assertIsInstance(inner_jaxpr, core.Jaxpr)\n    self.assertLen(inner_jaxpr.invars, 1 + 4)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[1].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[2].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[3].aval.shape)\n    self.assertEqual((inner_jaxpr.invars[0],), inner_jaxpr.invars[4].aval.shape)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('x', 'y'), out_specs=out_spec)\ndef g(x):\n    result = lax.psum(x, axis_name=reduce_along)\n\n    def check_rep(result):\n        self.assertEqual(jax.experimental.shard_map.get_replication(result), set(reduce_along))\n        return result\n    result = check_rep(result)\n    result = jax.vmap(check_rep)(result)\n    return result"
+  },
+  {
+    "test_code": "@unittest.skip('This test does not work with nested pjit and DShapedArray')\ndef test_typecheck_staging_nested(self):\n    n = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    m = core.ShapedArray((), jnp.dtype('int32'), weak_type=False)\n    a = core.DShapedArray((DBIdx(0),), jnp.dtype('float32'), weak_type=False)\n    b = core.DShapedArray((DBIdx(1),), jnp.dtype('float32'), weak_type=False)\n\n    def f(a, b):\n\n        @jax.jit\n        def g(x):\n            return x\n        return (g(a),)\n    jaxpr, _, _, () = pe.trace_to_jaxpr_dynamic(lu.wrap_init(f, debug_info=debug_info('test', f, (1, 2), {})), [n, m, a, b], keep_inputs=[False, False, True, True])\n    core.check_jaxpr(jaxpr)\n    _, _, c, d = jaxpr.invars\n    jaxpr.eqns[0].invars[1] = d\n    with self.assertRaisesRegex(TypeError, 'passes operand'):\n        core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].invars[1] = c\n    core.check_jaxpr(jaxpr)\n    jaxpr.eqns[0].outvars[0] = core.Var('', d.aval)\n    with self.assertRaisesRegex(TypeError, 'inconsistently typed as'):\n        core.check_jaxpr(jaxpr)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('x', 'y'), out_specs=out_spec)\ndef g(x):\n    result = lax.psum(x, axis_name=reduce_along)\n\n    def check_rep(result):\n        self.assertEqual(jax.experimental.shard_map.get_replication(result), set(reduce_along))\n        return result\n    result = check_rep(result)\n    result = jax.vmap(check_rep)(result)\n    return result"
+  },
+  {
+    "test_code": "def test_jvp_zeros(self):\n\n    def foo(x):\n\n        def bar(y):\n            return jnp.sin(x * y)\n        return jvp(bar, (3 * x,), (2 * x,))\n    jtu.check_eq(jit(foo)(0.5), foo(0.5))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def foo(x):\n    i = jax.lax.axis_index('x')\n    return jnp.exp(x) + i.astype(x.dtype)"
+  },
+  {
+    "test_code": "def test_simple_jit(self):\n\n    def foo(x):\n        if x.shape == ():\n            return x + 1.0\n        else:\n            return x + 2.0\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    x1, y1 = (np.array(1.0), np.array(2.0))\n    assert foo(x1) == y1\n    assert foo2(x1) == y1\n    assert foo3(x1) == y1\n    x2, y2 = (np.array([1.0, 2.0]), np.array([3.0, 4.0]))\n    assert np.all(foo(x2) == y2)\n    assert np.all(foo2(x2) == y2)\n    assert np.all(foo3(x2) == y2)",
+    "assertions": [
+      "assert foo(x1) == y1",
+      "assert foo2(x1) == y1",
+      "assert foo3(x1) == y1",
+      "assert np.all(foo(x2) == y2)",
+      "assert np.all(foo2(x2) == y2)",
+      "assert np.all(foo3(x2) == y2)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def foo(x):\n    i = jax.lax.axis_index('x')\n    return jnp.exp(x) + i.astype(x.dtype)"
+  },
+  {
+    "test_code": "def test_product_jit(self):\n\n    def foo(x, tup):\n        y, z = tup\n        w = x + z\n        return ((w, {'x': y}), z)\n    foo2 = jit(foo)\n    foo3 = jit(foo2)\n    args = (1.0, (2.0, 3.0))\n    expected_output = ((4.0, {'x': 2.0}), 3.0)\n    assert foo(*args) == expected_output\n    assert foo2(*args) == expected_output\n    assert foo3(*args) == foo(*args)",
+    "assertions": [
+      "assert foo(*args) == expected_output",
+      "assert foo2(*args) == expected_output",
+      "assert foo3(*args) == foo(*args)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def foo(x):\n    i = jax.lax.axis_index('x')\n    return jnp.exp(x) + i.astype(x.dtype)"
+  },
+  {
+    "test_code": "def test_jit_closure(self):\n\n    def foo(x):\n\n        @jit\n        def bar(y):\n            return x + y\n        return bar(0.0)\n    assert jvp(foo, (1.0,), (2.0,)) == (1.0, 2.0)",
+    "assertions": [
+      "assert jvp(foo, (1.0,), (2.0,)) == (1.0, 2.0)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "@partial(jax.remat, policy=lambda *args, **kwargs: True)\ndef bar(x):\n    return shard_map(foo, mesh=Mesh(jax.devices(), ['x']), in_specs=(P('x'),), out_specs=P('x'), check_rep=False)(x)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(((str(i), *spec) for i, spec in enumerate(test_specs)))\ndef test_jit(self, f, args):\n    jtu.check_close(jit(f)(*args), f(*args))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/core_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  }
+]

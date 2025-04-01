@@ -1,0 +1,405 @@
+[
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def foo(x, y):\n    z = jax.vmap(jax.vmap(jnp.sin))(x) * y\n    return jax.vmap(jax.vmap(jnp.add))(x, z)"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_vjp\ndef foo(x):\n    return x"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def bar(x):\n    out = jnp.sin(foo(x))\n    jax_setattr(thing, 'x', 5.0)\n    return out"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def cond(x):\n    return jnp.linalg.norm(matvec(x) - b) > tolerance"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def foo(x):\n    i = jax.lax.axis_index('x')\n    return jnp.exp(x) + i.astype(x.dtype)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@partial(jax.remat, policy=lambda *args, **kwargs: True)\ndef bar(x):\n    return shard_map(foo, mesh=Mesh(jax.devices(), ['x']), in_specs=(P('x'),), out_specs=P('x'), check_rep=False)(x)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def bar(y):\n    return jnp.multiply(x, y)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def foo(x):\n\n    def bar(y):\n        return jnp.multiply(x, y)\n    return jvp(bar, (3.0,), (1.0,))[1]"
+  },
+  {
+    "test_code": "def test_jit_metadata(self):\n    hlo = module_to_string(jax.jit(jnp.sin).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\"jit\\\\(sin\\\\)/jit\\\\(main\\\\)/sin\"')\n\n    def foo(x):\n        return jnp.sin(x)\n    hlo = module_to_string(jax.jit(foo).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\"jit\\\\(foo\\\\)/jit\\\\(main\\\\)/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jax.pure_callback(np.sin, x, x)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jax.pure_callback(np.sin, x, x)"
+  },
+  {
+    "test_code": "def test_grad_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n    hlo = module_to_string(jax.jit(jax.grad(foo)).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*jvp\\\\(jit\\\\(foo\\\\)\\\\)/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*transpose\\\\(jvp\\\\(jit\\\\(foo\\\\)\\\\)\\\\)/mul\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jax.pure_callback(np.sin, x, x)"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jax.pure_callback(np.sin, x, x)"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def cond(x):\n    return jax.pure_callback(_cond_callback, jax.ShapeDtypeStruct((), np.bool_), x)"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def cond(state):\n    idx, x, _ = state\n    chunk = jax.lax.dynamic_slice_in_dim(x, idx * chunk_size, chunk_size)\n    return (idx * chunk_size < x.shape[0]) & jnp.any(chunk > 0)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def foo(x):\n    output = jnp.zeros_like(x, device=cpu_sharding)\n    _, _, cpu_x = jax.lax.while_loop(cond, inner, (0, x, output))\n    return cpu_x"
+  },
+  {
+    "test_code": "def test_jit_metadata(self):\n    hlo = module_to_string(jax.jit(jnp.sin).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\"jit\\\\(sin\\\\)/jit\\\\(main\\\\)/sin\"')\n\n    def foo(x):\n        return jnp.sin(x)\n    hlo = module_to_string(jax.jit(foo).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\"jit\\\\(foo\\\\)/jit\\\\(main\\\\)/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_grad_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n    hlo = module_to_string(jax.jit(jax.grad(foo)).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*jvp\\\\(jit\\\\(foo\\\\)\\\\)/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*transpose\\\\(jvp\\\\(jit\\\\(foo\\\\)\\\\)\\\\)/mul\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "def test_argmax(self):\n\n    def f(x):\n        return jnp.argmax(x)\n    hlo = module_to_string(jax.jit(f).lower(jnp.arange(8.0)).compiler_ir())\n    self.assertNotRegex(hlo, '<.* at 0x[0-9a-fA-F]+>')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "@unittest.skip('b/352539562')\ndef test_source_file_prefix_removal(self):\n\n    def make_hlo():\n        return module_to_string(jax.jit(jnp.sin).lower(jnp.arange(8.0)).compiler_ir())\n    self.assertRegex(make_hlo(), '[/\\\\\\\\]+tests[/\\\\\\\\]+metadata_test.py')\n    with jax_config.hlo_source_file_canonicalization_regex('.*[\\\\\\\\/]+tests[/\\\\\\\\]+'):\n        hlo = make_hlo()\n        self.assertIn('metadata_test.py', hlo)\n        self.assertNotRegex(hlo, 'tests[/\\\\\\\\]+')\n        self.assertNotRegex(hlo, '[/\\\\\\\\]+metadata_test.py')\n    with jax_config.hlo_source_file_canonicalization_regex('no_match_xxx'):\n        hlo = make_hlo()\n        self.assertRegex(hlo, '[/\\\\\\\\]+tests[/\\\\\\\\]+metadata_test.py')\n    with jax_config.hlo_source_file_canonicalization_regex('.*'):\n        hlo = make_hlo()\n        self.assertNotIn('test.py', hlo)\n    with jax_config.hlo_source_file_canonicalization_regex('test'):\n        hlo = make_hlo()\n        self.assertRegex(hlo, '[/\\\\\\\\]+s[/\\\\\\\\]+metadata_.py')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_vjp\ndef foo(x):\n    return jnp.exp(x)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@partial(pmap, axis_name='i', devices=jax.devices())\ndef bar(y):\n    return lax.psum(y, 'i')"
+  },
+  {
+    "test_code": "def test_jit_metadata(self):\n    hlo = module_to_string(jax.jit(jnp.sin).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\"jit\\\\(sin\\\\)/jit\\\\(main\\\\)/sin\"')\n\n    def foo(x):\n        return jnp.sin(x)\n    hlo = module_to_string(jax.jit(foo).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\"jit\\\\(foo\\\\)/jit\\\\(main\\\\)/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_vjp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_vjp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_grad_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n    hlo = module_to_string(jax.jit(jax.grad(foo)).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*jvp\\\\(jit\\\\(foo\\\\)\\\\)/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*transpose\\\\(jvp\\\\(jit\\\\(foo\\\\)\\\\)\\\\)/mul\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_vjp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_vjp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_vjp\ndef foo(x, y):\n    return x"
+  },
+  {
+    "test_code": "def test_jit_metadata(self):\n    hlo = module_to_string(jax.jit(jnp.sin).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\"jit\\\\(sin\\\\)/jit\\\\(main\\\\)/sin\"')\n\n    def foo(x):\n        return jnp.sin(x)\n    hlo = module_to_string(jax.jit(foo).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\"jit\\\\(foo\\\\)/jit\\\\(main\\\\)/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_grad_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n    hlo = module_to_string(jax.jit(jax.grad(foo)).lower(1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*jvp\\\\(jit\\\\(foo\\\\)\\\\)/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*transpose\\\\(jvp\\\\(jit\\\\(foo\\\\)\\\\)\\\\)/mul\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_cond_metadata(self):\n\n    def true_fun(x):\n        return jnp.sin(x)\n\n    def false_fun(x):\n        return jnp.cos(x)\n\n    def f(which, x):\n        return jax.lax.cond(which, x, true_fun, x, false_fun)\n    hlo = module_to_string(jax.jit(f).lower(True, 1.0).compiler_ir())\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_0_fun/cos\"')\n    self.assertRegex(hlo, 'loc\\\\(\".*cond/branch_1_fun/sin\"')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "@jax.custom_jvp\ndef sin(x):\n    return jnp.sin(x)"
+  },
+  {
+    "test_code": "@unittest.skip('TODO')\ndef test_nested_jit_metadata(self):\n\n    @jax.jit\n    def foo(x):\n        return jnp.sin(x)\n\n    def bar(x):\n        return jnp.cos(foo(x))\n    _ = bar(1.0)\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'cos'\n    _ = jax.jit(bar)(1.0)\n    assert self.op_types[-3] == 'xla_call'\n    assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'\n    assert self.op_types[-2] == 'sin'\n    assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'\n    assert self.op_types[-1] == 'cos'\n    assert self.op_names[-1] == 'jit(bar)/cos'",
+    "assertions": [
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'cos'",
+      "assert self.op_types[-3] == 'xla_call'",
+      "assert self.op_names[-3] == 'jit(bar)/xla_call[ backend=None\\n                   device=None\\n                   name=foo ]'",
+      "assert self.op_types[-2] == 'sin'",
+      "assert self.op_names[-2] == 'jit(bar)/jit(foo)/sin'",
+      "assert self.op_types[-1] == 'cos'",
+      "assert self.op_names[-1] == 'jit(bar)/cos'"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/metadata_test.py",
+    "function": "def bar(y):\n\n    def baz(w):\n        q = call(lambda x: y, x)\n        q = q + call(lambda: y)\n        q = q + call(lambda y: w + y, y)\n        q = call(lambda w: call(jnp.sin, x) * y, 1.0) + q\n        return q\n    return api.jit(baz)(x)"
+  }
+]

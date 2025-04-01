@@ -1,0 +1,194 @@
+[
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(pred):\n\n    def true_fun():\n        x_ref[()] = 1.0\n\n    def false_fun():\n        x_ref[()] = 2.0\n    jax.lax.cond(pred, true_fun, false_fun)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@functools.partial(pjit.pjit, in_shardings=jax.sharding.PartitionSpec(None), out_shardings=jax.sharding.PartitionSpec('x'))\ndef f():\n    return jnp.zeros([32, 10])"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.jit\ndef f(x, r):\n    x = x.at[:, 0].set(x[:, 0] / r)\n    return x"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@partial(jnp.vectorize, excluded={1})\ndef f(x, y):\n    assert x.ndim == 0\n    assert y == 'foo'\n    return x"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.pmap\ndef f(x, y):\n    return x * y"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.jit\ndef f(x, y):\n    return jax.vmap(shard_alike, in_axes=(0, 1))(x, y)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f():\n    return random.uniform(self.make_key(3), (308000000, 128), dtype=jnp.bfloat16)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(x):\n    return jax.lax.convert_element_type(x, FooTy())"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(x):\n    y = x * jnp.arange(3.0).reshape((1, 3))\n    return jnp.take_along_axis(y, idx, -1).sum()"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('i'), out_specs=P())\ndef f(x):\n    return jax.lax.psum(((w * x) ** 2).sum(), 'i')"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(seed):\n    key = jax.random.key(seed)\n    return jax.random.uniform(key) + jax.random.normal(key)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(x_ref):\n    ones = jnp.ones_like(x_ref)[slc]\n    ref_primitives.ref_addupdate(x_ref, slc, ones)\n    x1 = ref_primitives.ref_get(x_ref, slc)\n    x2 = x1 + ones\n    ref_primitives.ref_set(x_ref, slc, x2)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(self, ys):\n    return lax.fori_loop(0, 10, loop_body, jnp.ones(4, np.float32))"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(hx, _):\n    hx = jax.nn.sigmoid(hx + a)\n    return (hx, None)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "def f(x):\n    u, s, v = jnp.linalg.svd(a + x * b, full_matrices=full_matrices, compute_uv=compute_uv)\n    vdiag = jnp.vectorize(jnp.diag, signature='(k)->(k,k)')\n    return jnp.matmul(jnp.matmul(u, vdiag(s).astype(u.dtype)), v).real"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@jax.profiler.annotate_function\ndef f(x, *, name):\n    return x + 2 * len(name)"
+  },
+  {
+    "test_code": "def testAnnotations(self):\n\n    def f(x: Any) -> typing.Array | None:\n        if isinstance(x, core.Tracer):\n            return x\n        elif isinstance(x, ArrayImpl):\n            return x\n        else:\n            return None\n    x = jnp.arange(10)\n    y = f(x)\n    self.assertArraysEqual(x, y)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/typing_test.py",
+    "function": "@partial(jax.jit, out_shardings=out_layout, donate_argnums=0)\ndef f(x):\n    return x * 2"
+  }
+]

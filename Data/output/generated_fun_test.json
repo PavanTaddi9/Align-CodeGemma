@@ -1,0 +1,32 @@
+[
+  {
+    "test_code": "@parameterized.named_parameters(jtu.cases_from_gens(gen_fun_and_types))\ndef testJitIsIdentity(self, fun):\n    vals = gen_vals(fun.in_vars)\n    fun = partial(eval_fun, fun)\n    ans = fun(*vals)\n    ans_jitted = maybe_jit(fun, len(vals))(*vals)\n    try:\n        check_all_close(ans, ans_jitted)\n    except:\n        print(fun)\n        raise",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/generated_fun_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=('n',))\ndef fun(x):\n    return jnp.sum(x)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(jtu.cases_from_gens(gen_fun_and_types))\ndef testJitIsIdentity(self, fun):\n    vals = gen_vals(fun.in_vars)\n    fun = partial(eval_fun, fun)\n    ans = fun(*vals)\n    ans_jitted = maybe_jit(fun, len(vals))(*vals)\n    try:\n        check_all_close(ans, ans_jitted)\n    except:\n        print(fun)\n        raise",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/generated_fun_test.py",
+    "function": "@jax.jit\ndef fun(x, y):\n    return cond(x < 3, None, lambda _: 2.0 * jnp.sin(y), x, lambda x: 2.0 * x)"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(jtu.cases_from_gens(gen_fun_and_types))\ndef testJitIsIdentity(self, fun):\n    vals = gen_vals(fun.in_vars)\n    fun = partial(eval_fun, fun)\n    ans = fun(*vals)\n    ans_jitted = maybe_jit(fun, len(vals))(*vals)\n    try:\n        check_all_close(ans, ans_jitted)\n    except:\n        print(fun)\n        raise",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/generated_fun_test.py",
+    "function": "def fun():\n    return jax.ffi.ffi_call('test', jax.ShapeDtypeStruct((), np.int64))()"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(jtu.cases_from_gens(gen_fun_and_types))\ndef testJitIsIdentity(self, fun):\n    vals = gen_vals(fun.in_vars)\n    fun = partial(eval_fun, fun)\n    ans = fun(*vals)\n    ans_jitted = maybe_jit(fun, len(vals))(*vals)\n    try:\n        check_all_close(ans, ans_jitted)\n    except:\n        print(fun)\n        raise",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/generated_fun_test.py",
+    "function": "def fun(x, t):\n    return jnp.sum(jnp.power(jnp.maximum(x, 0.0), 2)) + t"
+  },
+  {
+    "test_code": "@parameterized.named_parameters(jtu.cases_from_gens(gen_fun_and_types))\ndef testJitIsIdentity(self, fun):\n    vals = gen_vals(fun.in_vars)\n    fun = partial(eval_fun, fun)\n    ans = fun(*vals)\n    ans_jitted = maybe_jit(fun, len(vals))(*vals)\n    try:\n        check_all_close(ans, ans_jitted)\n    except:\n        print(fun)\n        raise",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/generated_fun_test.py",
+    "function": "@partial(jax.jit, backend=backend)\ndef fun(x, y):\n    return jnp.matmul(x, y)"
+  }
+]

@@ -1,0 +1,536 @@
+[
+  {
+    "test_code": "def test_debugger_eof(self):\n    stdin, stdout = make_fake_stdin_stdout([])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    with self.assertRaises(SystemExit):\n        f(2.0)\n        jax.effects_barrier()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_can_continue(self):\n    stdin, stdout = make_fake_stdin_stdout(['c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) ')\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value_in_jit(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_multiple_values(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x, y', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) (Array(2., dtype=float32), Array(3., dtype=float32))\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_context(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            @jax\\\\.jit\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_backtrace(self):\n    stdin, stdout = make_fake_stdin_stdout(['bt', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:.*\\n    \\\\(jdb\\\\) Traceback:.*\\n    ')\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_can_work_with_multiple_stack_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'u', 'p x', 'd', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\).*\\n            @jax\\\\.jit\\n            def g\\\\(x\\\\):\\n    ->        y = f\\\\(x\\\\)\\n              return jnp\\\\.exp\\\\(y\\\\)\\n    .*\\n    \\\\(jdb\\\\) Array\\\\(2\\\\., dtype=float32\\\\)\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_can_use_multiple_breakpoints(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x) * 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(3., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(6., dtype=float32)\\n    (jdb) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_vmap(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return 2.0 * y\n\n    @jax.jit\n    @jax.vmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(1., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pmap(self):\n    if jax.local_device_count() < 2:\n        raise unittest.SkipTest('Test requires >= 2 devices.')\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.pmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pjit(self):\n    if jax.default_backend() != 'tpu':\n        raise unittest.SkipTest(\"`pjit` doesn't work with CustomCall.\")\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c'])\n\n    def f(x):\n        y = x + 1\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    g = pjit.pjit(g, in_shardings=jax.sharding.PartitionSpec('dev'), out_shardings=jax.sharding.PartitionSpec('dev'))\n    with jax.sharding.Mesh(np.array(jax.devices()), ['dev']):\n        arr = (1 + jnp.arange(8)).astype(np.int32)\n        expected = _format_multiline('\\n      Entering jdb:\\n      \\\\(jdb\\\\) {}\\n      \\\\(jdb\\\\) '.format(re.escape(repr(arr))))\n        g(jnp.arange(8, dtype=jnp.int32))\n        jax.effects_barrier()\n        self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_uses_local_before_global_scope(self):\n    stdin, stdout = make_fake_stdin_stdout(['p foo', 'c'])\n    foo = 'outer'\n\n    def f(x):\n        foo = 'inner'\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del foo\n        return x\n    del foo\n    expected = _format_multiline(\"\\n    Entering jdb:\\n    \\\\(jdb\\\\) 'inner'\\n    \\\\(jdb\\\\) \")\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_can_limit_num_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['u', 'p x', 'c'])\n\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f():\n        x = 2\n        g()\n        return x\n    _ = f()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    \\\\(jdb\\\\) 2\\n    \\\\(jdb\\\\) ')\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)\n    stdin, stdout = make_fake_stdin_stdout(['u', 'u', 'c'])\n\n    def g2():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f2():\n        x = 2\n        g2()\n        return x\n    expected = '.*At topmost frame.*'\n    _ = f2()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_can_handle_dictionaries_with_unsortable_keys(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'p weird_dict', 'p weirder_dict', 'c'])\n\n    @jax.jit\n    def f():\n        weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n        weirder_dict = {lambda x: x: weird_dict}\n        x = 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del weirder_dict\n        return x\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) 2.0\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) ')\n    _ = f()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_debugger_eof(self):\n    stdin, stdout = make_fake_stdin_stdout([])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    with self.assertRaises(SystemExit):\n        f(2.0)\n        jax.effects_barrier()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_can_continue(self):\n    stdin, stdout = make_fake_stdin_stdout(['c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) ')\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value_in_jit(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_can_print_multiple_values(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x, y', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) (Array(2., dtype=float32), Array(3., dtype=float32))\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_can_print_context(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            @jax\\\\.jit\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_can_print_backtrace(self):\n    stdin, stdout = make_fake_stdin_stdout(['bt', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:.*\\n    \\\\(jdb\\\\) Traceback:.*\\n    ')\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_can_work_with_multiple_stack_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'u', 'p x', 'd', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\).*\\n            @jax\\\\.jit\\n            def g\\\\(x\\\\):\\n    ->        y = f\\\\(x\\\\)\\n              return jnp\\\\.exp\\\\(y\\\\)\\n    .*\\n    \\\\(jdb\\\\) Array\\\\(2\\\\., dtype=float32\\\\)\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_can_use_multiple_breakpoints(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x) * 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(3., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(6., dtype=float32)\\n    (jdb) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_works_with_vmap(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return 2.0 * y\n\n    @jax.jit\n    @jax.vmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(1., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pmap(self):\n    if jax.local_device_count() < 2:\n        raise unittest.SkipTest('Test requires >= 2 devices.')\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.pmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pjit(self):\n    if jax.default_backend() != 'tpu':\n        raise unittest.SkipTest(\"`pjit` doesn't work with CustomCall.\")\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c'])\n\n    def f(x):\n        y = x + 1\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    g = pjit.pjit(g, in_shardings=jax.sharding.PartitionSpec('dev'), out_shardings=jax.sharding.PartitionSpec('dev'))\n    with jax.sharding.Mesh(np.array(jax.devices()), ['dev']):\n        arr = (1 + jnp.arange(8)).astype(np.int32)\n        expected = _format_multiline('\\n      Entering jdb:\\n      \\\\(jdb\\\\) {}\\n      \\\\(jdb\\\\) '.format(re.escape(repr(arr))))\n        g(jnp.arange(8, dtype=jnp.int32))\n        jax.effects_barrier()\n        self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_uses_local_before_global_scope(self):\n    stdin, stdout = make_fake_stdin_stdout(['p foo', 'c'])\n    foo = 'outer'\n\n    def f(x):\n        foo = 'inner'\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del foo\n        return x\n    del foo\n    expected = _format_multiline(\"\\n    Entering jdb:\\n    \\\\(jdb\\\\) 'inner'\\n    \\\\(jdb\\\\) \")\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_can_limit_num_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['u', 'p x', 'c'])\n\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f():\n        x = 2\n        g()\n        return x\n    _ = f()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    \\\\(jdb\\\\) 2\\n    \\\\(jdb\\\\) ')\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)\n    stdin, stdout = make_fake_stdin_stdout(['u', 'u', 'c'])\n\n    def g2():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f2():\n        x = 2\n        g2()\n        return x\n    expected = '.*At topmost frame.*'\n    _ = f2()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_can_handle_dictionaries_with_unsortable_keys(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'p weird_dict', 'p weirder_dict', 'c'])\n\n    @jax.jit\n    def f():\n        weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n        weirder_dict = {lambda x: x: weird_dict}\n        x = 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del weirder_dict\n        return x\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) 2.0\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) ')\n    _ = f()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_debugger_can_work_with_multiple_stack_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'u', 'p x', 'd', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\).*\\n            @jax\\\\.jit\\n            def g\\\\(x\\\\):\\n    ->        y = f\\\\(x\\\\)\\n              return jnp\\\\.exp\\\\(y\\\\)\\n    .*\\n    \\\\(jdb\\\\) Array\\\\(2\\\\., dtype=float32\\\\)\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_can_use_multiple_breakpoints(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x) * 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(3., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(6., dtype=float32)\\n    (jdb) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_debugger_works_with_vmap(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return 2.0 * y\n\n    @jax.jit\n    @jax.vmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(1., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pmap(self):\n    if jax.local_device_count() < 2:\n        raise unittest.SkipTest('Test requires >= 2 devices.')\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.pmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pjit(self):\n    if jax.default_backend() != 'tpu':\n        raise unittest.SkipTest(\"`pjit` doesn't work with CustomCall.\")\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c'])\n\n    def f(x):\n        y = x + 1\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    g = pjit.pjit(g, in_shardings=jax.sharding.PartitionSpec('dev'), out_shardings=jax.sharding.PartitionSpec('dev'))\n    with jax.sharding.Mesh(np.array(jax.devices()), ['dev']):\n        arr = (1 + jnp.arange(8)).astype(np.int32)\n        expected = _format_multiline('\\n      Entering jdb:\\n      \\\\(jdb\\\\) {}\\n      \\\\(jdb\\\\) '.format(re.escape(repr(arr))))\n        g(jnp.arange(8, dtype=jnp.int32))\n        jax.effects_barrier()\n        self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_debugger_accesses_globals(self):\n    stdin, stdout = make_fake_stdin_stdout(['p foo', 'c'])\n\n    @jax.jit\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    expected = _format_multiline(\"\\n    Entering jdb:\\n    \\\\(jdb\\\\) \\\\*\\\\*\\\\* NameError: name 'foo' is not defined\\n    \\\\(jdb\\\\) \")\n    g()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_can_limit_num_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['u', 'p x', 'c'])\n\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f():\n        x = 2\n        g()\n        return x\n    _ = f()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    \\\\(jdb\\\\) 2\\n    \\\\(jdb\\\\) ')\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)\n    stdin, stdout = make_fake_stdin_stdout(['u', 'u', 'c'])\n\n    def g2():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f2():\n        x = 2\n        g2()\n        return x\n    expected = '.*At topmost frame.*'\n    _ = f2()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_debugger_eof(self):\n    stdin, stdout = make_fake_stdin_stdout([])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    with self.assertRaises(SystemExit):\n        f(2.0)\n        jax.effects_barrier()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_continue(self):\n    stdin, stdout = make_fake_stdin_stdout(['c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) ')\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value_in_jit(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_multiple_values(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x, y', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) (Array(2., dtype=float32), Array(3., dtype=float32))\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_context(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            @jax\\\\.jit\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_backtrace(self):\n    stdin, stdout = make_fake_stdin_stdout(['bt', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:.*\\n    \\\\(jdb\\\\) Traceback:.*\\n    ')\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_work_with_multiple_stack_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'u', 'p x', 'd', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\).*\\n            @jax\\\\.jit\\n            def g\\\\(x\\\\):\\n    ->        y = f\\\\(x\\\\)\\n              return jnp\\\\.exp\\\\(y\\\\)\\n    .*\\n    \\\\(jdb\\\\) Array\\\\(2\\\\., dtype=float32\\\\)\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_can_use_multiple_breakpoints(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x) * 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(3., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(6., dtype=float32)\\n    (jdb) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_vmap(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return 2.0 * y\n\n    @jax.jit\n    @jax.vmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(1., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pmap(self):\n    if jax.local_device_count() < 2:\n        raise unittest.SkipTest('Test requires >= 2 devices.')\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.pmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pjit(self):\n    if jax.default_backend() != 'tpu':\n        raise unittest.SkipTest(\"`pjit` doesn't work with CustomCall.\")\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c'])\n\n    def f(x):\n        y = x + 1\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    g = pjit.pjit(g, in_shardings=jax.sharding.PartitionSpec('dev'), out_shardings=jax.sharding.PartitionSpec('dev'))\n    with jax.sharding.Mesh(np.array(jax.devices()), ['dev']):\n        arr = (1 + jnp.arange(8)).astype(np.int32)\n        expected = _format_multiline('\\n      Entering jdb:\\n      \\\\(jdb\\\\) {}\\n      \\\\(jdb\\\\) '.format(re.escape(repr(arr))))\n        g(jnp.arange(8, dtype=jnp.int32))\n        jax.effects_barrier()\n        self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_uses_local_before_global_scope(self):\n    stdin, stdout = make_fake_stdin_stdout(['p foo', 'c'])\n    foo = 'outer'\n\n    def f(x):\n        foo = 'inner'\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del foo\n        return x\n    del foo\n    expected = _format_multiline(\"\\n    Entering jdb:\\n    \\\\(jdb\\\\) 'inner'\\n    \\\\(jdb\\\\) \")\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_can_limit_num_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['u', 'p x', 'c'])\n\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f():\n        x = 2\n        g()\n        return x\n    _ = f()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    \\\\(jdb\\\\) 2\\n    \\\\(jdb\\\\) ')\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)\n    stdin, stdout = make_fake_stdin_stdout(['u', 'u', 'c'])\n\n    def g2():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f2():\n        x = 2\n        g2()\n        return x\n    expected = '.*At topmost frame.*'\n    _ = f2()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_can_handle_dictionaries_with_unsortable_keys(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'p weird_dict', 'p weirder_dict', 'c'])\n\n    @jax.jit\n    def f():\n        weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n        weirder_dict = {lambda x: x: weird_dict}\n        x = 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del weirder_dict\n        return x\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) 2.0\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) ')\n    _ = f()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_debugger_eof(self):\n    stdin, stdout = make_fake_stdin_stdout([])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    with self.assertRaises(SystemExit):\n        f(2.0)\n        jax.effects_barrier()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_continue(self):\n    stdin, stdout = make_fake_stdin_stdout(['c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) ')\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value_in_jit(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_multiple_values(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x, y', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) (Array(2., dtype=float32), Array(3., dtype=float32))\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_context(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            @jax\\\\.jit\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_print_backtrace(self):\n    stdin, stdout = make_fake_stdin_stdout(['bt', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:.*\\n    \\\\(jdb\\\\) Traceback:.*\\n    ')\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_work_with_multiple_stack_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'u', 'p x', 'd', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\).*\\n            @jax\\\\.jit\\n            def g\\\\(x\\\\):\\n    ->        y = f\\\\(x\\\\)\\n              return jnp\\\\.exp\\\\(y\\\\)\\n    .*\\n    \\\\(jdb\\\\) Array\\\\(2\\\\., dtype=float32\\\\)\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_can_use_multiple_breakpoints(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x) * 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(3., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(6., dtype=float32)\\n    (jdb) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_vmap(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return 2.0 * y\n\n    @jax.jit\n    @jax.vmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(1., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pmap(self):\n    if jax.local_device_count() < 2:\n        raise unittest.SkipTest('Test requires >= 2 devices.')\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.pmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pjit(self):\n    if jax.default_backend() != 'tpu':\n        raise unittest.SkipTest(\"`pjit` doesn't work with CustomCall.\")\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c'])\n\n    def f(x):\n        y = x + 1\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    g = pjit.pjit(g, in_shardings=jax.sharding.PartitionSpec('dev'), out_shardings=jax.sharding.PartitionSpec('dev'))\n    with jax.sharding.Mesh(np.array(jax.devices()), ['dev']):\n        arr = (1 + jnp.arange(8)).astype(np.int32)\n        expected = _format_multiline('\\n      Entering jdb:\\n      \\\\(jdb\\\\) {}\\n      \\\\(jdb\\\\) '.format(re.escape(repr(arr))))\n        g(jnp.arange(8, dtype=jnp.int32))\n        jax.effects_barrier()\n        self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_uses_local_before_global_scope(self):\n    stdin, stdout = make_fake_stdin_stdout(['p foo', 'c'])\n    foo = 'outer'\n\n    def f(x):\n        foo = 'inner'\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del foo\n        return x\n    del foo\n    expected = _format_multiline(\"\\n    Entering jdb:\\n    \\\\(jdb\\\\) 'inner'\\n    \\\\(jdb\\\\) \")\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_can_limit_num_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['u', 'p x', 'c'])\n\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f():\n        x = 2\n        g()\n        return x\n    _ = f()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    \\\\(jdb\\\\) 2\\n    \\\\(jdb\\\\) ')\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)\n    stdin, stdout = make_fake_stdin_stdout(['u', 'u', 'c'])\n\n    def g2():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f2():\n        x = 2\n        g2()\n        return x\n    expected = '.*At topmost frame.*'\n    _ = f2()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_can_handle_dictionaries_with_unsortable_keys(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'p weird_dict', 'p weirder_dict', 'c'])\n\n    @jax.jit\n    def f():\n        weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n        weirder_dict = {lambda x: x: weird_dict}\n        x = 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del weirder_dict\n        return x\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) 2.0\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) ')\n    _ = f()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_debugger_can_work_with_multiple_stack_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'u', 'p x', 'd', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\).*\\n            @jax\\\\.jit\\n            def g\\\\(x\\\\):\\n    ->        y = f\\\\(x\\\\)\\n              return jnp\\\\.exp\\\\(y\\\\)\\n    .*\\n    \\\\(jdb\\\\) Array\\\\(2\\\\., dtype=float32\\\\)\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_can_use_multiple_breakpoints(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x) * 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(3., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(6., dtype=float32)\\n    (jdb) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_debugger_works_with_vmap(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return 2.0 * y\n\n    @jax.jit\n    @jax.vmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(1., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pmap(self):\n    if jax.local_device_count() < 2:\n        raise unittest.SkipTest('Test requires >= 2 devices.')\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.pmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pjit(self):\n    if jax.default_backend() != 'tpu':\n        raise unittest.SkipTest(\"`pjit` doesn't work with CustomCall.\")\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c'])\n\n    def f(x):\n        y = x + 1\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    g = pjit.pjit(g, in_shardings=jax.sharding.PartitionSpec('dev'), out_shardings=jax.sharding.PartitionSpec('dev'))\n    with jax.sharding.Mesh(np.array(jax.devices()), ['dev']):\n        arr = (1 + jnp.arange(8)).astype(np.int32)\n        expected = _format_multiline('\\n      Entering jdb:\\n      \\\\(jdb\\\\) {}\\n      \\\\(jdb\\\\) '.format(re.escape(repr(arr))))\n        g(jnp.arange(8, dtype=jnp.int32))\n        jax.effects_barrier()\n        self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_debugger_accesses_globals(self):\n    stdin, stdout = make_fake_stdin_stdout(['p foo', 'c'])\n\n    @jax.jit\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    expected = _format_multiline(\"\\n    Entering jdb:\\n    \\\\(jdb\\\\) \\\\*\\\\*\\\\* NameError: name 'foo' is not defined\\n    \\\\(jdb\\\\) \")\n    g()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_can_limit_num_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['u', 'p x', 'c'])\n\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f():\n        x = 2\n        g()\n        return x\n    _ = f()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    \\\\(jdb\\\\) 2\\n    \\\\(jdb\\\\) ')\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)\n    stdin, stdout = make_fake_stdin_stdout(['u', 'u', 'c'])\n\n    def g2():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f2():\n        x = 2\n        g2()\n        return x\n    expected = '.*At topmost frame.*'\n    _ = f2()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_debugger_eof(self):\n    stdin, stdout = make_fake_stdin_stdout([])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    with self.assertRaises(SystemExit):\n        f(2.0)\n        jax.effects_barrier()",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_can_continue(self):\n    stdin, stdout = make_fake_stdin_stdout(['c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) ')\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_can_print_value_in_jit(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_can_print_multiple_values(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x, y', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) (Array(2., dtype=float32), Array(3., dtype=float32))\\n    (jdb) ')\n    f(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_can_print_context(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    f(2.0)\n    jax.effects_barrier()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            @jax\\\\.jit\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_can_print_backtrace(self):\n    stdin, stdout = make_fake_stdin_stdout(['bt', 'c'])\n\n    @jax.jit\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n    expected = _format_multiline('\\n    Entering jdb:.*\\n    \\\\(jdb\\\\) Traceback:.*\\n    ')\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_can_work_with_multiple_stack_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['l', 'u', 'p x', 'd', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\).*\\n            @jax\\\\.jit\\n            def g\\\\(x\\\\):\\n    ->        y = f\\\\(x\\\\)\\n              return jnp\\\\.exp\\\\(y\\\\)\\n    .*\\n    \\\\(jdb\\\\) Array\\\\(2\\\\., dtype=float32\\\\)\\n    \\\\(jdb\\\\) > .*debugger_test\\\\.py\\\\([0-9]+\\\\)\\n            def f\\\\(x\\\\):\\n              y = jnp\\\\.sin\\\\(x\\\\)\\n    ->        debugger\\\\.breakpoint\\\\(stdin=stdin, stdout=stdout, backend=\"cli\"\\\\)\\n              return y\\n    .*\\n    \\\\(jdb\\\\) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_can_use_multiple_breakpoints(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return y\n\n    @jax.jit\n    def g(x):\n        y = f(x) * 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(3., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(6., dtype=float32)\\n    (jdb) ')\n    g(jnp.array(2.0, jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_works_with_vmap(self):\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = x + 1.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, ordered=True, backend='cli')\n        return 2.0 * y\n\n    @jax.jit\n    @jax.vmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    (jdb) Array(1., dtype=float32)\\n    (jdb) Entering jdb:\\n    (jdb) Array(2., dtype=float32)\\n    (jdb) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertEqual(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pmap(self):\n    if jax.local_device_count() < 2:\n        raise unittest.SkipTest('Test requires >= 2 devices.')\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c', 'p y', 'c'])\n\n    def f(x):\n        y = jnp.sin(x)\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    @jax.pmap\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) Entering jdb:\\n    \\\\(jdb\\\\) Array\\\\(.*, dtype=float32\\\\)\\n    \\\\(jdb\\\\) ')\n    g(jnp.arange(2.0, dtype=jnp.float32))\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_works_with_pjit(self):\n    if jax.default_backend() != 'tpu':\n        raise unittest.SkipTest(\"`pjit` doesn't work with CustomCall.\")\n    stdin, stdout = make_fake_stdin_stdout(['p y', 'c'])\n\n    def f(x):\n        y = x + 1\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        return y\n\n    def g(x):\n        y = f(x)\n        return jnp.exp(y)\n    g = pjit.pjit(g, in_shardings=jax.sharding.PartitionSpec('dev'), out_shardings=jax.sharding.PartitionSpec('dev'))\n    with jax.sharding.Mesh(np.array(jax.devices()), ['dev']):\n        arr = (1 + jnp.arange(8)).astype(np.int32)\n        expected = _format_multiline('\\n      Entering jdb:\\n      \\\\(jdb\\\\) {}\\n      \\\\(jdb\\\\) '.format(re.escape(repr(arr))))\n        g(jnp.arange(8, dtype=jnp.int32))\n        jax.effects_barrier()\n        self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_debugger_uses_local_before_global_scope(self):\n    stdin, stdout = make_fake_stdin_stdout(['p foo', 'c'])\n    foo = 'outer'\n\n    def f(x):\n        foo = 'inner'\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del foo\n        return x\n    del foo\n    expected = _format_multiline(\"\\n    Entering jdb:\\n    \\\\(jdb\\\\) 'inner'\\n    \\\\(jdb\\\\) \")\n    f(2.0)\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_can_limit_num_frames(self):\n    stdin, stdout = make_fake_stdin_stdout(['u', 'p x', 'c'])\n\n    def g():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f():\n        x = 2\n        g()\n        return x\n    _ = f()\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    .*\\n    \\\\(jdb\\\\) 2\\n    \\\\(jdb\\\\) ')\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)\n    stdin, stdout = make_fake_stdin_stdout(['u', 'u', 'c'])\n\n    def g2():\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli', num_frames=2)\n\n    @jax.jit\n    def f2():\n        x = 2\n        g2()\n        return x\n    expected = '.*At topmost frame.*'\n    _ = f2()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_can_handle_dictionaries_with_unsortable_keys(self):\n    stdin, stdout = make_fake_stdin_stdout(['p x', 'p weird_dict', 'p weirder_dict', 'c'])\n\n    @jax.jit\n    def f():\n        weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n        weirder_dict = {lambda x: x: weird_dict}\n        x = 2.0\n        debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n        del weirder_dict\n        return x\n    expected = _format_multiline('\\n    Entering jdb:\\n    \\\\(jdb\\\\) 2.0\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) <cant_flatten>\\n    \\\\(jdb\\\\) ')\n    _ = f()\n    jax.effects_barrier()\n    self.assertRegex(stdout.getvalue(), expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/debugger_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  }
+]

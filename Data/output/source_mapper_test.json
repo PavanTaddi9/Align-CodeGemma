@@ -1,0 +1,14 @@
+[
+  {
+    "test_code": "def test_jaxpr_pass(self):\n\n    def jax_fn(x, y):\n        return x + y\n    test_x = jnp.array([1, 2, 3])\n    test_y = jnp.array([4, 5, 6])\n    source_maps = source_mapper.generate_sourcemaps(jax_fn, passes=source_mapper.filter_passes('jaxpr'))(test_x, test_y)\n    self.assertLen(source_maps, 1)\n    dump = source_maps[0]\n    self.assertEqual(dump.pass_name, 'jaxpr')\n    self.assertIn('add a b', dump.generated_code)\n    source_map = dump.source_map\n    self.assertLen(source_map.sources, 1)\n    self.assertEqual(source_map.sources[0], source_mapper.canonicalize_filename(__file__))\n    mappings = source_map.mappings\n    self.assertLen(mappings, len(dump.generated_code.split('\\n')) + 1)\n    gen_col, file_idx, src_line, _ = mappings[0][0]\n    self.assertGreater(gen_col, 0)\n    self.assertEqual(file_idx, 0)\n    self.assertEqual(src_line, jax_fn.__code__.co_firstlineno)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/source_mapper_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "@parameterized.parameters(('hlo:stable-hlo', 'stablehlo.add', 13), ('hlo:original', 'add', 0))\ndef test_hlo_passes(self, pass_name, expected_hlo_op, expected_col):\n    del expected_col\n\n    def jax_fn(x, y):\n        return x + y\n    test_x = jnp.array([1, 2, 3])\n    test_y = jnp.array([4, 5, 6])\n    source_maps = source_mapper.generate_sourcemaps(jax_fn, passes=source_mapper.filter_passes(pass_name))(test_x, test_y)\n    self.assertLen(source_maps, 1)\n    dump = source_maps[0]\n    self.assertEqual(dump.pass_name, pass_name)\n    self.assertIn(expected_hlo_op, dump.generated_code)\n    source_map = dump.source_map\n    self.assertLen(source_map.sources, 1)\n    self.assertEqual(source_map.sources[0], source_mapper.canonicalize_filename(__file__))\n    mappings = source_map.mappings\n    self.assertLen(mappings, len(dump.generated_code.split('\\n')) + 1)\n    nonempty_mappings = [m for m in mappings if m]\n    self.assertLen(nonempty_mappings, 1)\n    gen_col, file_idx, src_line, _ = nonempty_mappings[0][0]\n    self.assertGreater(gen_col, 0)\n    self.assertEqual(file_idx, 0)\n    self.assertEqual(src_line, jax_fn.__code__.co_firstlineno)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/source_mapper_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  }
+]

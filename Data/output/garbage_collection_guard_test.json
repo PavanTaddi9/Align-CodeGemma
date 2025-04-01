@@ -1,0 +1,14 @@
+[
+  {
+    "test_code": "def test_gced_array_is_not_logged_by_default(self):\n    ref = _create_array_cycle()\n    with jtu.capture_stderr() as stderr:\n        self.assertIsNotNone(ref())\n        gc.collect()\n        self.assertIsNone(ref())\n    self.assertNotIn('`jax.Array` was deleted by the Python garbage collector', stderr())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/garbage_collection_guard_test.py",
+    "function": "def _create_array_cycle():\n    \"\"\"Creates a reference cycle of two jax.Arrays.\"\"\"\n    n1 = jnp.ones((2, 2))\n    n2 = jnp.zeros((2, 2))\n    n1.next = n2\n    n2.next = n1\n    return weakref.ref(n1)"
+  },
+  {
+    "test_code": "def test_gced_array_is_logged(self):\n    with config.array_garbage_collection_guard('log'):\n        with jtu.capture_stderr() as stderr:\n            ref = _create_array_cycle()\n            self.assertIsNotNone(ref())\n            gc.collect()\n            self.assertIsNone(ref())\n    self.assertIn('`jax.Array` was deleted by the Python garbage collector', stderr())",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/garbage_collection_guard_test.py",
+    "function": "def _create_array_cycle():\n    \"\"\"Creates a reference cycle of two jax.Arrays.\"\"\"\n    n1 = jnp.ones((2, 2))\n    n2 = jnp.zeros((2, 2))\n    n1.next = n2\n    n2.next = n1\n    return weakref.ref(n1)"
+  }
+]

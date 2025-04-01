@@ -1,0 +1,84 @@
+[
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "def func(x):\n    x, = promote_dtypes_complex(x)\n    return jnp.fft.irfft(jnp.concatenate([jnp.zeros_like(x, shape=1), x[:2] + 1j * x[2:]]))"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@_for_loop_impls\n@jax.legacy_prng_key('allow')\ndef test_for_loop_can_implement_cumsum(self, for_impl):\n\n    def cumsum(x):\n\n        def body(i, refs):\n            x_ref, accum_ref = refs\n            accum_ref[i + 1] = accum_ref[i] + x_ref[i]\n        accum = jnp.zeros(x.shape[0] + 1, x.dtype)\n        _, accum_out = for_impl(x.shape[0], body, (x, accum))\n        return accum_out[1:]\n    key = jax.random.PRNGKey(0)\n    x = jax.random.normal(key, (8,))\n    np.testing.assert_allclose(cumsum(x), jnp.cumsum(x), rtol=1e-06)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_for_loop_invar(self):\n\n    def f(x):\n        s = jnp.ones((2, 32), x.dtype)\n\n        def body(i, refs):\n            x_ref, y_ref = refs\n            y_ref[i] = s * x_ref[i] * jnp.cos(s)\n        return for_loop.for_loop(x.shape[0], body, (x, jnp.zeros_like(x)))\n    _, f_vjp = jax.linearize(f, jnp.ones((5, 2, 32)))\n    jaxpr = jax.make_jaxpr(f_vjp)(jnp.ones((5, 2, 32)))\n    consts = [v.aval for v in jaxpr.jaxpr.constvars if v.aval.shape == (2, 32)]\n    self.assertLen(consts, 2)\n\n    def loss(A):\n\n        def step(x, _):\n            return (jnp.matmul(A, x), None)\n        init_x = jnp.zeros(A.shape[-1:])\n        last_x, _ = for_loop.scan(step, init_x, jnp.arange(10))\n        return jnp.sum(last_x)\n    A = jnp.zeros((3, 3))\n    s = jax.jit(jax.grad(loss)).lower(A).as_text('hlo')\n    assert s.count('dynamic-update-slice(') < 2",
+    "assertions": [
+      "assert s.count('dynamic-update-slice(') < 2"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@_for_loop_impls\n@jax.legacy_prng_key('allow')\ndef test_for_loop_can_implement_cumsum(self, for_impl):\n\n    def cumsum(x):\n\n        def body(i, refs):\n            x_ref, accum_ref = refs\n            accum_ref[i + 1] = accum_ref[i] + x_ref[i]\n        accum = jnp.zeros(x.shape[0] + 1, x.dtype)\n        _, accum_out = for_impl(x.shape[0], body, (x, accum))\n        return accum_out[1:]\n    key = jax.random.PRNGKey(0)\n    x = jax.random.normal(key, (8,))\n    np.testing.assert_allclose(cumsum(x), jnp.cumsum(x), rtol=1e-06)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "def cumsum(x):\n\n    def body(i, _):\n        return (i + 1, jnp.sum(x[:i + 1]))\n    _, ans = lax.scan(body, 0, None, length=len(x))\n    return ans"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "def func(size):\n    lhs_one_d = jnp.arange(size, dtype='int32') + 1\n    lhs_two_d = jax.lax.broadcast_in_dim(lhs_one_d, (size, 2), (0,))\n    rhs = jax.lax.broadcasted_iota('int32', (2, 4), 0) + 1\n    return jnp.dot(lhs_two_d, rhs)"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "def func(x):\n    return jax.random.uniform(x, (2, 4), dtype=np.float32)"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_for_loop_invar(self):\n\n    def f(x):\n        s = jnp.ones((2, 32), x.dtype)\n\n        def body(i, refs):\n            x_ref, y_ref = refs\n            y_ref[i] = s * x_ref[i] * jnp.cos(s)\n        return for_loop.for_loop(x.shape[0], body, (x, jnp.zeros_like(x)))\n    _, f_vjp = jax.linearize(f, jnp.ones((5, 2, 32)))\n    jaxpr = jax.make_jaxpr(f_vjp)(jnp.ones((5, 2, 32)))\n    consts = [v.aval for v in jaxpr.jaxpr.constvars if v.aval.shape == (2, 32)]\n    self.assertLen(consts, 2)\n\n    def loss(A):\n\n        def step(x, _):\n            return (jnp.matmul(A, x), None)\n        init_x = jnp.zeros(A.shape[-1:])\n        last_x, _ = for_loop.scan(step, init_x, jnp.arange(10))\n        return jnp.sum(last_x)\n    A = jnp.zeros((3, 3))\n    s = jax.jit(jax.grad(loss)).lower(A).as_text('hlo')\n    assert s.count('dynamic-update-slice(') < 2",
+    "assertions": [
+      "assert s.count('dynamic-update-slice(') < 2"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@jtu.skip_on_devices('gpu', 'cpu')\n@jax.legacy_prng_key('allow')\ndef test_grad_of_triple_nested_for_loop(self):\n    func = lambda x: jnp.sin(x) + 1.0\n\n    @jax.jit\n    def f(x):\n        out = jnp.zeros_like(x)\n\n        def body(i, j, k, refs):\n            x_ref, out_ref = refs\n            y = func(x_ref[i, j, k])\n            out_ref[i, j, k] += y\n        return for_loop.for_loop(x.shape, body, (x, out))[1].sum()\n    x = random.normal(random.PRNGKey(0), (5, 4, 3))\n    ref = lambda x: jax.vmap(jax.vmap(jax.vmap(func)))(x).sum()\n    self.assertAllClose(f(x), ref(x))\n    jtu.check_grads(f, (x,), order=2, atol=0.1, rtol=0.1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/for_loop_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  }
+]

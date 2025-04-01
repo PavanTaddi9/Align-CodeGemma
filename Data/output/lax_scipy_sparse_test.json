@@ -1,0 +1,74 @@
+[
+  {
+    "test_code": "def test_cg_errors(self):\n    A = lambda x: x\n    b = jnp.zeros((2,))\n    with self.assertRaisesRegex(ValueError, 'x0 and b must have matching tree structure'):\n        jax.scipy.sparse.linalg.cg(A, {'x': b}, {'y': b})\n    with self.assertRaisesRegex(ValueError, 'x0 and b must have matching shape'):\n        jax.scipy.sparse.linalg.cg(A, b, b[:, np.newaxis])\n    with self.assertRaisesRegex(ValueError, 'must be a square matrix'):\n        jax.scipy.sparse.linalg.cg(jnp.zeros((3, 2)), jnp.zeros((2,)))\n    with self.assertRaisesRegex(TypeError, 'linear operator must be either a function or ndarray'):\n        jax.scipy.sparse.linalg.cg([[1]], jnp.zeros((1,)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (3, 3)], dtype=float_types + complex_types, preconditioner=[None, 'identity'])\ndef test_gmres_arnoldi_step(self, shape, dtype, preconditioner):\n    \"\"\"\n    The Arnoldi decomposition within GMRES is correct.\n    \"\"\"\n    if not config.enable_x64.value:\n        raise unittest.SkipTest('requires x64 mode')\n    rng = jtu.rand_default(self.rng())\n    A = rng(shape, dtype)\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    if preconditioner is None:\n        M = lambda x: x\n    else:\n        M = partial(matmul_high_precision, M)\n    n = shape[0]\n    x0 = rng(shape[:1], dtype)\n    Q = np.zeros((n, n + 1), dtype=dtype)\n    Q[:, 0] = x0 / jnp.linalg.norm(x0).astype(dtype)\n    Q = jnp.array(Q)\n    H = jnp.eye(n, n + 1, dtype=dtype)\n\n    @jax.tree_util.Partial\n    def A_mv(x):\n        return matmul_high_precision(A, x)\n    for k in range(n):\n        Q, H, _ = sp_linalg._kth_arnoldi_iteration(k, A_mv, M, Q, H)\n    QA = matmul_high_precision(Q[:, :n].conj().T, A)\n    QAQ = matmul_high_precision(QA, Q[:, :n])\n    self.assertAllClose(QAQ, H.T[:n, :], rtol=2e-05, atol=2e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (3, 3)], dtype=float_types + complex_types, preconditioner=[None, 'identity'])\ndef test_gmres_arnoldi_step(self, shape, dtype, preconditioner):\n    \"\"\"\n    The Arnoldi decomposition within GMRES is correct.\n    \"\"\"\n    if not config.enable_x64.value:\n        raise unittest.SkipTest('requires x64 mode')\n    rng = jtu.rand_default(self.rng())\n    A = rng(shape, dtype)\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    if preconditioner is None:\n        M = lambda x: x\n    else:\n        M = partial(matmul_high_precision, M)\n    n = shape[0]\n    x0 = rng(shape[:1], dtype)\n    Q = np.zeros((n, n + 1), dtype=dtype)\n    Q[:, 0] = x0 / jnp.linalg.norm(x0).astype(dtype)\n    Q = jnp.array(Q)\n    H = jnp.eye(n, n + 1, dtype=dtype)\n\n    @jax.tree_util.Partial\n    def A_mv(x):\n        return matmul_high_precision(A, x)\n    for k in range(n):\n        Q, H, _ = sp_linalg._kth_arnoldi_iteration(k, A_mv, M, Q, H)\n    QA = matmul_high_precision(Q[:, :n].conj().T, A)\n    QAQ = matmul_high_precision(QA, Q[:, :n])\n    self.assertAllClose(QAQ, H.T[:n, :], rtol=2e-05, atol=2e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def norm(x):\n    norm = np.linalg.norm(x, axis=(-2, -1))\n    return norm / ((inner_dimension + 1) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (3, 3)], dtype=float_types + complex_types, preconditioner=[None, 'identity'])\ndef test_gmres_arnoldi_step(self, shape, dtype, preconditioner):\n    \"\"\"\n    The Arnoldi decomposition within GMRES is correct.\n    \"\"\"\n    if not config.enable_x64.value:\n        raise unittest.SkipTest('requires x64 mode')\n    rng = jtu.rand_default(self.rng())\n    A = rng(shape, dtype)\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    if preconditioner is None:\n        M = lambda x: x\n    else:\n        M = partial(matmul_high_precision, M)\n    n = shape[0]\n    x0 = rng(shape[:1], dtype)\n    Q = np.zeros((n, n + 1), dtype=dtype)\n    Q[:, 0] = x0 / jnp.linalg.norm(x0).astype(dtype)\n    Q = jnp.array(Q)\n    H = jnp.eye(n, n + 1, dtype=dtype)\n\n    @jax.tree_util.Partial\n    def A_mv(x):\n        return matmul_high_precision(A, x)\n    for k in range(n):\n        Q, H, _ = sp_linalg._kth_arnoldi_iteration(k, A_mv, M, Q, H)\n    QA = matmul_high_precision(Q[:, :n].conj().T, A)\n    QAQ = matmul_high_precision(QA, Q[:, :n])\n    self.assertAllClose(QAQ, H.T[:n, :], rtol=2e-05, atol=2e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def norm(x):\n    norm = np.linalg.norm(x, axis=(-2, -1))\n    return norm / ((n + 1) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (3, 3)], dtype=float_types + complex_types, preconditioner=[None, 'identity'])\ndef test_gmres_arnoldi_step(self, shape, dtype, preconditioner):\n    \"\"\"\n    The Arnoldi decomposition within GMRES is correct.\n    \"\"\"\n    if not config.enable_x64.value:\n        raise unittest.SkipTest('requires x64 mode')\n    rng = jtu.rand_default(self.rng())\n    A = rng(shape, dtype)\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    if preconditioner is None:\n        M = lambda x: x\n    else:\n        M = partial(matmul_high_precision, M)\n    n = shape[0]\n    x0 = rng(shape[:1], dtype)\n    Q = np.zeros((n, n + 1), dtype=dtype)\n    Q[:, 0] = x0 / jnp.linalg.norm(x0).astype(dtype)\n    Q = jnp.array(Q)\n    H = jnp.eye(n, n + 1, dtype=dtype)\n\n    @jax.tree_util.Partial\n    def A_mv(x):\n        return matmul_high_precision(A, x)\n    for k in range(n):\n        Q, H, _ = sp_linalg._kth_arnoldi_iteration(k, A_mv, M, Q, H)\n    QA = matmul_high_precision(Q[:, :n].conj().T, A)\n    QAQ = matmul_high_precision(QA, Q[:, :n])\n    self.assertAllClose(QAQ, H.T[:n, :], rtol=2e-05, atol=2e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def norm(x):\n    n = np.linalg.norm(x, axis=(-2, -1))\n    return n / (max(1, max_rank) * jnp.finfo(dtype).eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2)], dtype=float_types + complex_types)\ndef test_cg_as_solve(self, shape, dtype):\n    rng = jtu.rand_default(self.rng())\n    a = rng(shape, dtype)\n    b = rng(shape[:1], dtype)\n    expected = np.linalg.solve(posify(a), b)\n    actual = lax_cg(posify(a), b)\n    self.assertAllClose(expected, actual, atol=1e-05, rtol=1e-05)\n    actual = jit(lax_cg)(posify(a), b)\n    self.assertAllClose(expected, actual, atol=1e-05, rtol=1e-05)\n    jtu.check_grads(lambda x, y: lax_cg(posify(x), y), (a, b), order=2, rtol=0.2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def check_grads(f, args, order, atol=None, rtol=None, eps=None):\n    default_tol = 1e-06 if config.enable_x64.value else 0.01\n    atol = atol or default_tol\n    rtol = rtol or default_tol\n    eps = eps or default_tol\n    jtu.check_jvp(f, partial(jax.jvp, f), args, atol, rtol, eps)\n    jtu.check_vjp(f, partial(jax.vjp, f), args, atol, rtol, eps)"
+  },
+  {
+    "test_code": "def test_linear_solve_batching_via_jacrev(self):\n    rng = np.random.RandomState(0)\n    M = rng.randn(5, 5)\n    A = np.dot(M, M.T)\n    matvec = lambda x: (jnp.dot(A, x[0]), jnp.dot(A, x[1]))\n\n    def f(b):\n        return jax.scipy.sparse.linalg.cg(matvec, (b, b))[0]\n    b = rng.randn(5)\n    jax.jacrev(f)(b)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "@jax.custom_vjp\ndef dot(x):\n    return jnp.dot(x, x)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (7, 7)], dtype=float_types + complex_types, preconditioner=[None, 'identity', 'exact'])\n@jtu.skip_on_devices('gpu')\ndef test_bicgstab_on_identity_system(self, shape, dtype, preconditioner):\n    A = jnp.eye(shape[1], dtype=dtype)\n    solution = jnp.ones(shape[1], dtype=dtype)\n    rng = jtu.rand_default(self.rng())\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    b = matmul_high_precision(A, solution)\n    tol = shape[0] * float(jnp.finfo(dtype).eps)\n    x, info = jax.scipy.sparse.linalg.bicgstab(A, b, tol=tol, atol=tol, M=M)\n    using_x64 = solution.dtype.kind in {np.float64, np.complex128}\n    solution_tol = 1e-08 if using_x64 else 0.0001\n    self.assertAllClose(x, solution, atol=solution_tol, rtol=solution_tol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def matmul_high_precision(a, b):\n    return jnp.matmul(a, b, precision=lax.Precision.HIGHEST)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (4, 4)], dtype=float_types + complex_types, preconditioner=[None, 'identity', 'exact'])\n@jtu.skip_on_devices('gpu')\ndef test_bicgstab_on_random_system(self, shape, dtype, preconditioner):\n    rng = jtu.rand_default(self.rng())\n    A = rng(shape, dtype)\n    solution = rng(shape[1:], dtype)\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    b = matmul_high_precision(A, solution)\n    tol = shape[0] * float(jnp.finfo(A.dtype).eps)\n    x, info = jax.scipy.sparse.linalg.bicgstab(A, b, tol=tol, atol=tol, M=M)\n    using_x64 = solution.dtype.kind in {np.float64, np.complex128}\n    solution_tol = 1e-08 if using_x64 else 0.0001\n    self.assertAllClose(x, solution, atol=solution_tol, rtol=solution_tol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def matmul_high_precision(a, b):\n    return jnp.matmul(a, b, precision=lax.Precision.HIGHEST)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (7, 7)], dtype=float_types + complex_types, preconditioner=[None, 'identity', 'exact'], solve_method=['batched', 'incremental'])\n@jtu.skip_on_devices('gpu')\ndef test_gmres_on_identity_system(self, shape, dtype, preconditioner, solve_method):\n    A = jnp.eye(shape[1], dtype=dtype)\n    solution = jnp.ones(shape[1], dtype=dtype)\n    rng = jtu.rand_default(self.rng())\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    b = matmul_high_precision(A, solution)\n    restart = shape[-1]\n    tol = shape[0] * float(jnp.finfo(dtype).eps)\n    x, info = jax.scipy.sparse.linalg.gmres(A, b, tol=tol, atol=tol, restart=restart, M=M, solve_method=solve_method)\n    using_x64 = solution.dtype.kind in {np.float64, np.complex128}\n    solution_tol = 1e-08 if using_x64 else 0.0001\n    self.assertAllClose(x, solution, atol=solution_tol, rtol=solution_tol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def matmul_high_precision(a, b):\n    return jnp.matmul(a, b, precision=lax.Precision.HIGHEST)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (4, 4)], dtype=float_types + complex_types, preconditioner=[None, 'identity', 'exact'], solve_method=['incremental', 'batched'])\n@jtu.skip_on_devices('gpu')\ndef test_gmres_on_random_system(self, shape, dtype, preconditioner, solve_method):\n    rng = jtu.rand_default(self.rng())\n    A = rng(shape, dtype)\n    solution = rng(shape[1:], dtype)\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    b = matmul_high_precision(A, solution)\n    restart = shape[-1]\n    tol = shape[0] * float(jnp.finfo(A.dtype).eps)\n    x, info = jax.scipy.sparse.linalg.gmres(A, b, tol=tol, atol=tol, restart=restart, M=M, solve_method=solve_method)\n    using_x64 = solution.dtype.kind in {np.float64, np.complex128}\n    solution_tol = 1e-08 if using_x64 else 0.0001\n    self.assertAllClose(x, solution, atol=solution_tol, rtol=solution_tol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def matmul_high_precision(a, b):\n    return jnp.matmul(a, b, precision=lax.Precision.HIGHEST)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 2), (3, 3)], dtype=float_types + complex_types, preconditioner=[None, 'identity'])\ndef test_gmres_arnoldi_step(self, shape, dtype, preconditioner):\n    \"\"\"\n    The Arnoldi decomposition within GMRES is correct.\n    \"\"\"\n    if not config.enable_x64.value:\n        raise unittest.SkipTest('requires x64 mode')\n    rng = jtu.rand_default(self.rng())\n    A = rng(shape, dtype)\n    M = self._fetch_preconditioner(preconditioner, A, rng=rng)\n    if preconditioner is None:\n        M = lambda x: x\n    else:\n        M = partial(matmul_high_precision, M)\n    n = shape[0]\n    x0 = rng(shape[:1], dtype)\n    Q = np.zeros((n, n + 1), dtype=dtype)\n    Q[:, 0] = x0 / jnp.linalg.norm(x0).astype(dtype)\n    Q = jnp.array(Q)\n    H = jnp.eye(n, n + 1, dtype=dtype)\n\n    @jax.tree_util.Partial\n    def A_mv(x):\n        return matmul_high_precision(A, x)\n    for k in range(n):\n        Q, H, _ = sp_linalg._kth_arnoldi_iteration(k, A_mv, M, Q, H)\n    QA = matmul_high_precision(Q[:, :n].conj().T, A)\n    QAQ = matmul_high_precision(QA, Q[:, :n])\n    self.assertAllClose(QAQ, H.T[:n, :], rtol=2e-05, atol=2e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_scipy_sparse_test.py",
+    "function": "def matmul_high_precision(a, b):\n    return jnp.matmul(a, b, precision=lax.Precision.HIGHEST)"
+  }
+]

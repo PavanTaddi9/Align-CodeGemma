@@ -1,0 +1,92 @@
+[
+  {
+    "test_code": "def test_closed_over_values_device_placement(self):\n    devices = self.get_devices()\n\n    def f():\n        return lax.add(3.0, 4.0)\n    self.assertIsInstance(f(), jax.Array)\n    self.assert_uncommitted_to_device(f(), devices[0])\n    self.assert_uncommitted_to_device(jax.jit(f)(), devices[0])\n    with jtu.ignore_warning(category=DeprecationWarning, message='backend and device argument'):\n        self.assert_committed_to_device(jax.jit(f, device=devices[1])(), devices[1])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_single_input_committed_multi_output(self):\n    if jax.device_count() < 3:\n        self.skipTest('Test requires 3 devices')\n    devices = self.get_devices()\n\n    @jax.jit\n    def f(a, b, c, d, e):\n        return (a, b, c, d, e)\n    outs = f(jax.device_put(1, devices[2]), jnp.array(2), jnp.array(3), jnp.array(4), jnp.array(5))\n    for o in outs:\n        self.assert_committed_to_device(o, devices[2])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_closed_over_values_device_placement(self):\n    devices = self.get_devices()\n\n    def f():\n        return lax.add(3.0, 4.0)\n    self.assertIsInstance(f(), jax.Array)\n    self.assert_uncommitted_to_device(f(), devices[0])\n    self.assert_uncommitted_to_device(jax.jit(f)(), devices[0])\n    with jtu.ignore_warning(category=DeprecationWarning, message='backend and device argument'):\n        self.assert_committed_to_device(jax.jit(f, device=devices[1])(), devices[1])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_single_input_committed_multi_output(self):\n    if jax.device_count() < 3:\n        self.skipTest('Test requires 3 devices')\n    devices = self.get_devices()\n\n    @jax.jit\n    def f(a, b, c, d, e):\n        return (a, b, c, d, e)\n    outs = f(jax.device_put(1, devices[2]), jnp.array(2), jnp.array(3), jnp.array(4), jnp.array(5))\n    for o in outs:\n        self.assert_committed_to_device(o, devices[2])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_device_put(self):\n    devices = self.get_devices()\n    x = jax.device_put(1, device=devices[0])\n    self.assert_committed_to_device(x, devices[0])\n    y = jax.device_put(x, device=devices[1])\n    self.assert_committed_to_device(y, devices[1])\n    x = jax.device_put(jnp.zeros(2), device=devices[0])\n    self.assert_committed_to_device(x, devices[0])\n    y = jax.device_put(x, device=devices[1])\n    self.assert_committed_to_device(y, devices[1])\n    x = jax.device_put(jnp.zeros(2), device=devices[1])\n    self.assert_committed_to_device(x, devices[1])\n    x = jax.device_put(jnp.zeros(2))\n    self.assert_uncommitted_to_device(x, devices[0])\n    x = jax.device_put(jax.device_put(2, device=devices[1]))\n    self.assert_committed_to_device(x, devices[1])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_closed_over_values_device_placement(self):\n    devices = self.get_devices()\n\n    def f():\n        return lax.add(3.0, 4.0)\n    self.assertIsInstance(f(), jax.Array)\n    self.assert_uncommitted_to_device(f(), devices[0])\n    self.assert_uncommitted_to_device(jax.jit(f)(), devices[0])\n    with jtu.ignore_warning(category=DeprecationWarning, message='backend and device argument'):\n        self.assert_committed_to_device(jax.jit(f, device=devices[1])(), devices[1])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_single_input_committed_multi_output(self):\n    if jax.device_count() < 3:\n        self.skipTest('Test requires 3 devices')\n    devices = self.get_devices()\n\n    @jax.jit\n    def f(a, b, c, d, e):\n        return (a, b, c, d, e)\n    outs = f(jax.device_put(1, devices[2]), jnp.array(2), jnp.array(3), jnp.array(4), jnp.array(5))\n    for o in outs:\n        self.assert_committed_to_device(o, devices[2])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_closed_over_values_device_placement(self):\n    devices = self.get_devices()\n\n    def f():\n        return lax.add(3.0, 4.0)\n    self.assertIsInstance(f(), jax.Array)\n    self.assert_uncommitted_to_device(f(), devices[0])\n    self.assert_uncommitted_to_device(jax.jit(f)(), devices[0])\n    with jtu.ignore_warning(category=DeprecationWarning, message='backend and device argument'):\n        self.assert_committed_to_device(jax.jit(f, device=devices[1])(), devices[1])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_single_input_committed_multi_output(self):\n    if jax.device_count() < 3:\n        self.skipTest('Test requires 3 devices')\n    devices = self.get_devices()\n\n    @jax.jit\n    def f(a, b, c, d, e):\n        return (a, b, c, d, e)\n    outs = f(jax.device_put(1, devices[2]), jnp.array(2), jnp.array(3), jnp.array(4), jnp.array(5))\n    for o in outs:\n        self.assert_committed_to_device(o, devices[2])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_closed_over_values_device_placement(self):\n    devices = self.get_devices()\n\n    def f():\n        return lax.add(3.0, 4.0)\n    self.assertIsInstance(f(), jax.Array)\n    self.assert_uncommitted_to_device(f(), devices[0])\n    self.assert_uncommitted_to_device(jax.jit(f)(), devices[0])\n    with jtu.ignore_warning(category=DeprecationWarning, message='backend and device argument'):\n        self.assert_committed_to_device(jax.jit(f, device=devices[1])(), devices[1])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_single_input_committed_multi_output(self):\n    if jax.device_count() < 3:\n        self.skipTest('Test requires 3 devices')\n    devices = self.get_devices()\n\n    @jax.jit\n    def f(a, b, c, d, e):\n        return (a, b, c, d, e)\n    outs = f(jax.device_put(1, devices[2]), jnp.array(2), jnp.array(3), jnp.array(4), jnp.array(5))\n    for o in outs:\n        self.assert_committed_to_device(o, devices[2])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_closed_over_values_device_placement(self):\n    devices = self.get_devices()\n\n    def f():\n        return lax.add(3.0, 4.0)\n    self.assertIsInstance(f(), jax.Array)\n    self.assert_uncommitted_to_device(f(), devices[0])\n    self.assert_uncommitted_to_device(jax.jit(f)(), devices[0])\n    with jtu.ignore_warning(category=DeprecationWarning, message='backend and device argument'):\n        self.assert_committed_to_device(jax.jit(f, device=devices[1])(), devices[1])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_single_input_committed_multi_output(self):\n    if jax.device_count() < 3:\n        self.skipTest('Test requires 3 devices')\n    devices = self.get_devices()\n\n    @jax.jit\n    def f(a, b, c, d, e):\n        return (a, b, c, d, e)\n    outs = f(jax.device_put(1, devices[2]), jnp.array(2), jnp.array(3), jnp.array(4), jnp.array(5))\n    for o in outs:\n        self.assert_committed_to_device(o, devices[2])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_closed_over_values_device_placement(self):\n    devices = self.get_devices()\n\n    def f():\n        return lax.add(3.0, 4.0)\n    self.assertIsInstance(f(), jax.Array)\n    self.assert_uncommitted_to_device(f(), devices[0])\n    self.assert_uncommitted_to_device(jax.jit(f)(), devices[0])\n    with jtu.ignore_warning(category=DeprecationWarning, message='backend and device argument'):\n        self.assert_committed_to_device(jax.jit(f, device=devices[1])(), devices[1])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_single_input_committed_multi_output(self):\n    if jax.device_count() < 3:\n        self.skipTest('Test requires 3 devices')\n    devices = self.get_devices()\n\n    @jax.jit\n    def f(a, b, c, d, e):\n        return (a, b, c, d, e)\n    outs = f(jax.device_put(1, devices[2]), jnp.array(2), jnp.array(3), jnp.array(4), jnp.array(5))\n    for o in outs:\n        self.assert_committed_to_device(o, devices[2])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/multi_device_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  }
+]

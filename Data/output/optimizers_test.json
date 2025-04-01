@@ -1,0 +1,32 @@
+[
+  {
+    "test_code": "def testUpdateFunStructureMismatchErrorMessage(self):\n\n    @optimizers.optimizer\n    def opt_maker():\n\n        def init_fun(x0):\n            return {'x': x0}\n\n        def update_fun(i, g, opt_state):\n            x = opt_state['x']\n            return {'x': x - 0.1 * g, 'v': g}\n\n        def get_params(opt_state):\n            return opt_state['x']\n        return (init_fun, update_fun, get_params)\n    init_fun, update_fun, get_params = opt_maker()\n    opt_state = init_fun(jnp.zeros(3))\n    self.assertRaises(TypeError, lambda: update_fun(opt_state))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/optimizers_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testIssue758(self):\n\n    def harmonic_bond(conf, params):\n        return jnp.sum(conf * params)\n    opt_init, opt_update, get_params = optimizers.sgd(0.05)\n    x0 = np.array([0.5], dtype=np.float64)\n\n    def minimize_structure(test_params):\n        energy_fn = functools.partial(harmonic_bond, params=test_params)\n        grad_fn = grad(energy_fn, argnums=(0,))\n        opt_state = opt_init(x0)\n\n        def apply_carry(carry, _):\n            i, x = carry\n            g = grad_fn(get_params(x))[0]\n            new_state = opt_update(i, g, x)\n            new_carry = (i + 1, new_state)\n            return (new_carry, _)\n        carry_final, _ = lax.scan(apply_carry, (0, opt_state), jnp.zeros((75, 0)))\n        trip, opt_final = carry_final\n        assert trip == 75\n        return opt_final\n    initial_params = jnp.array(0.5)\n    minimize_structure(initial_params)\n\n    def loss(test_params):\n        opt_final = minimize_structure(test_params)\n        return 1.0 - get_params(opt_final)[0]\n    loss_opt_init, loss_opt_update, loss_get_params = optimizers.sgd(0.05)\n    J1 = jacrev(loss, argnums=(0,))(initial_params)\n    J2 = jacfwd(loss, argnums=(0,))(initial_params)\n    self.assertAllClose(J1, J2, rtol=1e-06)",
+    "assertions": [
+      "assert trip == 75"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/optimizers_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testIssue758(self):\n\n    def harmonic_bond(conf, params):\n        return jnp.sum(conf * params)\n    opt_init, opt_update, get_params = optimizers.sgd(0.05)\n    x0 = np.array([0.5], dtype=np.float64)\n\n    def minimize_structure(test_params):\n        energy_fn = functools.partial(harmonic_bond, params=test_params)\n        grad_fn = grad(energy_fn, argnums=(0,))\n        opt_state = opt_init(x0)\n\n        def apply_carry(carry, _):\n            i, x = carry\n            g = grad_fn(get_params(x))[0]\n            new_state = opt_update(i, g, x)\n            new_carry = (i + 1, new_state)\n            return (new_carry, _)\n        carry_final, _ = lax.scan(apply_carry, (0, opt_state), jnp.zeros((75, 0)))\n        trip, opt_final = carry_final\n        assert trip == 75\n        return opt_final\n    initial_params = jnp.array(0.5)\n    minimize_structure(initial_params)\n\n    def loss(test_params):\n        opt_final = minimize_structure(test_params)\n        return 1.0 - get_params(opt_final)[0]\n    loss_opt_init, loss_opt_update, loss_get_params = optimizers.sgd(0.05)\n    J1 = jacrev(loss, argnums=(0,))(initial_params)\n    J2 = jacfwd(loss, argnums=(0,))(initial_params)\n    self.assertAllClose(J1, J2, rtol=1e-06)",
+    "assertions": [
+      "assert trip == 75"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/optimizers_test.py",
+    "function": "def minimize_structure(test_params):\n    energy_fn = partial(harmonic_bond, params=test_params)\n\n    def apply_carry(carry, _):\n        i, x = carry\n        new_x = x - 0.1 * jax.grad(energy_fn)(x)\n        new_carry = (i + 1, new_x)\n        return (new_carry, _)\n    x0 = jnp.array([1.0, 2.0, 3.0])\n    carry_final, _ = scan(apply_carry, (0, x0), jnp.zeros((75, 0)))\n    _, x_final = carry_final\n    return x_final"
+  },
+  {
+    "test_code": "def testIssue758(self):\n\n    def harmonic_bond(conf, params):\n        return jnp.sum(conf * params)\n    opt_init, opt_update, get_params = optimizers.sgd(0.05)\n    x0 = np.array([0.5], dtype=np.float64)\n\n    def minimize_structure(test_params):\n        energy_fn = functools.partial(harmonic_bond, params=test_params)\n        grad_fn = grad(energy_fn, argnums=(0,))\n        opt_state = opt_init(x0)\n\n        def apply_carry(carry, _):\n            i, x = carry\n            g = grad_fn(get_params(x))[0]\n            new_state = opt_update(i, g, x)\n            new_carry = (i + 1, new_state)\n            return (new_carry, _)\n        carry_final, _ = lax.scan(apply_carry, (0, opt_state), jnp.zeros((75, 0)))\n        trip, opt_final = carry_final\n        assert trip == 75\n        return opt_final\n    initial_params = jnp.array(0.5)\n    minimize_structure(initial_params)\n\n    def loss(test_params):\n        opt_final = minimize_structure(test_params)\n        return 1.0 - get_params(opt_final)[0]\n    loss_opt_init, loss_opt_update, loss_get_params = optimizers.sgd(0.05)\n    J1 = jacrev(loss, argnums=(0,))(initial_params)\n    J2 = jacfwd(loss, argnums=(0,))(initial_params)\n    self.assertAllClose(J1, J2, rtol=1e-06)",
+    "assertions": [
+      "assert trip == 75"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/optimizers_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  }
+]

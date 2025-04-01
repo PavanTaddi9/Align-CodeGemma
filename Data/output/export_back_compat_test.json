@@ -1,0 +1,8 @@
+[
+  {
+    "test_code": "def test_tpu_stablehlo_dynamic_reduce_window_unary(self):\n    shape = (3, 4)\n    _ = np.arange(math.prod(shape), dtype=np.float32).reshape(shape)\n\n    def func(x):\n        return jnp.cumsum(x, axis=0)\n    data = self.load_testdata(tpu_stablehlo_dynamic_reduce_window.data_unary_2023_06_17)\n    self.run_one_test(func, data, polymorphic_shapes=('b, ...',), expect_current_custom_calls=['stablehlo.dynamic_reduce_window', 'shape_assertion'])",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/export_back_compat_test.py",
+    "function": "def cumsum(x):\n\n    def body(i, _):\n        return (i + 1, jnp.sum(x[:i + 1]))\n    _, ans = lax.scan(body, 0, None, length=len(x))\n    return ans"
+  }
+]

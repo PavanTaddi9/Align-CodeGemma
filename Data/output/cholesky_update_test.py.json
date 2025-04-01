@@ -1,0 +1,14 @@
+[
+  {
+    "test_code": "@jtu.sample_product(shape=[(128, 128)], dtype=[jnp.float32, jnp.float64])\ndef testUpperOnes(self, shape, dtype):\n    \"\"\"A test with a (mildly) ill-conditioned matrix.\"\"\"\n    if dtype is jnp.float64 and (not config.enable_x64.value):\n        self.skipTest('Test disabled for x32 mode')\n    r_upper = jnp.triu(jnp.ones(shape)).astype(dtype)\n    w = jnp.arange(1, shape[0] + 1).astype(dtype)\n    new_matrix = r_upper.T @ r_upper + jnp.outer(w, w)\n    new_cholesky = jnp.linalg.cholesky(new_matrix, upper=True)\n    updated = lax_linalg.cholesky_update(r_upper, w)\n    atol = 1e-06 if dtype is jnp.float64 else 0.02\n    jtu._assert_numpy_allclose(updated, new_cholesky, atol=atol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/cholesky_update_test.py",
+    "function": "def outer(x, scale_f32):\n    scale = jax.lax.convert_element_type(scale_f32, sc32)\n\n    def body_fun(carry, _):\n        carry = inner(carry, scale)\n        return (carry, None)\n    x, _ = jax.lax.scan(body_fun, x, None, length=3)\n    return x"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(128, 128)], dtype=[jnp.float32, jnp.float64])\ndef testRandomMatrix(self, shape, dtype):\n    if dtype is jnp.float64 and (not config.enable_x64.value):\n        self.skipTest('Test disabled for x32 mode')\n    rng = jtu.rand_default(self.rng())\n    a = rng(shape, np.float64)\n    pd_matrix = jnp.array(a.T @ a).astype(dtype)\n    old_cholesky = jnp.linalg.cholesky(pd_matrix, upper=True)\n    w = rng((shape[0],), np.float64)\n    w = jnp.array(w).astype(dtype)\n    new_matrix = pd_matrix + jnp.outer(w, w)\n    new_cholesky = jnp.linalg.cholesky(new_matrix, upper=True)\n    updated = lax_linalg.cholesky_update(old_cholesky, w)\n    atol = 1e-06 if dtype == jnp.float64 else 0.001\n    jtu._assert_numpy_allclose(updated, new_cholesky, atol=atol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/cholesky_update_test.py",
+    "function": "def outer(x, scale_f32):\n    scale = jax.lax.convert_element_type(scale_f32, sc32)\n\n    def body_fun(carry, _):\n        carry = inner(carry, scale)\n        return (carry, None)\n    x, _ = jax.lax.scan(body_fun, x, None, length=3)\n    return x"
+  }
+]

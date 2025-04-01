@@ -1,0 +1,71 @@
+[
+  {
+    "test_code": "@jtu.sample_product(shape=[(15,), (3, 15), (1, 12)], dtype=jtu.dtypes.floating)\n@jax.legacy_prng_key('allow')\ndef testKdeResampleShape(self, shape, dtype):\n\n    def resample(key, dataset, weights, *, shape):\n        kde = lsp_stats.gaussian_kde(dataset, weights=jax.numpy.abs(weights))\n        return kde.resample(key, shape=shape)\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [jax.random.PRNGKey(0), rng(shape, dtype), rng(shape[-1:], dtype)]\n    ndim = shape[0] if len(shape) > 1 else 1\n    func = partial(resample, shape=())\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim,)\n    func = partial(resample, shape=(4,))\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim, 4)",
+    "assertions": [
+      "assert result.shape == (ndim,)",
+      "assert result.shape == (ndim, 4)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/scipy_stats_test.py",
+    "function": "def func(x):\n    x, = promote_dtypes_complex(x)\n    return jnp.fft.irfft(jnp.concatenate([jnp.zeros_like(x, shape=1), x[:2] + 1j * x[2:]]))"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(shape=shape, axis=axis) for shape, axis in (((0,), None), ((0,), 0), ((7,), None), ((7,), 0), ((47, 8), None), ((47, 8), 0), ((47, 8), 1), ((0, 2, 3), None), ((0, 2, 3), 0), ((0, 2, 3), 1), ((0, 2, 3), 2), ((10, 5, 21), None), ((10, 5, 21), 0), ((10, 5, 21), 1), ((10, 5, 21), 2))], dtype=jtu.dtypes.integer + jtu.dtypes.floating, contains_nans=[True, False], keepdims=[True, False])\n@jtu.ignore_warning(category=RuntimeWarning, message='One or more sample arguments is too small; all returned values will be NaN')\n@jtu.ignore_warning(category=RuntimeWarning, message='All axis-slices of one or more sample arguments are too small')\ndef testMode(self, shape, dtype, axis, contains_nans, keepdims):\n    if scipy_version < (1, 9, 0) and keepdims != True:\n        self.skipTest('scipy < 1.9.0 only support keepdims == True')\n    if contains_nans:\n        rng = jtu.rand_some_nan(self.rng())\n    else:\n        rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [rng(shape, dtype)]\n\n    def scipy_mode_wrapper(a, axis=0, nan_policy='propagate', keepdims=None):\n        \"\"\"Wrapper to manage the shape discrepancies between scipy and jax\"\"\"\n        if scipy_version < (1, 11, 0) and a.size == 0:\n            if keepdims:\n                if axis == None:\n                    output_shape = tuple((1 for _ in a.shape))\n                else:\n                    output_shape = tuple((1 if i == axis else s for i, s in enumerate(a.shape)))\n            elif axis == None:\n                output_shape = ()\n            else:\n                output_shape = np.delete(np.array(a.shape, dtype=np.int64), axis)\n            t = dtypes.canonicalize_dtype(jax.numpy.float_)\n            return (np.full(output_shape, np.nan, dtype=t), np.zeros(output_shape, dtype=t))\n        if scipy_version < (1, 9, 0):\n            result = osp_stats.mode(a, axis=axis, nan_policy=nan_policy)\n        else:\n            result = osp_stats.mode(a, axis=axis, nan_policy=nan_policy, keepdims=keepdims)\n        if a.size != 0 and axis == None and (keepdims == True):\n            output_shape = tuple((1 for _ in a.shape))\n            return (result.mode.reshape(output_shape), result.count.reshape(output_shape))\n        return result\n    scipy_fun = partial(scipy_mode_wrapper, axis=axis, keepdims=keepdims)\n    scipy_fun = jtu.ignore_warning(category=RuntimeWarning, message='Mean of empty slice.*')(scipy_fun)\n    scipy_fun = jtu.ignore_warning(category=RuntimeWarning, message='invalid value encountered.*')(scipy_fun)\n    lax_fun = partial(lsp_stats.mode, axis=axis, keepdims=keepdims)\n    tol_spec = {np.float32: 0.0002, np.float64: 5e-06}\n    tol = jtu.tolerance(dtype, tol_spec)\n    self._CheckAgainstNumpy(scipy_fun, lax_fun, args_maker, check_dtypes=False, tol=tol)\n    self._CompileAndCheck(lax_fun, args_maker, rtol=tol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/scipy_stats_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(15,), (3, 15), (1, 12)], dtype=jtu.dtypes.floating)\n@jax.legacy_prng_key('allow')\ndef testKdeResampleShape(self, shape, dtype):\n\n    def resample(key, dataset, weights, *, shape):\n        kde = lsp_stats.gaussian_kde(dataset, weights=jax.numpy.abs(weights))\n        return kde.resample(key, shape=shape)\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [jax.random.PRNGKey(0), rng(shape, dtype), rng(shape[-1:], dtype)]\n    ndim = shape[0] if len(shape) > 1 else 1\n    func = partial(resample, shape=())\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim,)\n    func = partial(resample, shape=(4,))\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim, 4)",
+    "assertions": [
+      "assert result.shape == (ndim,)",
+      "assert result.shape == (ndim, 4)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/scipy_stats_test.py",
+    "function": "def func(size):\n    lhs_one_d = jnp.arange(size, dtype='int32') + 1\n    lhs_two_d = jax.lax.broadcast_in_dim(lhs_one_d, (size, 2), (0,))\n    rhs = jax.lax.broadcasted_iota('int32', (2, 4), 0) + 1\n    return jnp.dot(lhs_two_d, rhs)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(15,), (3, 15), (1, 12)], dtype=jtu.dtypes.floating)\n@jax.legacy_prng_key('allow')\ndef testKdeResampleShape(self, shape, dtype):\n\n    def resample(key, dataset, weights, *, shape):\n        kde = lsp_stats.gaussian_kde(dataset, weights=jax.numpy.abs(weights))\n        return kde.resample(key, shape=shape)\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [jax.random.PRNGKey(0), rng(shape, dtype), rng(shape[-1:], dtype)]\n    ndim = shape[0] if len(shape) > 1 else 1\n    func = partial(resample, shape=())\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim,)\n    func = partial(resample, shape=(4,))\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim, 4)",
+    "assertions": [
+      "assert result.shape == (ndim,)",
+      "assert result.shape == (ndim, 4)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/scipy_stats_test.py",
+    "function": "def func(x):\n    return jax.random.uniform(x, (2, 4), dtype=np.float32)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(15,), (3, 15), (1, 12)], dtype=jtu.dtypes.floating)\n@jax.legacy_prng_key('allow')\ndef testKdeResampleShape(self, shape, dtype):\n\n    def resample(key, dataset, weights, *, shape):\n        kde = lsp_stats.gaussian_kde(dataset, weights=jax.numpy.abs(weights))\n        return kde.resample(key, shape=shape)\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [jax.random.PRNGKey(0), rng(shape, dtype), rng(shape[-1:], dtype)]\n    ndim = shape[0] if len(shape) > 1 else 1\n    func = partial(resample, shape=())\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim,)\n    func = partial(resample, shape=(4,))\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim, 4)",
+    "assertions": [
+      "assert result.shape == (ndim,)",
+      "assert result.shape == (ndim, 4)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/scipy_stats_test.py",
+    "function": "def func(xs):\n    return jnp.array(list(xs))"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(15,), (3, 15), (1, 12)], dtype=jtu.dtypes.floating)\n@jax.legacy_prng_key('allow')\ndef testKdeResampleShape(self, shape, dtype):\n\n    def resample(key, dataset, weights, *, shape):\n        kde = lsp_stats.gaussian_kde(dataset, weights=jax.numpy.abs(weights))\n        return kde.resample(key, shape=shape)\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [jax.random.PRNGKey(0), rng(shape, dtype), rng(shape[-1:], dtype)]\n    ndim = shape[0] if len(shape) > 1 else 1\n    func = partial(resample, shape=())\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim,)\n    func = partial(resample, shape=(4,))\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim, 4)",
+    "assertions": [
+      "assert result.shape == (ndim,)",
+      "assert result.shape == (ndim, 4)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/scipy_stats_test.py",
+    "function": "def args_maker():\n    \"\"\"Test the set of inputs np.geomspace is well-defined on.\"\"\"\n    start, stop = self._GetArgsMaker(rng, [start_shape, stop_shape], [dtype, dtype])()\n    start, stop = jnp.broadcast_arrays(start, stop)\n    if dtype in complex_dtypes:\n        return (start, stop)\n    start = start * jnp.sign(start) * jnp.sign(stop)\n    return (start, stop)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(15,), (3, 15), (1, 12)], dtype=jtu.dtypes.floating)\n@jax.legacy_prng_key('allow')\ndef testKdeResampleShape(self, shape, dtype):\n\n    def resample(key, dataset, weights, *, shape):\n        kde = lsp_stats.gaussian_kde(dataset, weights=jax.numpy.abs(weights))\n        return kde.resample(key, shape=shape)\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [jax.random.PRNGKey(0), rng(shape, dtype), rng(shape[-1:], dtype)]\n    ndim = shape[0] if len(shape) > 1 else 1\n    func = partial(resample, shape=())\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim,)\n    func = partial(resample, shape=(4,))\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim, 4)",
+    "assertions": [
+      "assert result.shape == (ndim,)",
+      "assert result.shape == (ndim, 4)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/scipy_stats_test.py",
+    "function": "def args_maker():\n    \"\"\"Test the set of inputs np.geomspace is well-defined on.\"\"\"\n    start, stop = self._GetArgsMaker(rng, [start_shape, stop_shape], [dtype, dtype])()\n    start, stop = jnp.broadcast_arrays(start, stop)\n    if dtype in complex_dtypes:\n        return (start, stop)\n    start = start * jnp.sign(start) * jnp.sign(stop)\n    return (start, stop)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(15,), (3, 15), (1, 12)], dtype=jtu.dtypes.floating)\n@jax.legacy_prng_key('allow')\ndef testKdeResampleShape(self, shape, dtype):\n\n    def resample(key, dataset, weights, *, shape):\n        kde = lsp_stats.gaussian_kde(dataset, weights=jax.numpy.abs(weights))\n        return kde.resample(key, shape=shape)\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [jax.random.PRNGKey(0), rng(shape, dtype), rng(shape[-1:], dtype)]\n    ndim = shape[0] if len(shape) > 1 else 1\n    func = partial(resample, shape=())\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim,)\n    func = partial(resample, shape=(4,))\n    with jax.debug_key_reuse(False):\n        self._CompileAndCheck(func, args_maker, rtol={np.float32: 3e-07, np.float64: 4e-15})\n    result = func(*args_maker())\n    assert result.shape == (ndim, 4)",
+    "assertions": [
+      "assert result.shape == (ndim,)",
+      "assert result.shape == (ndim, 4)"
+    ],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/scipy_stats_test.py",
+    "function": "def args_maker():\n    x = jnp.array(rng(shape, dtype))\n    if out_dtype in unsigned_dtypes:\n        x = 10 * jnp.abs(x)\n    return [x]"
+  }
+]

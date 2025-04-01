@@ -1,0 +1,62 @@
+[
+  {
+    "test_code": "@jax.default_matmul_precision('float32')\ndef testKernelRegressionTrainAndPredict(self):\n    n, d = (100, 20)\n    truth = self.rng.normal(size=d)\n    xs = self.rng.normal(size=(n, d))\n    ys = jnp.dot(xs, truth)\n    kernel = lambda x, y: jnp.dot(x, y)\n    predict = kernel_lsq.train(kernel, xs, ys)\n    np.testing.assert_allclose(predict(xs), ys, atol=0.001, rtol=0.001)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "def predict(params, inputs):\n    for W, b in params:\n        outputs = jnp.dot(inputs, W) + b\n        inputs = jnp.maximum(0, outputs)\n    return outputs"
+  },
+  {
+    "test_code": "@jax.default_matmul_precision('float32')\ndef testKernelRegressionTrainAndPredict(self):\n    n, d = (100, 20)\n    truth = self.rng.normal(size=d)\n    xs = self.rng.normal(size=(n, d))\n    ys = jnp.dot(xs, truth)\n    kernel = lambda x, y: jnp.dot(x, y)\n    predict = kernel_lsq.train(kernel, xs, ys)\n    np.testing.assert_allclose(predict(xs), ys, atol=0.001, rtol=0.001)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "def predict(params, inputs):\n    for W, b in params:\n        outputs = jnp.dot(W, inputs) + b\n        inputs = jnp.tanh(outputs)\n    return outputs"
+  },
+  {
+    "test_code": "def testKernelRegressionGram(self):\n    n, d = (100, 20)\n    xs = self.rng.normal(size=(n, d))\n    kernel = lambda x, y: jnp.dot(x, y)\n    np.testing.assert_allclose(kernel_lsq.gram(kernel, xs), jnp.dot(xs, xs.T), atol=1e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "@jax.custom_vjp\ndef dot(x):\n    return jnp.dot(x, x)"
+  },
+  {
+    "test_code": "@jax.default_matmul_precision('float32')\ndef testKernelRegressionTrainAndPredict(self):\n    n, d = (100, 20)\n    truth = self.rng.normal(size=d)\n    xs = self.rng.normal(size=(n, d))\n    ys = jnp.dot(xs, truth)\n    kernel = lambda x, y: jnp.dot(x, y)\n    predict = kernel_lsq.train(kernel, xs, ys)\n    np.testing.assert_allclose(predict(xs), ys, atol=0.001, rtol=0.001)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "@jax.custom_vjp\ndef dot(x):\n    return jnp.dot(x, x)"
+  },
+  {
+    "test_code": "def testKernelRegressionGram(self):\n    n, d = (100, 20)\n    xs = self.rng.normal(size=(n, d))\n    kernel = lambda x, y: jnp.dot(x, y)\n    np.testing.assert_allclose(kernel_lsq.gram(kernel, xs), jnp.dot(xs, xs.T), atol=1e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "def dot(lhs: jnp.ndarray, rhs: jnp.ndarray, transpose_lhs: bool=False, transpose_rhs: bool=False, preferred_element_type: jnp.dtype=jnp.float32) -> jnp.ndarray:\n    lhs = jnp.transpose(lhs) if transpose_lhs else lhs\n    rhs = jnp.transpose(rhs) if transpose_rhs else rhs\n    return jax.lax.dot(lhs, rhs, preferred_element_type=preferred_element_type)"
+  },
+  {
+    "test_code": "@jax.default_matmul_precision('float32')\ndef testKernelRegressionTrainAndPredict(self):\n    n, d = (100, 20)\n    truth = self.rng.normal(size=d)\n    xs = self.rng.normal(size=(n, d))\n    ys = jnp.dot(xs, truth)\n    kernel = lambda x, y: jnp.dot(x, y)\n    predict = kernel_lsq.train(kernel, xs, ys)\n    np.testing.assert_allclose(predict(xs), ys, atol=0.001, rtol=0.001)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "def dot(lhs: jnp.ndarray, rhs: jnp.ndarray, transpose_lhs: bool=False, transpose_rhs: bool=False, preferred_element_type: jnp.dtype=jnp.float32) -> jnp.ndarray:\n    lhs = jnp.transpose(lhs) if transpose_lhs else lhs\n    rhs = jnp.transpose(rhs) if transpose_rhs else rhs\n    return jax.lax.dot(lhs, rhs, preferred_element_type=preferred_element_type)"
+  },
+  {
+    "test_code": "def testKernelRegressionGram(self):\n    n, d = (100, 20)\n    xs = self.rng.normal(size=(n, d))\n    kernel = lambda x, y: jnp.dot(x, y)\n    np.testing.assert_allclose(kernel_lsq.gram(kernel, xs), jnp.dot(xs, xs.T), atol=1e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "def assert_allclose(self, out: jnp.ndarray, expected_out: jnp.ndarray, *, atol: float=1e-05, rtol: float=1e-05):\n    self.assertEqual(out.dtype, expected_out.dtype)\n    np.testing.assert_allclose(out.astype(jnp.float32), expected_out.astype(jnp.float32), atol=atol, rtol=rtol)"
+  },
+  {
+    "test_code": "@jax.default_matmul_precision('float32')\ndef testKernelRegressionTrainAndPredict(self):\n    n, d = (100, 20)\n    truth = self.rng.normal(size=d)\n    xs = self.rng.normal(size=(n, d))\n    ys = jnp.dot(xs, truth)\n    kernel = lambda x, y: jnp.dot(x, y)\n    predict = kernel_lsq.train(kernel, xs, ys)\n    np.testing.assert_allclose(predict(xs), ys, atol=0.001, rtol=0.001)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "def assert_allclose(self, out: jnp.ndarray, expected_out: jnp.ndarray, *, atol: float=1e-05, rtol: float=1e-05):\n    self.assertEqual(out.dtype, expected_out.dtype)\n    np.testing.assert_allclose(out.astype(jnp.float32), expected_out.astype(jnp.float32), atol=atol, rtol=rtol)"
+  },
+  {
+    "test_code": "def testKernelRegressionGram(self):\n    n, d = (100, 20)\n    xs = self.rng.normal(size=(n, d))\n    kernel = lambda x, y: jnp.dot(x, y)\n    np.testing.assert_allclose(kernel_lsq.gram(kernel, xs), jnp.dot(xs, xs.T), atol=1e-05)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "@functools.partial(self.pallas_call, out_shape=jax.ShapeDtypeStruct(out_shape, dtype))\ndef dot(x_ref, y_ref, o_ref):\n    x = x_ref[:, :]\n    y = y_ref[:, :]\n    o_ref[:, :] = pl.dot(x, y, trans_x, trans_y).astype(o_ref.dtype)"
+  },
+  {
+    "test_code": "@jax.default_matmul_precision('float32')\ndef testKernelRegressionTrainAndPredict(self):\n    n, d = (100, 20)\n    truth = self.rng.normal(size=d)\n    xs = self.rng.normal(size=(n, d))\n    ys = jnp.dot(xs, truth)\n    kernel = lambda x, y: jnp.dot(x, y)\n    predict = kernel_lsq.train(kernel, xs, ys)\n    np.testing.assert_allclose(predict(xs), ys, atol=0.001, rtol=0.001)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/examples_test.py",
+    "function": "@functools.partial(self.pallas_call, out_shape=jax.ShapeDtypeStruct(out_shape, dtype))\ndef dot(x_ref, y_ref, o_ref):\n    x = x_ref[:, :]\n    y = y_ref[:, :]\n    o_ref[:, :] = pl.dot(x, y, trans_x, trans_y).astype(o_ref.dtype)"
+  }
+]

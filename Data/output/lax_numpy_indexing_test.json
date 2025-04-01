@@ -1,0 +1,236 @@
+[
+  {
+    "test_code": "def testBooleanIndexingDynamicShapeError(self):\n    x = np.zeros(3)\n    i = np.array([True, True, False])\n    self.assertRaises(IndexError, lambda: jax.jit(lambda x, i: x[i])(x, i))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testJVPOfGradOfIndexing(self):\n    x = jnp.ones((3, 4), jnp.float32)\n    i = jnp.ones((3,), jnp.int32)\n    f = lambda x, i: jnp.sum(x[i])\n    primals, tangents = jax.jvp(jax.grad(f), (x, i), (x, np.zeros(i.shape, dtypes.float0)))\n    expected = np.broadcast_to(np.array([0, 3, 0], dtype=np.float32)[:, None], (3, 4))\n    self.assertAllClose(expected, primals)\n    self.assertAllClose(np.zeros_like(x), tangents)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.sample_product(shape=[(2, 3, 4, 5)], update_ndim=[0, 1, 2], idx=[np.index_exp[True], np.index_exp[False], np.index_exp[..., True], np.index_exp[..., False], np.index_exp[0, :2, True], np.index_exp[0, :2, False], np.index_exp[:2, 0, True], np.index_exp[:2, 0, False], np.index_exp[:2, np.array([0, 2]), True], np.index_exp[np.array([1, 0]), :, True], np.index_exp[True, :, True, :, np.array(True)]])\ndef testScalarBoolUpdate(self, shape, idx, update_ndim):\n    update_shape = np.zeros(shape)[idx].shape[-update_ndim:]\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: [rng(shape, np.int32), rng(update_shape, np.int32)]\n\n    def np_fun(x, update):\n        x = np.array(x, copy=True)\n        x[idx] = update\n        return x\n    jnp_fun = lambda x, update: jnp.asarray(x).at[idx].set(update)\n    self._CheckAgainstNumpy(np_fun, jnp_fun, args_maker)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testFloatIndexingError(self):\n    BAD_INDEX_TYPE_ERROR = 'Indexer must have integer or boolean type, got indexer with type'\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros(2)[0.0]\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros((2, 2))[0, 0.0]\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros((2, 2))[0, 0.0]\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jax.jit(lambda idx: jnp.zeros((2, 2))[idx])((0, 0.0))\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros(2).at[0.0].add(1.0)\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros(2).at[0.0].set(1.0)\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros((2, 2))[jnp.arange(2), 1.0]\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros((2, 2))[jnp.arange(2), 1 + 1j]",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testStrIndexingError(self):\n    msg = 'JAX does not support string indexing'\n    with self.assertRaisesRegex(TypeError, msg):\n        jnp.zeros(2)['abc']\n    with self.assertRaisesRegex(TypeError, msg):\n        jnp.zeros((2, 3))[:, 'abc']",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testWrongNumberOfIndices(self):\n    with self.assertRaisesRegex(IndexError, 'Too many indices: 0-dimensional array indexed with 1 regular index.'):\n        jnp.array(1)[0]\n    with self.assertRaisesRegex(IndexError, 'Too many indices: 1-dimensional array indexed with 2 regular indices.'):\n        jnp.zeros(3)[:, 5]",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testIndexDtypeError(self):\n    jnp.array(1)\n    with self.assertNoWarnings():\n        jnp.zeros(5).at[::2].set(1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testIndexedUpdateAliasingBug(self):\n    fn = lambda x: x.at[1:].set(1 + x[:-1])\n    y = jnp.zeros(8)\n    self.assertArraysEqual(fn(y), jax.jit(fn)(y))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testScatterValuesCastToTargetDType(self):\n    a = jnp.zeros(1, dtype=jnp.uint32)\n    val = 2 ** 32 - 1\n    b = a.at[0].set(jnp.uint32(val))\n    self.assertEqual(int(b[0]), val)\n    c = a.at[0].set(val)\n    self.assertEqual(int(c[0]), val)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=('n',))\ndef fun(x):\n    return jnp.sum(x)"
+  },
+  {
+    "test_code": "def testIndexedUpdateAliasingBug(self):\n    fn = lambda x: x.at[1:].set(1 + x[:-1])\n    y = jnp.zeros(8)\n    self.assertArraysEqual(fn(y), jax.jit(fn)(y))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@jax.jit\ndef fn(n, x):\n    return lax.broadcast_in_dim(x, (n,), ())"
+  },
+  {
+    "test_code": "def testUnpacking(self):\n\n    def foo(x):\n        a, b, c = x\n        return a + b + c\n    cfoo = jax.jit(foo)\n    a1 = foo(np.arange(3))\n    a2 = cfoo(np.arange(3))\n    self.assertAllClose(a1, a2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def foo(x, y):\n    z = jax.vmap(jax.vmap(jnp.sin))(x) * y\n    return jax.vmap(jax.vmap(jnp.add))(x, z)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@jax.jit\ndef fun(x, y):\n    return cond(x < 3, None, lambda _: 2.0 * jnp.sin(y), x, lambda x: 2.0 * x)"
+  },
+  {
+    "test_code": "def testIndexedUpdateAliasingBug(self):\n    fn = lambda x: x.at[1:].set(1 + x[:-1])\n    y = jnp.zeros(8)\n    self.assertArraysEqual(fn(y), jax.jit(fn)(y))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@jax.vmap\ndef fn(a, b):\n    m1, v1 = a\n    m2, v2 = b\n    return (m1 + m2, jsp.linalg.solve(m1, v2) + jsp.linalg.solve(m2, v1))"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def fun():\n    return jax.ffi.ffi_call('test', jax.ShapeDtypeStruct((), np.int64))()"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def fun(x, t):\n    return jnp.sum(jnp.power(jnp.maximum(x, 0.0), 2)) + t"
+  },
+  {
+    "test_code": "def testIndexingTypePromotion(self):\n\n    def _check(x_type, y_type):\n        x = jnp.arange(5, dtype=x_type)\n        y = y_type(0)\n        out = x.at[0].set(y)\n        self.assertEqual(x.dtype, out.dtype)\n\n    @jtu.ignore_warning(category=NumpyComplexWarning, message='Casting complex values to real')\n    def _check_warns(x_type, y_type, msg):\n        with self.assertWarnsRegex(FutureWarning, msg):\n            _check(x_type, y_type)\n\n    def _check_raises(x_type, y_type, msg):\n        with self.assertRaisesRegex(ValueError, msg):\n            _check(x_type, y_type)\n    _check(jnp.int32, jnp.int32)\n    _check(jnp.float32, jnp.float32)\n    _check(jnp.complex64, jnp.complex64)\n    _check(jnp.int32, int)\n    _check(jnp.float32, int)\n    _check(jnp.float32, float)\n    _check(jnp.complex64, int)\n    _check(jnp.complex64, float)\n    _check(jnp.complex64, complex)\n    msg = 'scatter inputs have incompatible types'\n    with jax.numpy_dtype_promotion('standard'):\n        _check(jnp.int32, jnp.int16)\n        _check(jnp.float32, jnp.float16)\n        _check(jnp.float32, jnp.int32)\n        _check(jnp.complex64, jnp.int32)\n        _check(jnp.complex64, jnp.float32)\n        _check_warns(jnp.int16, jnp.int32, msg)\n        _check_warns(jnp.int32, jnp.float32, msg)\n        _check_warns(jnp.int32, jnp.complex64, msg)\n        _check_warns(jnp.float16, jnp.float32, msg)\n        _check_warns(jnp.float32, jnp.complex64, msg)\n    msg = 'Input dtypes .* have no available implicit dtype promotion path'\n    with jax.numpy_dtype_promotion('strict'):\n        _check_raises(jnp.int32, jnp.int16, msg)\n        _check_raises(jnp.float32, jnp.float16, msg)\n        _check_raises(jnp.float32, jnp.int32, msg)\n        _check_raises(jnp.complex64, jnp.int32, msg)\n        _check_raises(jnp.complex64, jnp.float32, msg)\n        _check_raises(jnp.int16, jnp.int32, msg)\n        _check_raises(jnp.int32, jnp.float32, msg)\n        _check_raises(jnp.int32, jnp.complex64, msg)\n        _check_raises(jnp.float16, jnp.float32, msg)\n        _check_raises(jnp.float32, jnp.complex64, msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def _check(self, s, *ops):\n    a = np.einsum(s, *ops)\n    b = jnp.einsum(s, *ops, precision=lax.Precision.HIGHEST)\n    self.assertAllClose(a, b, atol=0.0001, rtol=0.0001)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@partial(jax.jit, backend=backend)\ndef fun(x, y):\n    return jnp.matmul(x, y)"
+  },
+  {
+    "test_code": "def testUnpacking(self):\n\n    def foo(x):\n        a, b, c = x\n        return a + b + c\n    cfoo = jax.jit(foo)\n    a1 = foo(np.arange(3))\n    a2 = cfoo(np.arange(3))\n    self.assertAllClose(a1, a2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@jax.custom_vjp\ndef foo(x):\n    return x"
+  },
+  {
+    "test_code": "def testIndexedUpdateAliasingBug(self):\n    fn = lambda x: x.at[1:].set(1 + x[:-1])\n    y = jnp.zeros(8)\n    self.assertArraysEqual(fn(y), jax.jit(fn)(y))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@custom_transpose_with_example_out(jnp.ones(2))\ndef fn(r, x):\n    tracer_spy.append(r)\n    tracer_spy.append(x['c'])\n    return dict(b=x['c'] / r)"
+  },
+  {
+    "test_code": "def testIndexingTypePromotion(self):\n\n    def _check(x_type, y_type):\n        x = jnp.arange(5, dtype=x_type)\n        y = y_type(0)\n        out = x.at[0].set(y)\n        self.assertEqual(x.dtype, out.dtype)\n\n    @jtu.ignore_warning(category=NumpyComplexWarning, message='Casting complex values to real')\n    def _check_warns(x_type, y_type, msg):\n        with self.assertWarnsRegex(FutureWarning, msg):\n            _check(x_type, y_type)\n\n    def _check_raises(x_type, y_type, msg):\n        with self.assertRaisesRegex(ValueError, msg):\n            _check(x_type, y_type)\n    _check(jnp.int32, jnp.int32)\n    _check(jnp.float32, jnp.float32)\n    _check(jnp.complex64, jnp.complex64)\n    _check(jnp.int32, int)\n    _check(jnp.float32, int)\n    _check(jnp.float32, float)\n    _check(jnp.complex64, int)\n    _check(jnp.complex64, float)\n    _check(jnp.complex64, complex)\n    msg = 'scatter inputs have incompatible types'\n    with jax.numpy_dtype_promotion('standard'):\n        _check(jnp.int32, jnp.int16)\n        _check(jnp.float32, jnp.float16)\n        _check(jnp.float32, jnp.int32)\n        _check(jnp.complex64, jnp.int32)\n        _check(jnp.complex64, jnp.float32)\n        _check_warns(jnp.int16, jnp.int32, msg)\n        _check_warns(jnp.int32, jnp.float32, msg)\n        _check_warns(jnp.int32, jnp.complex64, msg)\n        _check_warns(jnp.float16, jnp.float32, msg)\n        _check_warns(jnp.float32, jnp.complex64, msg)\n    msg = 'Input dtypes .* have no available implicit dtype promotion path'\n    with jax.numpy_dtype_promotion('strict'):\n        _check_raises(jnp.int32, jnp.int16, msg)\n        _check_raises(jnp.float32, jnp.float16, msg)\n        _check_raises(jnp.float32, jnp.int32, msg)\n        _check_raises(jnp.complex64, jnp.int32, msg)\n        _check_raises(jnp.complex64, jnp.float32, msg)\n        _check_raises(jnp.int16, jnp.int32, msg)\n        _check_raises(jnp.int32, jnp.float32, msg)\n        _check_raises(jnp.int32, jnp.complex64, msg)\n        _check_raises(jnp.float16, jnp.float32, msg)\n        _check_raises(jnp.float32, jnp.complex64, msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def _check(obj, out_dtype, weak_type):\n    dtype_reference = np.array(obj, dtype=out_dtype)\n    out = jnp.array(obj)\n    self.assertDtypesMatch(out, dtype_reference)\n    self.assertEqual(dtypes.is_weakly_typed(out), weak_type)\n    out_jit = jax.jit(jnp.array)(obj)\n    self.assertDtypesMatch(out_jit, dtype_reference)\n    self.assertEqual(dtypes.is_weakly_typed(out_jit), weak_type)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def args_maker():\n    \"\"\"Test the set of inputs np.geomspace is well-defined on.\"\"\"\n    start, stop = self._GetArgsMaker(rng, [start_shape, stop_shape], [dtype, dtype])()\n    start, stop = jnp.broadcast_arrays(start, stop)\n    if dtype in complex_dtypes:\n        return (start, stop)\n    start = start * jnp.sign(start) * jnp.sign(stop)\n    return (start, stop)"
+  },
+  {
+    "test_code": "def testUnpacking(self):\n\n    def foo(x):\n        a, b, c = x\n        return a + b + c\n    cfoo = jax.jit(foo)\n    a1 = foo(np.arange(3))\n    a2 = cfoo(np.arange(3))\n    self.assertAllClose(a1, a2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "def testFloatIndexingError(self):\n    BAD_INDEX_TYPE_ERROR = 'Indexer must have integer or boolean type, got indexer with type'\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros(2)[0.0]\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros((2, 2))[0, 0.0]\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros((2, 2))[0, 0.0]\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jax.jit(lambda idx: jnp.zeros((2, 2))[idx])((0, 0.0))\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros(2).at[0.0].add(1.0)\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros(2).at[0.0].set(1.0)\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros((2, 2))[jnp.arange(2), 1.0]\n    with self.assertRaisesRegex(TypeError, BAD_INDEX_TYPE_ERROR):\n        jnp.zeros((2, 2))[jnp.arange(2), 1 + 1j]",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@staticmethod\ndef add(dt, x, y):\n    fromscale = partial(jax.lax.convert_element_type, new_dtype=dt.float_dtype)\n    toscale = partial(jax.lax.convert_element_type, new_dtype=dt)\n    return toscale(jax.lax.max(fromscale(x), fromscale(y)))"
+  },
+  {
+    "test_code": "def testIndexingWeakTypes(self):\n    x = lax_internal._convert_element_type(jnp.arange(5), float, weak_type=True)\n    a = x.at[0].set(1.0)\n    self.assertEqual(a.dtype, x.dtype)\n    self.assertTrue(dtypes.is_weakly_typed(a))\n    b = x.at[0].add(1.0)\n    self.assertEqual(b.dtype, x.dtype)\n    self.assertTrue(dtypes.is_weakly_typed(b))\n    c = x.at[0].mul(1.0)\n    self.assertEqual(c.dtype, x.dtype)\n    self.assertTrue(dtypes.is_weakly_typed(c))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@staticmethod\ndef add(dt, x, y):\n    fromscale = partial(jax.lax.convert_element_type, new_dtype=dt.float_dtype)\n    toscale = partial(jax.lax.convert_element_type, new_dtype=dt)\n    return toscale(jax.lax.max(fromscale(x), fromscale(y)))"
+  },
+  {
+    "test_code": "def testSegmentSumBehavior(self):\n    data = np.array([5, 1, 7, 2, 3, 4, 1, 3], dtype=float)\n    segment_ids = np.array([0, 0, 0, 1, 2, 2, 3, 3])\n    ans = jnp.zeros_like(data, shape=np.max(segment_ids) + 1).at[segment_ids].add(data)\n    expected = np.array([13, 2, 7, 4])\n    self.assertAllClose(ans, expected, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@staticmethod\ndef add(dt, x, y):\n    fromscale = partial(jax.lax.convert_element_type, new_dtype=dt.float_dtype)\n    toscale = partial(jax.lax.convert_element_type, new_dtype=dt)\n    return toscale(jax.lax.max(fromscale(x), fromscale(y)))"
+  },
+  {
+    "test_code": "def testIndexingTypePromotion(self):\n\n    def _check(x_type, y_type):\n        x = jnp.arange(5, dtype=x_type)\n        y = y_type(0)\n        out = x.at[0].set(y)\n        self.assertEqual(x.dtype, out.dtype)\n\n    @jtu.ignore_warning(category=NumpyComplexWarning, message='Casting complex values to real')\n    def _check_warns(x_type, y_type, msg):\n        with self.assertWarnsRegex(FutureWarning, msg):\n            _check(x_type, y_type)\n\n    def _check_raises(x_type, y_type, msg):\n        with self.assertRaisesRegex(ValueError, msg):\n            _check(x_type, y_type)\n    _check(jnp.int32, jnp.int32)\n    _check(jnp.float32, jnp.float32)\n    _check(jnp.complex64, jnp.complex64)\n    _check(jnp.int32, int)\n    _check(jnp.float32, int)\n    _check(jnp.float32, float)\n    _check(jnp.complex64, int)\n    _check(jnp.complex64, float)\n    _check(jnp.complex64, complex)\n    msg = 'scatter inputs have incompatible types'\n    with jax.numpy_dtype_promotion('standard'):\n        _check(jnp.int32, jnp.int16)\n        _check(jnp.float32, jnp.float16)\n        _check(jnp.float32, jnp.int32)\n        _check(jnp.complex64, jnp.int32)\n        _check(jnp.complex64, jnp.float32)\n        _check_warns(jnp.int16, jnp.int32, msg)\n        _check_warns(jnp.int32, jnp.float32, msg)\n        _check_warns(jnp.int32, jnp.complex64, msg)\n        _check_warns(jnp.float16, jnp.float32, msg)\n        _check_warns(jnp.float32, jnp.complex64, msg)\n    msg = 'Input dtypes .* have no available implicit dtype promotion path'\n    with jax.numpy_dtype_promotion('strict'):\n        _check_raises(jnp.int32, jnp.int16, msg)\n        _check_raises(jnp.float32, jnp.float16, msg)\n        _check_raises(jnp.float32, jnp.int32, msg)\n        _check_raises(jnp.complex64, jnp.int32, msg)\n        _check_raises(jnp.complex64, jnp.float32, msg)\n        _check_raises(jnp.int16, jnp.int32, msg)\n        _check_raises(jnp.int32, jnp.float32, msg)\n        _check_raises(jnp.int32, jnp.complex64, msg)\n        _check_raises(jnp.float16, jnp.float32, msg)\n        _check_raises(jnp.float32, jnp.complex64, msg)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def _check(obj, out_dtype, weak_type):\n    dtype_reference = np.array(obj, dtype=out_dtype)\n    out = jnp.array(obj)\n    self.assertDtypesMatch(out, dtype_reference)\n    self.assertEqual(dtypes.is_weakly_typed(out), weak_type)\n    out_jit = jax.jit(jnp.array)(obj)\n    self.assertDtypesMatch(out_jit, dtype_reference)\n    self.assertEqual(dtypes.is_weakly_typed(out_jit), weak_type)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def args_maker():\n    \"\"\"Test the set of inputs np.geomspace is well-defined on.\"\"\"\n    start, stop = self._GetArgsMaker(rng, [start_shape, stop_shape], [dtype, dtype])()\n    start, stop = jnp.broadcast_arrays(start, stop)\n    if dtype in complex_dtypes:\n        return (start, stop)\n    start = start * jnp.sign(start) * jnp.sign(stop)\n    return (start, stop)"
+  },
+  {
+    "test_code": "def testUnpacking(self):\n\n    def foo(x):\n        a, b, c = x\n        return a + b + c\n    cfoo = jax.jit(foo)\n    a1 = foo(np.arange(3))\n    a2 = cfoo(np.arange(3))\n    self.assertAllClose(a1, a2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "@jax.jit\ndef foo(x):\n    return jnp.concatenate(x)"
+  },
+  {
+    "test_code": "def testUnpacking(self):\n\n    def foo(x):\n        a, b, c = x\n        return a + b + c\n    cfoo = jax.jit(foo)\n    a1 = foo(np.arange(3))\n    a2 = cfoo(np.arange(3))\n    self.assertAllClose(a1, a2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def foo(x):\n    i = jax.lax.axis_index('x')\n    return jnp.exp(x) + i.astype(x.dtype)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def args_maker():\n    x = jnp.array(rng(shape, dtype))\n    if out_dtype in unsigned_dtypes:\n        x = 10 * jnp.abs(x)\n    return [x]"
+  },
+  {
+    "test_code": "def testUnpacking(self):\n\n    def foo(x):\n        a, b, c = x\n        return a + b + c\n    cfoo = jax.jit(foo)\n    a1 = foo(np.arange(3))\n    a2 = cfoo(np.arange(3))\n    self.assertAllClose(a1, a2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def foo(x):\n\n    def bar(y):\n        return jnp.multiply(x, y)\n    return jvp(bar, (3.0,), (1.0,))[1]"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def fun(x):\n    self.assertEqual(x.dtype, jnp.complex64)\n    out_type = (jax.ShapeDtypeStruct(x.shape[:-1], x.dtype), jax.ShapeDtypeStruct(x.shape, x.dtype))\n    return jax.pure_callback(callback, out_type, x)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneSliceIndex', [IndexSpec(shape=(5,), indexer=slice(1, 3)), IndexSpec(shape=(5, 4), indexer=slice(1, 3))]), ('TwoSliceIndices', [IndexSpec(shape=(5, 4), indexer=(slice(1, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, 2)))]), ('NonUnitStrides', [IndexSpec(shape=(3,), indexer=slice(None, None, -1)), IndexSpec(shape=(3, 3), indexer=slice(0, 3, -2)), IndexSpec(shape=(3, 4, 5), indexer=slice(0, 4, 2))]), ('OnlyStartOrStopDynamic', [IndexSpec(shape=(5, 4), indexer=(slice(None, 3), slice(0, 2))), IndexSpec(shape=(5, 4, 3), indexer=(slice(1, 3), slice(0, None)))])] for shape, indexer, _ in index_specs], dtype=all_dtypes)\ndef testDynamicIndexingWithSlicesErrors(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(x, unpacked_indexer):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    args_maker = lambda: [rng(shape, dtype), unpacked_indexer]\n    self.assertRaises(IndexError, lambda: fun(*args_maker()))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def args_maker():\n    factor_shape = shape[:-1] + (2 * shape[-1],)\n    a = rng(factor_shape, dtype)\n    return [np.matmul(a, jnp.conj(T(a)))]"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer, mode=mode) for mode in MODES for name, index_specs in (STATIC_INDEXING_TESTS if mode == 'promise_in_bounds' else STATIC_INDEXING_TESTS + STATIC_INDEXING_OUT_OF_BOUNDS_TESTS) for shape, indexer, _ in index_specs], dtype=float_dtypes)\ndef testStaticIndexingGrads(self, name, shape, dtype, indexer, mode):\n    rng = jtu.rand_default(self.rng())\n    tol = 0.01 if jnp.finfo(dtype).bits == 32 else None\n    arg = rng(shape, dtype)\n    fun = lambda x: jnp.asarray(x).at[indexer].get(mode=mode, fill_value=7) ** 2\n    check_grads(fun, (arg,), 2, tol, tol, tol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def check_grads(f, args, order, atol=None, rtol=None, eps=None):\n    default_tol = 1e-06 if config.enable_x64.value else 0.01\n    atol = atol or default_tol\n    rtol = rtol or default_tol\n    eps = eps or default_tol\n    jtu.check_jvp(f, partial(jax.jvp, f), args, atol, rtol, eps)\n    jtu.check_vjp(f, partial(jax.vjp, f), args, atol, rtol, eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('OneIntIndex', [IndexSpec(shape=(3,), indexer=1), IndexSpec(shape=(3, 3), indexer=0), IndexSpec(shape=(3, 4, 5), indexer=2), IndexSpec(shape=(3,), indexer=-1), IndexSpec(shape=(3,), indexer=-2)]), ('TwoIntIndices', [IndexSpec(shape=(3, 3), indexer=(2, 1)), IndexSpec(shape=(3, 4, 5), indexer=(1, 2)), IndexSpec(shape=(3, 4, 5), indexer=(-1, 2))]), ('ThreeIntIndices', [IndexSpec((3, 4, 5), indexer=(1, 2, 3))])] for shape, indexer, _ in index_specs], dtype=float_dtypes)\ndef testDynamicIndexingWithIntegersGrads(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    tol = 0.01 if jnp.finfo(dtype).bits == 32 else None\n    unpacked_indexer, pack_indexer = self._ReplaceSlicesWithTuples(indexer)\n\n    @jax.jit\n    def fun(unpacked_indexer, x):\n        indexer = pack_indexer(unpacked_indexer)\n        return x[indexer]\n    arr = rng(shape, dtype)\n    check_grads(partial(fun, unpacked_indexer), (arr,), 2, tol, tol, tol)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def check_grads(f, args, order, atol=None, rtol=None, eps=None):\n    default_tol = 1e-06 if config.enable_x64.value else 0.01\n    atol = atol or default_tol\n    rtol = rtol or default_tol\n    eps = eps or default_tol\n    jtu.check_jvp(f, partial(jax.jvp, f), args, atol, rtol, eps)\n    jtu.check_vjp(f, partial(jax.vjp, f), args, atol, rtol, eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, shape=shape, indexer=indexer) for name, index_specs in [('One1DIntArrayIndex', [IndexSpec(shape=(3,), indexer=np.array([0, 1])), IndexSpec(shape=(3, 3), indexer=np.array([1, 2, 1])), IndexSpec(shape=(3, 4, 5), indexer=np.array([0, 2, 0, 1])), IndexSpec(shape=(3,), indexer=np.array([-1, 1])), IndexSpec(shape=(3,), indexer=np.array([-2, -1]))]), ('One2DIntArrayIndex', [IndexSpec(shape=(3,), indexer=np.array([[0, 0]])), IndexSpec(shape=(3, 3), indexer=np.array([[1, 2, 1], [0, 1, -1]])), IndexSpec(shape=(3, 4, 5), indexer=np.array([[0, 2, 0, 1], [-1, -2, 1, 0]]))]), ('Two1DIntArrayIndicesNoBroadcasting', [IndexSpec(shape=(3, 3), indexer=(np.array([0, 1]), np.array([1, 2]))), IndexSpec(shape=(3, 4, 5), indexer=(np.array([0, 2, 0, 1]), np.array([-1, 0, -1, 2])))]), ('Two1DIntArrayIndicesWithBroadcasting', [IndexSpec(shape=(3, 3), indexer=(np.array([[0, 1]]), np.array([1, 2]))), IndexSpec(shape=(3, 4, 5), indexer=(np.array([[0, 2, 0, 1]]), np.array([-1, 0, -1, 2])))]), ('TupleOfPythonIntsAndIntArrays', [IndexSpec(shape=(3, 4, 5), indexer=(0, np.array([0, 1]))), IndexSpec(shape=(3, 4, 5), indexer=(0, 1, np.array([[2, 3, 0, 3]])))]), ('TupleOfListsOfPythonIntsAndIntArrays', [IndexSpec(shape=(3, 4, 5), indexer=([0, 1], np.array([0]))), IndexSpec(shape=(3, 4, 5), indexer=([[0], [-1]], np.array([[2, 3, 0, 3]])))])] for shape, indexer, _ in index_specs], dtype=float_dtypes)\ndef testAdvancedIntegerIndexingGrads(self, name, shape, dtype, indexer):\n    rng = jtu.rand_default(self.rng())\n    tol = 0.01 if jnp.finfo(dtype).bits == 32 else None\n    arg = rng(shape, dtype)\n    fun = lambda x: jnp.asarray(x)[indexer]\n    check_grads(fun, (arg,), 2, tol, tol, eps=1.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def check_grads(f, args, order, atol=None, rtol=None, eps=None):\n    default_tol = 1e-06 if config.enable_x64.value else 0.01\n    atol = atol or default_tol\n    rtol = rtol or default_tol\n    eps = eps or default_tol\n    jtu.check_jvp(f, partial(jax.jvp, f), args, atol, rtol, eps)\n    jtu.check_vjp(f, partial(jax.vjp, f), args, atol, rtol, eps)"
+  },
+  {
+    "test_code": "@jtu.sample_product([dict(name=name, mode=mode, shape=shape, indexer=indexer, update_shape=update_shape) for mode in [None] + MODES for name, index_specs in (STATIC_INDEXING_TESTS if mode == 'promise_in_bounds' else STATIC_INDEXING_TESTS + STATIC_INDEXING_OUT_OF_BOUNDS_TESTS) for shape, indexer, index_shape in index_specs for update_shape in _broadcastable_shapes(index_shape)], [dict(op=op, dtype=dtype, update_dtype=update_dtype) for op in [UpdateOps.ADD, UpdateOps.SUB, UpdateOps.MUL, UpdateOps.UPDATE] for dtype in float_dtypes for update_dtype in _compatible_dtypes(op, dtype, inexact=True)])\ndef testStaticIndexingGrads(self, name, shape, dtype, update_shape, update_dtype, indexer, op, mode):\n    rng = jtu.rand_default(self.rng())\n    jax_fn = lambda x, y: UpdateOps.jax_fn(op, indexer, x, y, mode=mode, unique_indices=True)\n    x = rng(shape, dtype)\n    y = rng(update_shape, update_dtype)\n    with jtu.strict_promotion_if_dtypes_match([dtype, update_dtype]):\n        check_grads(jax_fn, (x, y), 2, rtol=0.001, atol=0.001, eps=1.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def check_grads(f, args, order, atol=None, rtol=None, eps=None):\n    default_tol = 1e-06 if config.enable_x64.value else 0.01\n    atol = atol or default_tol\n    rtol = rtol or default_tol\n    eps = eps or default_tol\n    jtu.check_jvp(f, partial(jax.jvp, f), args, atol, rtol, eps)\n    jtu.check_vjp(f, partial(jax.vjp, f), args, atol, rtol, eps)"
+  },
+  {
+    "test_code": "@parameterized.parameters(itertools.chain.from_iterable((jtu.sample_product_testcases([dict(name=name, unique_indices=unique_indices, shape=shape, indexer=indexer, update_shape=update_shape) for name, index_specs in (ADVANCED_INDEXING_TESTS_NO_REPEATS if unique_indices else ADVANCED_INDEXING_TESTS) for shape, indexer, index_shape in index_specs for update_shape in _broadcastable_shapes(index_shape)], [dict(op=op, dtype=dtype, update_dtype=update_dtype) for op in ([UpdateOps.ADD, UpdateOps.SUB, UpdateOps.MUL, UpdateOps.UPDATE] if unique_indices else [UpdateOps.ADD, UpdateOps.SUB]) for dtype in float_dtypes for update_dtype in _compatible_dtypes(op, dtype, inexact=True)]) for unique_indices in [False, True])))\ndef testAdvancedIndexingGrads(self, name, shape, dtype, update_shape, update_dtype, indexer, op, unique_indices):\n    rng = jtu.rand_default(self.rng())\n    jax_fn = lambda x, y: UpdateOps.jax_fn(op, indexer, x, y, unique_indices=unique_indices)\n    x = rng(shape, dtype)\n    y = rng(update_shape, update_dtype)\n    with jtu.strict_promotion_if_dtypes_match([dtype, update_dtype]):\n        check_grads(jax_fn, (x, y), 2, rtol=0.001, atol=0.001, eps=1.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_indexing_test.py",
+    "function": "def check_grads(f, args, order, atol=None, rtol=None, eps=None):\n    default_tol = 1e-06 if config.enable_x64.value else 0.01\n    atol = atol or default_tol\n    rtol = rtol or default_tol\n    eps = eps or default_tol\n    jtu.check_jvp(f, partial(jax.jvp, f), args, atol, rtol, eps)\n    jtu.check_vjp(f, partial(jax.vjp, f), args, atol, rtol, eps)"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "test_code": "def test_eviction(self):\n    cache = LRUCache(self.name, max_size=2)\n    cache.put('a', b'a')\n    cache.put('b', b'b')\n    time.sleep(1)\n    cache.get('b')\n    cache.put('c', b'c')\n    self.assertCacheKeys(('b', 'c'))\n    time.sleep(1)\n    cache.get('b')\n    cache.put('d', b'd')\n    self.assertCacheKeys(('b', 'd'))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lru_cache_test.py",
+    "function": "@colocated_python.colocated_python\ndef sleep(x: jax.Array) -> jax.Array:\n    time.sleep(5)\n    return x"
+  },
+  {
+    "test_code": "def test_eviction_with_empty_value(self):\n    cache = LRUCache(self.name, max_size=1)\n    cache.put('a', b'a')\n    cache.put('b', b'')\n    self.assertCacheKeys(('a', 'b'))\n    time.sleep(1)\n    cache.get('a')\n    cache.put('c', b'c')\n    self.assertCacheKeys(('c',))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lru_cache_test.py",
+    "function": "@colocated_python.colocated_python\ndef sleep(x: jax.Array) -> jax.Array:\n    time.sleep(5)\n    return x"
+  },
+  {
+    "test_code": "def test_existing_cache_dir(self):\n    cache = LRUCache(self.name, max_size=2)\n    cache.put('a', b'a')\n    del cache\n    cache = LRUCache(self.name, max_size=2)\n    self.assertEqual(cache.get('a'), b'a')\n    cache.put('b', b'b')\n    time.sleep(1)\n    cache.get('a')\n    cache.put('c', b'c')\n    self.assertCacheKeys(('a', 'c'))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lru_cache_test.py",
+    "function": "@colocated_python.colocated_python\ndef sleep(x: jax.Array) -> jax.Array:\n    time.sleep(5)\n    return x"
+  }
+]

@@ -1,0 +1,398 @@
+[
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters('eager', 'on_wait')\ndef test_race_detection(self, dma_execution_mode):\n\n    def kernel_without_race(x_ref, o_ref, t_ref, sem):\n        copy = pltpu.make_async_copy(x_ref, t_ref, sem)\n        copy.start()\n        copy.wait()\n        o_ref[...] = t_ref[...] + 1.0\n\n    def kernel_with_race(x_ref, o_ref, t_ref, sem):\n        copy = pltpu.make_async_copy(x_ref, t_ref, sem)\n        copy.start()\n        o_ref[...] = t_ref[...] + 1.0\n        copy.wait()\n    x = jnp.zeros((8, 128), jnp.float32)\n    y = pl.pallas_call(kernel_without_race, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), in_specs=[pl.BlockSpec(memory_space=pltpu.TPUMemorySpace.ANY)], scratch_shapes=[pltpu.VMEM(x.shape, x.dtype), pltpu.SemaphoreType.DMA], interpret=mosaic_interpret.TPUInterpretParams(detect_races=True, dma_execution_mode=dma_execution_mode))(x).block_until_ready()\n    self.assertFalse(mosaic_interpret.races.races_found)\n    np.testing.assert_allclose(y, x + 1.0)\n    pl.pallas_call(kernel_with_race, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), in_specs=[pl.BlockSpec(memory_space=pltpu.TPUMemorySpace.ANY)], scratch_shapes=[pltpu.VMEM(x.shape, x.dtype), pltpu.SemaphoreType.DMA], interpret=mosaic_interpret.TPUInterpretParams(detect_races=True, dma_execution_mode=dma_execution_mode))(x).block_until_ready()\n    self.assertTrue(mosaic_interpret.races.races_found)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_matmul_example(self):\n\n    def matmul_kernel(x_ref, y_ref, z_ref):\n        z_ref[...] = x_ref[...] @ y_ref[...]\n\n    @jax.jit\n    def matmul(x: jax.Array, y: jax.Array):\n        return pl.pallas_call(matmul_kernel, out_shape=jax.ShapeDtypeStruct((x.shape[0], y.shape[1]), x.dtype), grid=(2, 2), in_specs=[pl.BlockSpec((x.shape[0] // 2, x.shape[1]), lambda i, j: (i, 0)), pl.BlockSpec((y.shape[0], y.shape[1] // 2), lambda i, j: (0, j))], out_specs=pl.BlockSpec((x.shape[0] // 2, y.shape[1] // 2), lambda i, j: (i, j)), interpret=mosaic_interpret.TPUInterpretParams())(x, y)\n    k1, k2 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k1, (1024, 1024))\n    y = jax.random.normal(k2, (1024, 1024))\n    z = matmul(x, y)\n    np.testing.assert_allclose(z, x @ y, atol=0.0001)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def split(self) -> jax.Array:\n    key = jax_getattr(self, 'key')\n    new_key, returned_key = jax.random.split(key)\n    jax_setattr(self, 'key', new_key)\n    return returned_key"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(pred):\n\n    def true_fun():\n        x_ref[()] = 1.0\n\n    def false_fun():\n        x_ref[()] = 2.0\n    jax.lax.cond(pred, true_fun, false_fun)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@functools.partial(pjit.pjit, in_shardings=jax.sharding.PartitionSpec(None), out_shardings=jax.sharding.PartitionSpec('x'))\ndef f():\n    return jnp.zeros([32, 10])"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(x, r):\n    x = x.at[:, 0].set(x[:, 0] / r)\n    return x"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@partial(jnp.vectorize, excluded={1})\ndef f(x, y):\n    assert x.ndim == 0\n    assert y == 'foo'\n    return x"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.pmap\ndef f(x, y):\n    return x * y"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(x, y):\n    return jax.vmap(shard_alike, in_axes=(0, 1))(x, y)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f():\n    return random.uniform(self.make_key(3), (308000000, 128), dtype=jnp.bfloat16)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    return jax.lax.convert_element_type(x, FooTy())"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    y = x * jnp.arange(3.0).reshape((1, 3))\n    return jnp.take_along_axis(y, idx, -1).sum()"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('i'), out_specs=P())\ndef f(x):\n    return jax.lax.psum(((w * x) ** 2).sum(), 'i')"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(seed):\n    key = jax.random.key(seed)\n    return jax.random.uniform(key) + jax.random.normal(key)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x_ref):\n    ones = jnp.ones_like(x_ref)[slc]\n    ref_primitives.ref_addupdate(x_ref, slc, ones)\n    x1 = ref_primitives.ref_get(x_ref, slc)\n    x2 = x1 + ones\n    ref_primitives.ref_set(x_ref, slc, x2)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(self, ys):\n    return lax.fori_loop(0, 10, loop_body, jnp.ones(4, np.float32))"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(hx, _):\n    hx = jax.nn.sigmoid(hx + a)\n    return (hx, None)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    u, s, v = jnp.linalg.svd(a + x * b, full_matrices=full_matrices, compute_uv=compute_uv)\n    vdiag = jnp.vectorize(jnp.diag, signature='(k)->(k,k)')\n    return jnp.matmul(jnp.matmul(u, vdiag(s).astype(u.dtype)), v).real"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.profiler.annotate_function\ndef f(x, *, name):\n    return x + 2 * len(name)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@partial(jax.jit, out_shardings=out_layout, donate_argnums=0)\ndef f(x):\n    return x * 2"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(z):\n    x_re = jnp.concatenate([jnp.real(z), jnp.imag(z)])\n    return f_re(x_re)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@run_state\ndef f(x_ref):\n    x = x_ref[...]\n\n    def _body(ref):\n        ref[...] = jnp.sin(ref[...])\n    x = run_state(_body)(x)\n    x_ref[...] = x"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@functools.partial(new_checkpoint, policy=policy)\ndef f(x):\n    x = jnp.einsum('ij,jk->ik', x, x, precision=lax.Precision.HIGHEST)\n    x = jnp.sin(x)\n    x = jnp.einsum('ij,jk->ik', x, x, precision=lax.Precision.HIGHEST)\n    x = jnp.sin(x)\n    x = jnp.einsum('ij,jk->ik', x, x, precision=lax.Precision.HIGHEST)\n    x = jnp.sin(x)\n    x = jnp.sum(x)\n    return x"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@functools.partial(jax.jit, static_argnames=['c'])\ndef f(x, *, c):\n    return c * jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x, y):\n\n    @partial(map_fun, in_axes=1, out_axes=2)\n    def h(y):\n        return jnp.sin(x + y)\n    return h(y).sum()"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(carry, x):\n    return (carry + jax.lax.psum(jnp.sum(x), axis_name='x'), None)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(k1, k2, k3, k4):\n    batch_size = 1\n    seq_len = 1\n    input_size = 1\n    hidden_size = 1\n    bidirectional = False\n    num_directions = 2 if bidirectional else 1\n    num_layers = 1\n    x = jax.random.normal(k1, (batch_size, seq_len, input_size), dtype=jnp.float32)\n    h_0 = jax.random.normal(k2, (num_directions * num_layers, batch_size, hidden_size), dtype=jnp.float32)\n    c_0 = jax.random.normal(k3, (num_directions * num_layers, batch_size, hidden_size), dtype=jnp.float32)\n    seq_lengths = jnp.ones((batch_size,), dtype=jnp.int32) * seq_len\n    weights = rnn.init_lstm_weight(k4, input_size, hidden_size, num_layers, bidirectional)\n    return rnn.lstm(x, h_0, c_0, weights, seq_lengths=seq_lengths, input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, dropout=False, bidirectional=bidirectional)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@colocated_python.colocated_python\ndef f(x):\n    out_arrays = []\n    for shard in x.addressable_shards:\n        np_array = jax.device_get(shard.data)\n        input_ints = struct.unpack('<ii', base64.b64decode(np_array[0].encode('ascii')))\n        output_string = base64.b64encode(struct.pack('<ii', input_ints[0] + 1, input_ints[1] + 1)).decode('ascii')\n        out_np_array = np.array([output_string], dtype=np.dtypes.StringDType())\n        out_arrays.append(jax.device_put(out_np_array, device=shard.device))\n    out = jax.make_array_from_single_device_arrays(sharding=x.sharding, shape=x.shape, arrays=out_arrays)\n    return out"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x, y):\n    s = jit(jnp.sin)(x)\n    return jnp.sin(s) + jnp.cos(y)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@partial(jax.jit, in_shardings=NamedSharding(mesh, PartitionSpec('x')), out_shardings=NamedSharding(mesh, PartitionSpec('x')), compiler_options=compiler_options)\ndef f(x):\n    agg = x\n    for _ in range(its):\n        agg = agg @ x\n    return agg"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(_, y):\n    input_effect(y, index=0)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@checkify.checkify\ndef f():\n    checkify.check(x > 0, 'must be positive!')\n    return jnp.log(x)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(z):\n    y = odeint(dz_dt, z, jnp.arange(10.0))\n    return jnp.sum(y)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    return x.at[1].apply(jax.numpy.sin)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(x):\n    bits = prng.threefry_random_bits(jnp.array([0, 0], dtype='uint32'), 32, x.shape)\n    return bits + x"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@partial(jax.jit, in_shardings=NamedSharding(mesh, P('x')), out_shardings=NamedSharding(mesh, P('x')))\ndef f(x, y):\n    z = x @ y\n    return z @ y"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    debugging.inspect_array_sharding(x, callback=_cb)\n    return jnp.square(x)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@partial(jax.jit, inline=True)\ndef f(x):\n    return lax.add(x, 3)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f():\n    key = jax.random.key(0)\n    return jax.random.bits(key) + jax.random.bits(key)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(x):\n    nonlocal num_traces\n    num_traces += 1\n    return x + x"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(a, b):\n    with set_xla_metadata(key2='val2'):\n        return a + b"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(n):\n    token = lax.create_token(n)\n    token = lax.fori_loop(0, n, doubler, token)\n    return n"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    return jnp.full_like(x, 2.0)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(b):\n    return jax.scipy.sparse.linalg.cg(matvec, (b, b))[0]"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x, y):\n\n    @jax.jit\n    def g(x):\n        return x * y\n    return g(x) + g(y)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(Xtree, y):\n    if deep:\n        out = Xtree['deep']['X'] @ y\n    else:\n        out = Xtree['X'] @ y\n    if bias:\n        out += Xtree['list'][1][0]\n    out = jnp.sum(out)\n    if has_aux:\n        return (out, {'y': y.shape})\n    else:\n        return out"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    y = jnp.array([2, 5])\n    return lax.rev(x * y, (0,))"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    return jnp.argmax(x)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return x + c"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x):\n    return jnp.cos(jnp.sum(jnp.exp(-x)) ** 2)"
+  },
+  {
+    "test_code": "def test_dynamic_grid(self):\n\n    def kernel(x_ref, o_ref):\n        o_ref[...] = x_ref[...]\n    iters = jax.random.randint(jax.random.key(0), (), 10, 20, dtype=jnp.int32)\n\n    @jax.jit\n    def f(x):\n        return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype), grid=(iters,), in_specs=(pl.BlockSpec(x.shape, lambda i: (0, 0)),), out_specs=pl.BlockSpec(x.shape, lambda i: (0, 0)), interpret=mosaic_interpret.TPUInterpretParams())(x)\n    x = jnp.arange(32 * 128.0).reshape((32, 128))\n    y = f(x)\n    np.testing.assert_allclose(y, x)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def f(x, y):\n    z = jax.numpy.add(x, y)\n    return self.pallas_call(kernel, grid=(3,), in_specs=[pl.BlockSpec((1, 128, 128), lambda i: (i, 0, 0))], out_specs=pl.BlockSpec((1, 128, 128), lambda i: (i, 0, 0)), out_shape=x, compiler_params=pltpu.TPUCompilerParams(allow_input_fusion=[True]))(z)"
+  },
+  {
+    "test_code": "def test_matmul_example(self):\n\n    def matmul_kernel(x_ref, y_ref, z_ref):\n        z_ref[...] = x_ref[...] @ y_ref[...]\n\n    @jax.jit\n    def matmul(x: jax.Array, y: jax.Array):\n        return pl.pallas_call(matmul_kernel, out_shape=jax.ShapeDtypeStruct((x.shape[0], y.shape[1]), x.dtype), grid=(2, 2), in_specs=[pl.BlockSpec((x.shape[0] // 2, x.shape[1]), lambda i, j: (i, 0)), pl.BlockSpec((y.shape[0], y.shape[1] // 2), lambda i, j: (0, j))], out_specs=pl.BlockSpec((x.shape[0] // 2, y.shape[1] // 2), lambda i, j: (i, j)), interpret=mosaic_interpret.TPUInterpretParams())(x, y)\n    k1, k2 = jax.random.split(jax.random.key(0))\n    x = jax.random.normal(k1, (1024, 1024))\n    y = jax.random.normal(k2, (1024, 1024))\n    z = matmul(x, y)\n    np.testing.assert_allclose(z, x @ y, atol=0.0001)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/pallas/tpu_pallas_interpret_test.py",
+    "function": "def matmul(impl, x, y):\n    z = impl(x, y)\n    return jnp.exp(jnp.tanh(z)).astype(x.dtype)"
+  }
+]

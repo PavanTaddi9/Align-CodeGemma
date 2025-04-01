@@ -1,0 +1,332 @@
+[
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(n, x):\n    return lax.broadcast_in_dim(x, (n,), ())"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(n, x):\n    return lax.broadcast_in_dim(x, (n,), ())"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(n, x):\n    return lax.broadcast_in_dim(x, (n,), ())"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.vmap\ndef fn(a, b):\n    m1, v1 = a\n    m2, v2 = b\n    return (m1 + m2, jsp.linalg.solve(m1, v2) + jsp.linalg.solve(m2, v1))"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.vmap\ndef fn(a, b):\n    m1, v1 = a\n    m2, v2 = b\n    return (m1 + m2, jsp.linalg.solve(m1, v2) + jsp.linalg.solve(m2, v1))"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.vmap\ndef fn(a, b):\n    m1, v1 = a\n    m2, v2 = b\n    return (m1 + m2, jsp.linalg.solve(m1, v2) + jsp.linalg.solve(m2, v1))"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@custom_transpose_with_example_out(jnp.ones(2))\ndef fn(r, x):\n    tracer_spy.append(r)\n    tracer_spy.append(x['c'])\n    return dict(b=x['c'] / r)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@custom_transpose_with_example_out(jnp.ones(2))\ndef fn(r, x):\n    tracer_spy.append(r)\n    tracer_spy.append(x['c'])\n    return dict(b=x['c'] / r)"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@custom_transpose_with_example_out(jnp.ones(2))\ndef fn(r, x):\n    tracer_spy.append(r)\n    tracer_spy.append(x['c'])\n    return dict(b=x['c'] / r)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(data, segment_ids):\n    return jax.ops.segment_sum(data, segment_ids, num_segments).sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(data, segment_ids):\n    return jax.ops.segment_sum(data, segment_ids, num_segments).sum()"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(data, segment_ids):\n    return jax.ops.segment_sum(data, segment_ids, num_segments).sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@compute_on('device_host')\ndef fn():\n    k = jax.random.key(0)\n    return jax.nn.initializers.lecun_normal()(k, (2, 2), jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@compute_on('device_host')\ndef fn():\n    k = jax.random.key(0)\n    return jax.nn.initializers.lecun_normal()(k, (2, 2), jnp.float32)"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@compute_on('device_host')\ndef fn():\n    k = jax.random.key(0)\n    return jax.nn.initializers.lecun_normal()(k, (2, 2), jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(indices):\n    return jnp.equal(indices, jnp.arange(3)).astype(jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(indices):\n    return jnp.equal(indices, jnp.arange(3)).astype(jnp.float32)"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(indices):\n    return jnp.equal(indices, jnp.arange(3)).astype(jnp.float32)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(key):\n    x = jnp.arange(113003)\n    x = with_sharding_constraint(x, P('data'))\n    y = jnp.arange(65536)\n    y = with_sharding_constraint(y.reshape(-1), P('data'))\n    z = jnp.concatenate([x, y], axis=0)\n    z = with_sharding_constraint(z, P('data'))\n    return (x, y, z)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(key):\n    x = jnp.arange(113003)\n    x = with_sharding_constraint(x, P('data'))\n    y = jnp.arange(65536)\n    y = with_sharding_constraint(y.reshape(-1), P('data'))\n    z = jnp.concatenate([x, y], axis=0)\n    z = with_sharding_constraint(z, P('data'))\n    return (x, y, z)"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(key):\n    x = jnp.arange(113003)\n    x = with_sharding_constraint(x, P('data'))\n    y = jnp.arange(65536)\n    y = with_sharding_constraint(y.reshape(-1), P('data'))\n    z = jnp.concatenate([x, y], axis=0)\n    z = with_sharding_constraint(z, P('data'))\n    return (x, y, z)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.vmap\ndef fn(x):\n    R1 = jnp.array([[x[0], 0, 0], [0, x[0], 0], [0, 0, x[0]]])\n    R2 = jnp.array([[x[0], 0, 0], [0, x[1], 0], [0, 0, x[2]]])\n    H = jnp.eye(4)\n    H = H.at[:3, :3].set(R2.T)\n    pos = H @ jnp.concatenate([x, jnp.array([1.0])])\n    return (pos, R1)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.vmap\ndef fn(x):\n    R1 = jnp.array([[x[0], 0, 0], [0, x[0], 0], [0, 0, x[0]]])\n    R2 = jnp.array([[x[0], 0, 0], [0, x[1], 0], [0, 0, x[2]]])\n    H = jnp.eye(4)\n    H = H.at[:3, :3].set(R2.T)\n    pos = H @ jnp.concatenate([x, jnp.array([1.0])])\n    return (pos, R1)"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.vmap\ndef fn(x):\n    R1 = jnp.array([[x[0], 0, 0], [0, x[0], 0], [0, 0, x[0]]])\n    R2 = jnp.array([[x[0], 0, 0], [0, x[1], 0], [0, 0, x[2]]])\n    H = jnp.eye(4)\n    H = H.at[:3, :3].set(R2.T)\n    pos = H @ jnp.concatenate([x, jnp.array([1.0])])\n    return (pos, R1)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(x: jax.Array):\n    checkify.check(jnp.all(x > 0), 'x must be positive')\n    return x + 1"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(x: jax.Array):\n    checkify.check(jnp.all(x > 0), 'x must be positive')\n    return x + 1"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(x: jax.Array):\n    checkify.check(jnp.all(x > 0), 'x must be positive')\n    return x + 1"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(x):\n    return x * x"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(x):\n    return x * x"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.jit\ndef fn(x):\n    return x * x"
+  },
+  {
+    "test_code": "def test_no_recompile(self):\n    x1 = jnp.array([1, 2])\n    x2 = jnp.array([3, 4])\n    x_flat1, unravel1 = flatten_util.ravel_pytree((x1, x2))\n    x_flat2, unravel2 = flatten_util.ravel_pytree((x1, x2))\n    num_traces = 0\n\n    def run(flat, unravel):\n        nonlocal num_traces\n        num_traces += 1\n        flat = flat + 1\n        return unravel(flat)\n    run = jax.jit(run, static_argnums=1)\n    run(x_flat1, unravel1)\n    run(x_flat2, unravel2)\n    self.assertEqual(num_traces, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def run(pos):\n    maxiter = 1000\n\n    def cond(v):\n        return v[0] < maxiter\n\n    def step(v):\n        i, pos = v\n        jax.debug.callback(print_it, i + 1, maxiter)\n        return (i + 1, pos + 1)\n    val = (jnp.array(0), pos)\n    val = jax.lax.while_loop(cond, step, val)\n    return val[1]"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@custom_transpose(jnp.ones(2))\ndef fn(r, x):\n    return x / r"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@custom_transpose(jnp.ones(2))\ndef fn(r, x):\n    return x / r"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@custom_transpose(jnp.ones(2))\ndef fn(r, x):\n    return x / r"
+  },
+  {
+    "test_code": "def test_different_types(self):\n    e, = prefix_errors((1, 2), [1, 2])\n    expected = 'pytree structure error: different types at key path\\n    in_axes'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_types_nested(self):\n    e, = prefix_errors(((1,), (2,)), ([3], (4,)))\n    expected = 'pytree structure error: different types at key path\\n    in_axes\\\\[0\\\\]'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_num_children_tuple(self):\n    e, = prefix_errors((1,), (2, 3))\n    expected = 'pytree structure error: different lengths of tuple at key path\\n    in_axes'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_num_children_list(self):\n    e, = prefix_errors([1], [2, 3])\n    expected = 'pytree structure error: different lengths of list at key path\\n    in_axes'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_num_children_generic(self):\n    e, = prefix_errors({'hi': 1}, {'hi': 2, 'bye': 3})\n    expected = 'pytree structure error: different numbers of pytree children at key path\\n    in_axes'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_num_children_nested(self):\n    e, = prefix_errors([[1]], [[2, 3]])\n    expected = 'pytree structure error: different lengths of list at key path\\n    in_axes\\\\[0\\\\]'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_num_children_print_key_diff(self):\n    e, = prefix_errors({'a': 1}, {'a': 2, 'b': 3})\n    expected = 'so the symmetric difference on key sets is\\n    b'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_metadata(self):\n    e, = prefix_errors({1: 2}, {3: 4})\n    expected = 'pytree structure error: different pytree metadata at key path\\n    in_axes'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_metadata_nested(self):\n    e, = prefix_errors([{1: 2}], [{3: 4}])\n    expected = 'pytree structure error: different pytree metadata at key path\\n    in_axes\\\\[0\\\\]'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_fallback_keypath(self):\n    e, = prefix_errors(Special(1, [2]), Special(3, 4))\n    expected = 'pytree structure error: different types at key path\\n    in_axes\\\\[<flat index 1>\\\\]'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_different_structure_no_children(self):\n    e, = prefix_errors({}, {'a': []})\n    expected = 'pytree structure error: different numbers of pytree children at key path\\n    in_axes'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_curly_braces_in_keys_no_children(self):\n    e, = prefix_errors({'{oops}': {}}, {})\n    expected = 'pytree structure error: different numbers of pytree children at key path\\n    in_axes'\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_curly_braces_in_keys_list_length(self):\n    e, = prefix_errors({'{oops}': []}, {'{oops}': [{}]})\n    expected = \"pytree structure error: different lengths of list at key path\\n    in_axes\\\\['{oops}'\\\\]\"\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_curly_braces_in_keys_different_lengths(self):\n    e, = prefix_errors({'{oops}': {}}, {'{oops}': 1})\n    expected = \"pytree structure error: different types at key path\\n    in_axes\\\\['{oops}'\\\\]\"\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_curly_braces_in_keys_different_metadata(self):\n    e, = prefix_errors({'{oops}': {'{a}': 1}}, {'{oops}': {'{b}': 1}})\n    expected = \"pytree structure error: different pytree metadata at key path\\n    in_axes\\\\['{oops}'\\\\]\"\n    with self.assertRaisesRegex(ValueError, expected):\n        raise e('in_axes')",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def e(x):\n    return jnp.sin(jnp.cos(x))"
+  },
+  {
+    "test_code": "def test_no_recompile(self):\n    x1 = jnp.array([1, 2])\n    x2 = jnp.array([3, 4])\n    x_flat1, unravel1 = flatten_util.ravel_pytree((x1, x2))\n    x_flat2, unravel2 = flatten_util.ravel_pytree((x1, x2))\n    num_traces = 0\n\n    def run(flat, unravel):\n        nonlocal num_traces\n        num_traces += 1\n        flat = flat + 1\n        return unravel(flat)\n    run = jax.jit(run, static_argnums=1)\n    run(x_flat1, unravel1)\n    run(x_flat2, unravel2)\n    self.assertEqual(num_traces, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def run(primal_ins, cotangent_outs):\n    primal_outs, vjp = jax.vjp(g, *primal_ins)\n    cotangent_ins = vjp(cotangent_outs)\n    return (primal_outs, cotangent_ins)"
+  },
+  {
+    "test_code": "def test_tree_map_with_path(self):\n    func = lambda kp, x, y: (sum((k.idx for k in kp)), x + y)\n    obj = [1, 2, (3, 4)]\n    obj2 = [5, 6, (7, 8)]\n    self.assertEqual(jax.tree.map_with_path(func, obj, obj2), tree_util.tree_map_with_path(func, obj, obj2))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.custom_jvp\ndef sum(x):\n    return jnp.sum(x, axis=0)"
+  },
+  {
+    "test_code": "def test_tree_map_with_path_is_leaf(self):\n    func = lambda kp, x, y: (sum((k.idx for k in kp)), x + y)\n    obj = [1, 2, (3, 4)]\n    obj2 = [5, 6, (7, 8)]\n    is_leaf = lambda x: isinstance(x, tuple)\n    self.assertEqual(jax.tree.map_with_path(func, obj, obj2, is_leaf=is_leaf), tree_util.tree_map_with_path(func, obj, obj2, is_leaf=is_leaf))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "@jax.custom_jvp\ndef sum(x):\n    return jnp.sum(x, axis=0)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2),), (StaticTuple((2, None)),), (StaticDict(foo=2),))\ndef test_trace_just_once_with_same_static(self, y):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y)\n    fn(3, y)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(*args, split_transpose=False):\n    v, fn_transpose = jax.vjp(partial(loss, split_transpose=split_transpose), *args)\n    grads = fn_transpose(1.0)\n    return (*grads, v)"
+  },
+  {
+    "test_code": "@parameterized.parameters((StaticInt(2), StaticInt(4)), (StaticTuple((2, None)), StaticTuple((4, None))), (StaticDict(foo=2), StaticDict(foo=4)))\ndef test_trace_twice_with_different_static(self, y1, y2):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: StaticInt):\n        nonlocal num_called\n        num_called += 1\n        unstatic_y = type(static_y).__base__(static_y)\n        [y] = tree_util.tree_leaves(unstatic_y)\n        return x + y\n    fn(1, y1)\n    fn(3, y2)\n    self.assertEqual(num_called, 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(*args, split_transpose=False):\n    v, fn_transpose = jax.vjp(partial(loss, split_transpose=split_transpose), *args)\n    grads = fn_transpose(1.0)\n    return (*grads, v)"
+  },
+  {
+    "test_code": "def test_trace_just_once_if_static_looks_constant(self):\n    num_called = 0\n\n    @jax.jit\n    def fn(x: int, static_y: BlackBox):\n        nonlocal num_called\n        num_called += 1\n        return x + static_y.value\n    self.assertEqual(fn(1, BlackBox(2)), 3)\n    self.assertEqual(fn(3, BlackBox(1)), 5)\n    self.assertEqual(num_called, 1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/tree_util_test.py",
+    "function": "def fn(*args, split_transpose=False):\n    v, fn_transpose = jax.vjp(partial(loss, split_transpose=split_transpose), *args)\n    grads = fn_transpose(1.0)\n    return (*grads, v)"
+  }
+]

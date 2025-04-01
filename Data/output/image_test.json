@@ -1,0 +1,44 @@
+[
+  {
+    "test_code": "@jtu.sample_product([dict(image_shape=image_shape, target_shape=target_shape) for image_shape, target_shape in [([1], [0]), ([5, 5], [5, 0]), ([5, 5], [0, 1]), ([5, 5], [0, 0])]], dtype=[np.float32], method=['nearest', 'linear', 'lanczos3', 'lanczos5', 'cubic'], antialias=[False, True])\ndef testResizeEmpty(self, dtype, image_shape, target_shape, method, antialias):\n    image = np.ones(image_shape, dtype)\n    out = jax.image.resize(image, shape=target_shape, method=method, antialias=antialias)\n    self.assertArraysEqual(out, jnp.zeros(target_shape, dtype))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/image_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def testScaleAndTranslateNegativeDims(self):\n    data = jnp.full((3, 3), 0.5)\n    actual = jax.image.scale_and_translate(data, (5, 5), (-2, -1), jnp.ones(2), jnp.zeros(2), 'linear')\n    expected = jax.image.scale_and_translate(data, (5, 5), (0, 1), jnp.ones(2), jnp.zeros(2), 'linear')\n    self.assertAllClose(actual, expected)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/image_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=[np.float32], target_shape=_RESIZE_GRADIENTS_SHAPES, image_shape=_RESIZE_GRADIENTS_SHAPES, method=['bilinear', 'lanczos3', 'lanczos5', 'bicubic'], antialias=[False, True])\ndef testResizeGradients(self, dtype, image_shape, target_shape, method, antialias):\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: (rng(image_shape, dtype),)\n    jax_fn = partial(image.resize, shape=target_shape, method=method, antialias=antialias)\n    jtu.check_grads(jax_fn, args_maker(), order=2, rtol=0.01, eps=1.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/image_test.py",
+    "function": "def args_maker():\n    \"\"\"Test the set of inputs np.geomspace is well-defined on.\"\"\"\n    start, stop = self._GetArgsMaker(rng, [start_shape, stop_shape], [dtype, dtype])()\n    start, stop = jnp.broadcast_arrays(start, stop)\n    if dtype in complex_dtypes:\n        return (start, stop)\n    start = start * jnp.sign(start) * jnp.sign(stop)\n    return (start, stop)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=[np.float32], target_shape=_RESIZE_GRADIENTS_SHAPES, image_shape=_RESIZE_GRADIENTS_SHAPES, method=['bilinear', 'lanczos3', 'lanczos5', 'bicubic'], antialias=[False, True])\ndef testResizeGradients(self, dtype, image_shape, target_shape, method, antialias):\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: (rng(image_shape, dtype),)\n    jax_fn = partial(image.resize, shape=target_shape, method=method, antialias=antialias)\n    jtu.check_grads(jax_fn, args_maker(), order=2, rtol=0.01, eps=1.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/image_test.py",
+    "function": "def args_maker():\n    \"\"\"Test the set of inputs np.geomspace is well-defined on.\"\"\"\n    start, stop = self._GetArgsMaker(rng, [start_shape, stop_shape], [dtype, dtype])()\n    start, stop = jnp.broadcast_arrays(start, stop)\n    if dtype in complex_dtypes:\n        return (start, stop)\n    start = start * jnp.sign(start) * jnp.sign(stop)\n    return (start, stop)"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=[np.float32], target_shape=_RESIZE_GRADIENTS_SHAPES, image_shape=_RESIZE_GRADIENTS_SHAPES, method=['bilinear', 'lanczos3', 'lanczos5', 'bicubic'], antialias=[False, True])\ndef testResizeGradients(self, dtype, image_shape, target_shape, method, antialias):\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: (rng(image_shape, dtype),)\n    jax_fn = partial(image.resize, shape=target_shape, method=method, antialias=antialias)\n    jtu.check_grads(jax_fn, args_maker(), order=2, rtol=0.01, eps=1.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/image_test.py",
+    "function": "def args_maker():\n    x = jnp.array(rng(shape, dtype))\n    if out_dtype in unsigned_dtypes:\n        x = 10 * jnp.abs(x)\n    return [x]"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=[np.float32], target_shape=_RESIZE_GRADIENTS_SHAPES, image_shape=_RESIZE_GRADIENTS_SHAPES, method=['bilinear', 'lanczos3', 'lanczos5', 'bicubic'], antialias=[False, True])\ndef testResizeGradients(self, dtype, image_shape, target_shape, method, antialias):\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: (rng(image_shape, dtype),)\n    jax_fn = partial(image.resize, shape=target_shape, method=method, antialias=antialias)\n    jtu.check_grads(jax_fn, args_maker(), order=2, rtol=0.01, eps=1.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/image_test.py",
+    "function": "def args_maker():\n    factor_shape = shape[:-1] + (2 * shape[-1],)\n    a = rng(factor_shape, dtype)\n    return [np.matmul(a, jnp.conj(T(a)))]"
+  },
+  {
+    "test_code": "@jtu.sample_product(dtype=[np.float32], target_shape=_RESIZE_GRADIENTS_SHAPES, image_shape=_RESIZE_GRADIENTS_SHAPES, method=['bilinear', 'lanczos3', 'lanczos5', 'bicubic'], antialias=[False, True])\ndef testResizeGradients(self, dtype, image_shape, target_shape, method, antialias):\n    rng = jtu.rand_default(self.rng())\n    args_maker = lambda: (rng(image_shape, dtype),)\n    jax_fn = partial(image.resize, shape=target_shape, method=method, antialias=antialias)\n    jtu.check_grads(jax_fn, args_maker(), order=2, rtol=0.01, eps=1.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/image_test.py",
+    "function": "def check_grads(f, args, order, atol=None, rtol=None, eps=None):\n    default_tol = 1e-06 if config.enable_x64.value else 0.01\n    atol = atol or default_tol\n    rtol = rtol or default_tol\n    eps = eps or default_tol\n    jtu.check_jvp(f, partial(jax.jvp, f), args, atol, rtol, eps)\n    jtu.check_vjp(f, partial(jax.vjp, f), args, atol, rtol, eps)"
+  }
+]

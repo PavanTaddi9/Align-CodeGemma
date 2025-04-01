@@ -1,0 +1,968 @@
+[
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    jax.random.normal(jax.random.key(0), 1000)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@partial(jax.jit, abstracted_axes=(None, 'n'))\ndef f(x):\n    return x[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_refs_in_vjps(self, jit):\n\n    def gradient_history_calculator_fwd(x, ref):\n        return (x, ref)\n\n    def gradient_history_calculator_bwd(amax_history, grad_output):\n        amax_update = jnp.max(jnp.abs(grad_output))\n        shifted = jnp.roll(amax_history[:], 1)\n        shifted = shifted.at[0].set(amax_update)\n        amax_history[:] = shifted\n        amax_from_history = jnp.max(amax_history[:])\n        grad_output = grad_output / amax_from_history\n        return (grad_output, None)\n\n    @jax.custom_vjp\n    def gradient_history_calculator(x, ref):\n        return x\n    gradient_history_calculator.defvjp(gradient_history_calculator_fwd, gradient_history_calculator_bwd)\n\n    class DotOp:\n\n        def __init__(self):\n            self.amax_history = core.mutable_array(jnp.zeros(5))\n\n        def forward(self, x, y):\n            out = jnp.dot(x, y)\n            out = gradient_history_calculator(out, self.amax_history)\n            return out\n    dot_op = DotOp()\n    x_top = jnp.ones((5,))\n    y_top = jnp.ones((5,))\n\n    def loss(x, y):\n        return dot_op.forward(x, y).sum()\n    if jit:\n        loss = jax.jit(loss)\n    for i in range(3):\n        jax.grad(loss, (0, 1))(x_top, y_top)\n        self.assertAllClose(dot_op.amax_history[:], jnp.zeros((5,)).at[:i + 1].set(1.0), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    y = x + 2\n    return (jnp.nan, y)"
+  },
+  {
+    "test_code": "def test_return_from_cond(self):\n    with self.assertRaisesRegex(ValueError, 'traced for cond returned a mutable array reference of type'):\n        jax.lax.cond(True, lambda: core.mutable_array(1.0), lambda: core.mutable_array(2.0))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_argument_aliases_cond(self):\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'for cond.*at both x1 and x2'):\n        jax.lax.cond(True, lambda x1, x2: ..., lambda x1, x2: ..., x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_closure_and_argument_aliases_cond(self):\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'closed over and passed as the argument y_ref'):\n        jax.lax.cond(True, lambda y_ref: x_ref[...] + y_ref[...], lambda y_ref: x_ref[...] + y_ref[...], x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    x, y = jax.lax.cond(x < 3, lambda x, y: (x * 2, y), lambda x, y: (x * 3, y), x, y)\n    return (x, y)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_scan_internal_mut_array(self, jit):\n\n    def body_fun(_, x):\n        x_mut = core.mutable_array(x)\n        x_mut[...] += 2\n        return ((), x_mut[...])\n    doit = lambda: jax.lax.scan(body_fun, (), np.arange(5))\n    if jit:\n        doit = jax.jit(doit)\n    _, xs = doit()\n    self.assertAllClose(xs, np.arange(5) + 2, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_scan_closed_over_mut_array(self, jit):\n    x_mut = core.mutable_array(0)\n\n    def body_fun(_, x):\n        x_mut[...] += 2\n        return ((), x_mut[...])\n    doit = lambda: jax.lax.scan(body_fun, (), np.arange(5))\n    if jit:\n        doit = jax.jit(doit)\n    _, xs = doit()\n    self.assertAllClose(x_mut[...], 10)\n    self.assertAllClose(xs, np.arange(5) * 2 + 2, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_scan_scanned_mut_array(self, jit):\n\n    def body_fun(_, index_x):\n        index, x = index_x\n        x[...] += index\n        return ((), x[...])\n    x_mut = core.mutable_array(np.arange(5))\n    doit = lambda: jax.lax.scan(body_fun, (), (np.arange(5), x_mut))\n    if jit:\n        doit = jax.jit(doit)\n    _, xs = doit()\n    self.assertAllClose(xs, np.arange(5) * 2, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_return_from_scan(self):\n    with self.assertRaisesRegex(ValueError, 'traced for scan returned a mutable array reference of type'):\n        jax.lax.scan(lambda c, x: (core.mutable_array(c), x), 0, jnp.arange(3))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_argument_aliases_scan(self):\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'appeared at both c\\\\[0\\\\] and c\\\\[1\\\\]'):\n        jax.lax.scan(lambda c, _: (None, None), (x_ref, x_ref), None, length=1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_closure_and_argument_aliases_scan(self):\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'closed over and passed as the argument y_ref'):\n        jax.lax.scan(lambda y_ref, _: (x_ref[...] + y_ref[...], None), x_ref, None, length=1)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    return 0.0 / x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f():\n    weird_dict = {lambda x: x: 2.0, lambda x: x * 2: 3}\n    weirder_dict = {lambda x: x: weird_dict}\n    x = 2.0\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')\n    del weirder_dict\n    return x"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(x):\n    out = jnp.zeros_like(x)\n\n    def body(i, j, k, refs):\n        x_ref, out_ref = refs\n        y = func(x_ref[i, j, k])\n        out_ref[i, j, k] += y\n    return for_loop.for_loop(x.shape, body, (x, out))[1].sum()"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.jit\ndef f(a, b, c, d, e):\n    return (a, b, c, d, e)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x):\n    return jsp.special.betainc(jnp.ones(3), 1.0, x)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    return jnp.add(3.0, 4.0)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(x, y):\n    z = jax_getattr(thing1, 'x')\n    w = jax_getattr(thing2, 'x')\n    out = jnp.sin(x * y * z * w)\n    jax_setattr(thing1, 'x', out)\n    jax_setattr(thing2, 'x', 2 * out)\n    return (3 * out, 4 * out)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.vmap\n@jax.value_and_grad\n@jax.named_scope('foo')\ndef f(x):\n\n    @jax.named_scope('scan_body')\n    def body(carry, x):\n        return (carry * x, carry + x)\n    return lax.scan(body, x, jnp.arange(8.0))[0]"
+  },
+  {
+    "test_code": "def test_return_from_cond(self):\n    with self.assertRaisesRegex(ValueError, 'traced for cond returned a mutable array reference of type'):\n        jax.lax.cond(True, lambda: core.mutable_array(1.0), lambda: core.mutable_array(2.0))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "def test_argument_aliases_cond(self):\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'for cond.*at both x1 and x2'):\n        jax.lax.cond(True, lambda x1, x2: ..., lambda x1, x2: ..., x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "def test_closure_and_argument_aliases_cond(self):\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'closed over and passed as the argument y_ref'):\n        jax.lax.cond(True, lambda y_ref: x_ref[...] + y_ref[...], lambda y_ref: x_ref[...] + y_ref[...], x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "@jax.named_scope('bar_cond')\ndef cond(x):\n    return x < 5.0"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f():\n    out = [rng(shape, dtype or jnp.float_) for shape, dtype in zip(shapes, dtypes)]\n    if np_arrays:\n        return out\n    return [jnp.asarray(a) if isinstance(a, (np.ndarray, np.generic)) else a for a in out]"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_basic(self, jit):\n\n    def f(x_mut):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros(3))\n    f(x_mut)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)(x_mut)\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_multiple_inputs_and_outputs(self, jit):\n\n    def f(x_mut, y, z_mut, w):\n        x_mut[...] += 1\n        z_mut[...] += 1\n        return (x_mut[...] + y + z_mut[...] + w, y + w)\n    if jit:\n        f = jax.jit(f)\n    x_mut = core.mutable_array(jnp.zeros((1, 3)))\n    y = jnp.ones((2, 3))\n    z_mut = core.mutable_array(jnp.zeros((2, 3)))\n    w = jnp.ones((2, 1))\n    out1, out2 = f(x_mut, y, z_mut, w)\n    self.assertAllClose(x_mut[...], jnp.ones((1, 3)), check_dtypes=False)\n    self.assertAllClose(z_mut[...], jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out1, 4 * jnp.ones((2, 3)), check_dtypes=False)\n    self.assertAllClose(out2, y + w, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_basic(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    def f():\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n    if jit:\n        f = jax.jit(f)\n    f()\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    jaxpr = jax.make_jaxpr(f)()\n    self.assertTrue(any((isinstance(e, RefEffect) for e in jaxpr.effects)))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_closed_over_nested(self, jit):\n    x_mut = core.mutable_array(jnp.zeros(3))\n\n    @jax.jit\n    def f(y_mut, z):\n        x_mut[...] += 1.0\n        x_mut[0] += 1\n        x_mut[1] += 5\n        y_mut[2] += 7\n        return z + 9\n    if jit:\n        f = jax.jit(f)\n    y_mut = core.mutable_array(np.zeros(3))\n    w = f(y_mut, 1)\n    self.assertAllClose(x_mut[...], jnp.array([2.0, 6.0, 1.0]), check_dtypes=False)\n    self.assertAllClose(y_mut[...], jnp.array([0.0, 0.0, 7.0]), check_dtypes=False)\n    self.assertAllClose(w, 10, check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.parameters([True, False])\ndef test_internal_mutarray_basic(self, jit):\n\n    def f():\n        x_mut = core.mutable_array(jnp.zeros(3))\n        x_mut[0] += 1\n        x_mut[0] += 1\n        x_mut[2] += 1\n        return x_mut[...]\n    if jit:\n        f = jax.jit(f)\n    out = f()\n    self.assertAllClose(out, jnp.array([2.0, 0.0, 1.0]), check_dtypes=False)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "def test_double_jit_mutable_array(self):\n\n    @jax.jit\n    @jax.jit\n    def f():\n        x_ref = core.mutable_array(jnp.zeros(8))\n        return x_ref[...]\n    x = f()\n    self.assertArraysEqual(x, jnp.zeros(8))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "def test_sharding_persists(self):\n    mesh = jax.make_mesh((1,), ('i',))\n    x = jax.device_put(jnp.arange(2), NamedSharding(mesh, P('i')))\n    s = x.sharding\n    a = core.mutable_array(x)\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, a[...].sharding)\n    f = jax.jit(lambda: a[...])\n    y = f()\n    self.assertEqual(s, a.sharding)\n    self.assertEqual(s, y.sharding)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_return_from_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(ref):\n        return ref\n    f.defvjp(lambda ref: ..., lambda *_: ...)\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'custom_vjp primal function'):\n        f(x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_argument_aliases_custom_vjp_primal(self, jit):\n\n    @jax.custom_vjp\n    def f(x_ref, y_ref):\n        ...\n    f.defvjp(lambda x_ref, y_ref: (None, None), lambda _, g: (None, None))\n    if jit:\n        f = jax.jit(f)\n    x_ref = core.mutable_array(0.0)\n    with self.assertRaisesRegex(ValueError, 'x_ref and y_ref'):\n        f(x_ref, x_ref)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  },
+  {
+    "test_code": "@parameterized.parameters([False, True])\ndef test_cond_both_branches_close_over_same_mutable_array(self, jit):\n    x_ref = core.mutable_array(0.0)\n\n    def f(pred):\n\n        def true_fun():\n            x_ref[()] = 1.0\n\n        def false_fun():\n            x_ref[()] = 2.0\n        jax.lax.cond(pred, true_fun, false_fun)\n    if jit:\n        f = jax.jit(f)\n    out_true = f(True)\n    self.assertAllClose(x_ref[...], 1.0)\n    out_false = f(False)\n    self.assertAllClose(x_ref[...], 2.0)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mutable_array_test.py",
+    "function": "def f(c, a):\n    tracer_spy.append(c)\n    d = 0.75\n    b = jnp.sin(c * jnp.sum(jnp.cos(d * a)))\n    c = 0.9 * jnp.cos(d * jnp.sum(jnp.sin(c * a)))\n    return (c, b)"
+  }
+]

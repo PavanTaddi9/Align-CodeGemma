@@ -1,0 +1,290 @@
+[
+  {
+    "test_code": "def test_nested_jit_stack(self):\n\n    @jax.value_and_grad\n    @jax.jit\n    def f(x):\n\n        @jax.jit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_nested_pjit_stack(self):\n\n    @jax.value_and_grad\n    @pjit\n    def f(x):\n\n        @pjit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_cond_body_should_not_have_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x + 1\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x - 1\n        return lax.cond(y, true_fn, false_fn, x)\n    jaxpr = jax.make_jaxpr(f)(0, True)\n    for eqn in jaxpr.eqns:\n        self.assertEqual(str(eqn.source_info.name_stack), 'foo')\n        if eqn.primitive is lax.cond_p:\n            self.assertEqual(str(eqn.params['branches'][0].eqns[0].source_info.name_stack), 'false')\n            self.assertEqual(str(eqn.params['branches'][1].eqns[0].source_info.name_stack), 'true')\n    hlo_text = _get_hlo(f)(1, True)\n    self.assertIn('foo/cond/branch_0_fun/false/sub', hlo_text)\n    self.assertIn('foo/cond/branch_1_fun/true/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_vmap_of_cond_should_transform_name_stack(self):\n\n    @jax.named_scope('foo')\n    @functools.partial(jax.vmap, in_axes=(0, None))\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x + 1\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x - 1\n        return lax.cond(y, true_fn, false_fn, x)\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2), True)\n    for eqn in jaxpr.eqns:\n        self.assertIn('foo', str(eqn.source_info.name_stack))\n        if eqn.primitive is lax.cond_p:\n            self.assertEqual(str(eqn.params['branches'][0].eqns[0].source_info.name_stack), 'false')\n            self.assertEqual(str(eqn.params['branches'][1].eqns[0].source_info.name_stack), 'true')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0), True)\n    self.assertIn('foo/vmap(cond)/branch_0_fun/false/sub', hlo_text)\n    self.assertIn('foo/vmap(cond)/branch_1_fun/true/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_jvp_of_cond_transforms_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x + 1\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x - 1\n        return lax.cond(y, true_fn, false_fn, x)\n    f_ = lambda x: jax.jit(f)(x, True)\n    g = lambda x, t: jax.jvp(f_, (x,), (t,))\n    jaxpr = jax.make_jaxpr(g)(jnp.arange(2.0), jnp.ones(2))\n    jaxpr_param = 'jaxpr'\n    call_jaxpr = jaxpr.jaxpr.eqns[0].params[jaxpr_param]\n    self.assertEqual(str(call_jaxpr.eqns[1].source_info.name_stack), 'foo')\n    self.assertEqual(str(call_jaxpr.eqns[1].params['branches'][0].eqns[0].source_info.name_stack), 'false')\n    self.assertEqual(str(call_jaxpr.eqns[1].params['branches'][1].eqns[0].source_info.name_stack), 'true')\n    hlo_text = _get_hlo(g)(jnp.arange(2.0), jnp.ones(2))\n    self.assertIn('jvp(jit(f))/foo/cond/branch_0_fun/false/sub', hlo_text)\n    self.assertIn('jvp(jit(f))/foo/cond/branch_1_fun/true/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_vmap_of_jvp_of_cond_transforms_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x + 1\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x - 1\n        return lax.cond(y, true_fn, false_fn, x)\n    f_ = lambda x: jax.jit(f)(x, True)\n    g = jax.vmap(lambda x, t: jax.jvp(f_, (x,), (t,)))\n    jaxpr = jax.make_jaxpr(g)(jnp.arange(2.0), jnp.ones(2))\n    jaxpr_param = 'jaxpr'\n    call_jaxpr = jaxpr.jaxpr.eqns[0].params[jaxpr_param]\n    self.assertEqual(str(call_jaxpr.eqns[1].params['branches'][0].eqns[0].source_info.name_stack), 'false')\n    self.assertEqual(str(call_jaxpr.eqns[1].params['branches'][1].eqns[0].source_info.name_stack), 'true')\n    hlo_text = _get_hlo(g)(jnp.arange(2.0), jnp.ones(2))\n    self.assertIn('vmap(jvp(jit(f)))/foo/cond/branch_0_fun/false/sub\"', hlo_text)\n    self.assertIn('vmap(jvp(jit(f)))/foo/cond/branch_1_fun/true/add\"', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_grad_of_cond_transforms_name_stack(self):\n\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x * x * 2.0\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x / jnp.square(x)\n        return lax.cond(y, true_fn, false_fn, x)\n    jaxpr = jax.make_jaxpr(f)(1.0, True)\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'transpose(jvp(foo))')\n    hlo_text = _get_hlo(f)(1.0, True)\n    self.assertIn('jvp(foo)/cond/branch_0_fun/false/div', hlo_text)\n    self.assertIn('jvp(foo)/cond/branch_1_fun/true/mul', hlo_text)\n    self.assertIn('transpose(jvp(foo))/cond/branch_0_fun/false/div', hlo_text)\n    self.assertIn('transpose(jvp(foo))/cond/branch_1_fun/true/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_vmap_of_grad_of_cond_transforms_name_stack(self):\n\n    @functools.partial(jax.vmap, in_axes=(0, None))\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x * x * 2.0\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x / x / 2.0\n        return lax.cond(y, true_fn, false_fn, x)\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2.0), True)\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'vmap(jvp(foo))')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'vmap(transpose(jvp(foo)))')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0), True)\n    self.assertIn('vmap(jvp(foo))/cond/branch_0_fun/false/div', hlo_text)\n    self.assertIn('vmap(jvp(foo))/cond/branch_1_fun/true/mul', hlo_text)\n    self.assertIn('vmap(transpose(jvp(foo)))/cond/branch_0_fun/false/div', hlo_text)\n    self.assertIn('vmap(transpose(jvp(foo)))/cond/branch_1_fun/true/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def cond(state):\n    it, _, fx, _ = state\n    return (jnp.max(jnp.abs(fx)) > tol) & (it < max_it)"
+  },
+  {
+    "test_code": "def test_jit_jaxpr_should_not_store_outer_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.jit\n        @jax.named_scope('bar')\n        def _f(x):\n            return x + 1\n        return _f(x)\n    jaxpr = jax.make_jaxpr(f)(2).jaxpr\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'foo')\n    jaxpr_param = 'jaxpr'\n    self.assertEqual(str(jaxpr.eqns[0].params[jaxpr_param].eqns[0].source_info.name_stack), 'bar')\n    hlo_text = _get_hlo(f)(2)\n    self.assertIn('foo/jit(_f)/bar', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _f(x):\n    return cond(x[0] < 2, lambda x: jnp.array([1.0, 2.0], x.dtype) * x, lambda x: jnp.sin(x), x)"
+  },
+  {
+    "test_code": "def test_vmap_should_apply_to_call_jaxpr(self):\n\n    @jax.named_scope('foo')\n    @jax.vmap\n    def f(x):\n\n        @jax.jit\n        @jax.named_scope('bar')\n        def _f(x):\n            return x + 1\n        return _f(x)\n    jaxpr = jax.make_jaxpr(f)(jnp.ones(2)).jaxpr\n    jaxpr_param = 'jaxpr'\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'foo')\n    self.assertEqual(str(jaxpr.eqns[0].params[jaxpr_param].eqns[0].source_info.name_stack), 'bar')\n    hlo_text = _get_hlo(f)(jnp.ones(2))\n    self.assertIn('foo/vmap(jit(_f))/bar', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _f(x):\n    return cond(x[0] < 2, lambda x: jnp.array([1.0, 2.0], x.dtype) * x, lambda x: jnp.sin(x), x)"
+  },
+  {
+    "test_code": "def test_nested_jit_stack(self):\n\n    @jax.value_and_grad\n    @jax.jit\n    def f(x):\n\n        @jax.jit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_nested_pjit_stack(self):\n\n    @jax.value_and_grad\n    @pjit\n    def f(x):\n\n        @pjit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_scan_body_should_not_have_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (carry + x, carry + x)\n        return lax.scan(body, x, jnp.arange(5, dtype='float32'))\n    jaxpr = jax.make_jaxpr(f)(jnp.float32(1))\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'foo')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(f)(1.0)\n    self.assertIn('foo/while/body/scan_body', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_vmap_of_scan_should_transform_stack(self):\n\n    @jax.vmap\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (carry + x, carry + x)\n        return lax.scan(body, x, jnp.arange(8.0))\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2.0))\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'vmap(foo)')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0))\n    self.assertIn('vmap(foo)/while/body/scan_body/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_jvp_of_scan_should_transform_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (carry + x, carry + x)\n        return lax.scan(body, x, jnp.arange(8, dtype='float32'))\n    g = lambda x, t: jax.jvp(f, (x,), (t,))\n    jaxpr = jax.make_jaxpr(g)(jnp.float32(1), jnp.float32(1))\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(g)(1.0, 1.0)\n    self.assertIn('jvp(foo)/while/body/scan_body/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_grad_of_scan_should_transform_stack(self):\n\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (2 * carry * x, carry + x)\n        return lax.scan(body, x, jnp.arange(8.0, dtype='float32'))[0]\n    jaxpr = jax.make_jaxpr(f)(jnp.float32(2))\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'transpose(jvp(foo))')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(f)(1.0)\n    self.assertIn('jvp(foo)/while/body/scan_body/mul', hlo_text)\n    self.assertIn('transpose(jvp(foo))/while/body/scan_body/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_vmap_of_grad_of_scan_should_transform_stack(self):\n\n    @jax.vmap\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (carry * x, carry + x)\n        return lax.scan(body, x, jnp.arange(8.0))[0]\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2.0))\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'vmap(jvp(foo))')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'vmap(transpose(jvp(foo)))')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0))\n    self.assertIn('vmap(jvp(foo))/while/body/scan_body/mul', hlo_text)\n    self.assertIn('vmap(transpose(jvp(foo)))/while/body/scan_body/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def scan(y):\n\n    def body(carry, x):\n        return (carry, jnp.dot(x, x))\n    return jax.lax.scan(body, 1.0, y, unroll=False)"
+  },
+  {
+    "test_code": "def test_nested_jit_stack(self):\n\n    @jax.value_and_grad\n    @jax.jit\n    def f(x):\n\n        @jax.jit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "def test_nested_pjit_stack(self):\n\n    @jax.value_and_grad\n    @pjit\n    def f(x):\n\n        @pjit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "def test_nested_jit_stack(self):\n\n    @jax.value_and_grad\n    @jax.jit\n    def f(x):\n\n        @jax.jit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "def test_nested_pjit_stack(self):\n\n    @jax.value_and_grad\n    @pjit\n    def f(x):\n\n        @pjit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "def test_call_primitive_jaxpr_should_not_store_outer_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('bar')\n        def _f(x):\n            return [x + 1]\n        return core.call(lu.wrap_init(_f, debug_info=api_util.debug_info('test', _f, (0,), {})), x)[0]\n    jaxpr = jax.make_jaxpr(f)(2).jaxpr\n    self.assertEqual(str(jaxpr.eqns[0].params['call_jaxpr'].eqns[0].source_info.name_stack), 'bar')\n    hlo_text = _get_hlo(f)(2)\n    self.assertIn('foo/jit(core_call)/bar', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def call(platform, x):\n    target_name = dict(cpu='lapack_sgeqrf_ffi', rocm='hipsolver_geqrf_ffi', cuda='cusolver_geqrf_ffi')[platform]\n    f = jex.ffi.ffi_call if _use_extend else jax.ffi.ffi_call\n    return f(target_name, output_types, input_output_aliases={0: 0}, input_layouts=[x_major_to_minor], output_layouts=[x_major_to_minor, None], **kwargs)(x)"
+  },
+  {
+    "test_code": "def test_nested_jit_stack(self):\n\n    @jax.value_and_grad\n    @jax.jit\n    def f(x):\n\n        @jax.jit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "def test_nested_pjit_stack(self):\n\n    @jax.value_and_grad\n    @pjit\n    def f(x):\n\n        @pjit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "def test_call_primitive_jaxpr_should_not_store_outer_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('bar')\n        def _f(x):\n            return [x + 1]\n        return core.call(lu.wrap_init(_f, debug_info=api_util.debug_info('test', _f, (0,), {})), x)[0]\n    jaxpr = jax.make_jaxpr(f)(2).jaxpr\n    self.assertEqual(str(jaxpr.eqns[0].params['call_jaxpr'].eqns[0].source_info.name_stack), 'bar')\n    hlo_text = _get_hlo(f)(2)\n    self.assertIn('foo/jit(core_call)/bar', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_jit_jaxpr_should_not_store_outer_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.jit\n        @jax.named_scope('bar')\n        def _f(x):\n            return x + 1\n        return _f(x)\n    jaxpr = jax.make_jaxpr(f)(2).jaxpr\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'foo')\n    jaxpr_param = 'jaxpr'\n    self.assertEqual(str(jaxpr.eqns[0].params[jaxpr_param].eqns[0].source_info.name_stack), 'bar')\n    hlo_text = _get_hlo(f)(2)\n    self.assertIn('foo/jit(_f)/bar', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_vmap_should_apply_to_call_jaxpr(self):\n\n    @jax.named_scope('foo')\n    @jax.vmap\n    def f(x):\n\n        @jax.jit\n        @jax.named_scope('bar')\n        def _f(x):\n            return x + 1\n        return _f(x)\n    jaxpr = jax.make_jaxpr(f)(jnp.ones(2)).jaxpr\n    jaxpr_param = 'jaxpr'\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'foo')\n    self.assertEqual(str(jaxpr.eqns[0].params[jaxpr_param].eqns[0].source_info.name_stack), 'bar')\n    hlo_text = _get_hlo(f)(jnp.ones(2))\n    self.assertIn('foo/vmap(jit(_f))/bar', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_jvp_should_apply_to_call_jaxpr(self):\n\n    @jax.jit\n    def f(x):\n        with jax.named_scope('bar'):\n            with jax.named_scope('baz'):\n                return jnp.square(x)\n    g = jax.named_scope('foo')(lambda x, t: jax.jvp(f, (x,), (t,)))\n    jaxpr = jax.make_jaxpr(g)(1.0, 1.0).jaxpr\n    jaxpr_param = 'jaxpr'\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'foo')\n    self.assertEqual(str(jaxpr.eqns[0].params[jaxpr_param].eqns[0].source_info.name_stack), 'bar/baz')\n    hlo_text = _get_hlo(g)(1.0, 1.0)\n    self.assertIn('foo/jvp(jit(f))/bar/baz/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_grad_should_add_jvp_and_transpose_to_name_stack(self):\n\n    @jax.value_and_grad\n    def f(x):\n        with jax.named_scope('foo'):\n            return 2 * jnp.sin(x)\n    jaxpr = jax.make_jaxpr(f)(1.0).jaxpr\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[4].source_info.name_stack), 'transpose(jvp(foo))')\n    hlo_text = _get_hlo(f)(1.0)\n    self.assertIn('jvp(foo)/sin', hlo_text)\n    self.assertIn('jvp(foo)/cos', hlo_text)\n    self.assertIn('transpose(jvp(foo))/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_grad_should_add_jvp_and_transpose_to_call_jaxpr(self):\n\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    @jax.jit\n    def f(x):\n        with jax.named_scope('bar'):\n            return jax.lax.sin(x)\n    jaxpr = jax.make_jaxpr(f)(1.0).jaxpr\n    jaxpr_param = 'jaxpr'\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'transpose(jvp(foo))')\n    self.assertEqual(str(jaxpr.eqns[0].params[jaxpr_param].eqns[0].source_info.name_stack), 'bar')\n    self.assertEqual(str(jaxpr.eqns[0].params[jaxpr_param].eqns[1].source_info.name_stack), 'bar')\n    self.assertEqual(str(jaxpr.eqns[1].params[jaxpr_param].eqns[0].source_info.name_stack), 'bar')\n    hlo_text = _get_hlo(f)(1.0)\n    self.assertIn('jvp(foo)/jit(f)/bar/sin', hlo_text)\n    self.assertIn('jvp(foo)/jit(f)/bar/cos', hlo_text)\n    self.assertIn('transpose(jvp(foo))/jit(f)/bar/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_nested_jit_stack(self):\n\n    @jax.value_and_grad\n    @jax.jit\n    def f(x):\n\n        @jax.jit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_nested_pjit_stack(self):\n\n    @jax.value_and_grad\n    @pjit\n    def f(x):\n\n        @pjit\n        def g(y):\n            return jnp.sin(y)\n        return g(x)\n    hlo_text = _get_hlo(f)(2.0)\n    self.assertIn('jvp(jit(f))/jit(g)/sin', hlo_text)\n    self.assertIn('jvp(jit(f))/jit(g)/cos', hlo_text)\n    self.assertIn('transpose(jvp(jit(f)))/jit(g)/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_remat_appears_in_hlo(self):\n\n    @ad_checkpoint.remat\n    def f(x):\n        return jnp.sin(x)\n    hlo_text = _get_hlo(f)(2.0)\n    hlo_text_grad = _get_hlo(jax.grad(f))(2.0)\n    self.assertNotIn('rematted_computation', hlo_text)\n    self.assertNotIn('remat', hlo_text)\n    self.assertIn('checkpoint', hlo_text)\n    self.assertIn('rematted_computation', hlo_text_grad)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_while_loop_body_should_not_have_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('bar')\n        def body(x):\n            return x + 1\n\n        @jax.named_scope('bar_cond')\n        def cond(x):\n            return x < 5\n        return lax.while_loop(cond, body, x)\n    jaxpr = jax.make_jaxpr(f)(0)\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'foo')\n    self.assertEqual(str(jaxpr.eqns[0].params['body_jaxpr'].eqns[0].source_info.name_stack), 'bar')\n    self.assertEqual(str(jaxpr.eqns[0].params['cond_jaxpr'].eqns[0].source_info.name_stack), 'bar_cond')\n    hlo_text = _get_hlo(f)(1.0)\n    self.assertIn('foo/while/body/bar', hlo_text)\n    self.assertIn('foo/while/cond/bar_cond', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_vmap_of_while_loop_should_transform_name_stack(self):\n\n    @jax.vmap\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('bar')\n        def body(x):\n            return x + 1\n\n        @jax.named_scope('bar_cond')\n        def cond(x):\n            return x < 5\n        return lax.while_loop(cond, body, x)\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2))\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'vmap(foo)')\n    self.assertEqual(str(jaxpr.eqns[0].params['body_jaxpr'].eqns[0].source_info.name_stack), 'bar')\n    self.assertEqual(str(jaxpr.eqns[0].params['cond_jaxpr'].eqns[0].source_info.name_stack), 'bar_cond')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0))\n    self.assertIn('vmap(foo)/while/body/bar/add', hlo_text)\n    self.assertIn('vmap(foo)/while/cond/bar_cond/lt', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_jvp_of_while_loop_transforms_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('bar')\n        def body(x):\n            return x + 1.0\n\n        @jax.named_scope('bar_cond')\n        def cond(x):\n            return x < 5.0\n        return lax.while_loop(cond, body, x)\n    g = lambda x, t: jax.jvp(f, (x,), (t,))\n    jaxpr = jax.make_jaxpr(g)(1.0, 1.0)\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[0].params['body_jaxpr'].eqns[0].source_info.name_stack), 'bar')\n    self.assertEqual(str(jaxpr.eqns[0].params['cond_jaxpr'].eqns[0].source_info.name_stack), 'bar_cond')\n    hlo_text = _get_hlo(g)(1.0, 1.0)\n    self.assertIn('jvp(foo)/while/body/bar/add', hlo_text)\n    self.assertIn('jvp(foo)/while/cond/bar_cond/lt', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_vmap_of_jvp_of_while_loop_transforms_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('bar')\n        def body(x):\n            return x + 1.0\n\n        @jax.named_scope('bar_cond')\n        def cond(x):\n            return x < 5.0\n        return lax.while_loop(cond, body, x)\n    g = jax.vmap(lambda x, t: jax.jvp(f, (x,), (t,)))\n    jaxpr = jax.make_jaxpr(g)(jnp.arange(2.0), jnp.ones(2))\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'vmap(jvp(foo))')\n    self.assertEqual(str(jaxpr.eqns[0].params['body_jaxpr'].eqns[0].source_info.name_stack), 'bar')\n    self.assertEqual(str(jaxpr.eqns[0].params['cond_jaxpr'].eqns[0].source_info.name_stack), 'bar_cond')\n    hlo_text = _get_hlo(g)(jnp.arange(2.0), jnp.ones(2))\n    self.assertIn('vmap(jvp(foo))/while/body/bar/add', hlo_text)\n    self.assertIn('vmap(jvp(foo))/while/body_pred/bar_cond', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_cond_body_should_not_have_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x + 1\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x - 1\n        return lax.cond(y, true_fn, false_fn, x)\n    jaxpr = jax.make_jaxpr(f)(0, True)\n    for eqn in jaxpr.eqns:\n        self.assertEqual(str(eqn.source_info.name_stack), 'foo')\n        if eqn.primitive is lax.cond_p:\n            self.assertEqual(str(eqn.params['branches'][0].eqns[0].source_info.name_stack), 'false')\n            self.assertEqual(str(eqn.params['branches'][1].eqns[0].source_info.name_stack), 'true')\n    hlo_text = _get_hlo(f)(1, True)\n    self.assertIn('foo/cond/branch_0_fun/false/sub', hlo_text)\n    self.assertIn('foo/cond/branch_1_fun/true/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_vmap_of_cond_should_transform_name_stack(self):\n\n    @jax.named_scope('foo')\n    @functools.partial(jax.vmap, in_axes=(0, None))\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x + 1\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x - 1\n        return lax.cond(y, true_fn, false_fn, x)\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2), True)\n    for eqn in jaxpr.eqns:\n        self.assertIn('foo', str(eqn.source_info.name_stack))\n        if eqn.primitive is lax.cond_p:\n            self.assertEqual(str(eqn.params['branches'][0].eqns[0].source_info.name_stack), 'false')\n            self.assertEqual(str(eqn.params['branches'][1].eqns[0].source_info.name_stack), 'true')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0), True)\n    self.assertIn('foo/vmap(cond)/branch_0_fun/false/sub', hlo_text)\n    self.assertIn('foo/vmap(cond)/branch_1_fun/true/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_jvp_of_cond_transforms_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x + 1\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x - 1\n        return lax.cond(y, true_fn, false_fn, x)\n    f_ = lambda x: jax.jit(f)(x, True)\n    g = lambda x, t: jax.jvp(f_, (x,), (t,))\n    jaxpr = jax.make_jaxpr(g)(jnp.arange(2.0), jnp.ones(2))\n    jaxpr_param = 'jaxpr'\n    call_jaxpr = jaxpr.jaxpr.eqns[0].params[jaxpr_param]\n    self.assertEqual(str(call_jaxpr.eqns[1].source_info.name_stack), 'foo')\n    self.assertEqual(str(call_jaxpr.eqns[1].params['branches'][0].eqns[0].source_info.name_stack), 'false')\n    self.assertEqual(str(call_jaxpr.eqns[1].params['branches'][1].eqns[0].source_info.name_stack), 'true')\n    hlo_text = _get_hlo(g)(jnp.arange(2.0), jnp.ones(2))\n    self.assertIn('jvp(jit(f))/foo/cond/branch_0_fun/false/sub', hlo_text)\n    self.assertIn('jvp(jit(f))/foo/cond/branch_1_fun/true/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_vmap_of_jvp_of_cond_transforms_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x + 1\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x - 1\n        return lax.cond(y, true_fn, false_fn, x)\n    f_ = lambda x: jax.jit(f)(x, True)\n    g = jax.vmap(lambda x, t: jax.jvp(f_, (x,), (t,)))\n    jaxpr = jax.make_jaxpr(g)(jnp.arange(2.0), jnp.ones(2))\n    jaxpr_param = 'jaxpr'\n    call_jaxpr = jaxpr.jaxpr.eqns[0].params[jaxpr_param]\n    self.assertEqual(str(call_jaxpr.eqns[1].params['branches'][0].eqns[0].source_info.name_stack), 'false')\n    self.assertEqual(str(call_jaxpr.eqns[1].params['branches'][1].eqns[0].source_info.name_stack), 'true')\n    hlo_text = _get_hlo(g)(jnp.arange(2.0), jnp.ones(2))\n    self.assertIn('vmap(jvp(jit(f)))/foo/cond/branch_0_fun/false/sub\"', hlo_text)\n    self.assertIn('vmap(jvp(jit(f)))/foo/cond/branch_1_fun/true/add\"', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_grad_of_cond_transforms_name_stack(self):\n\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x * x * 2.0\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x / jnp.square(x)\n        return lax.cond(y, true_fn, false_fn, x)\n    jaxpr = jax.make_jaxpr(f)(1.0, True)\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'transpose(jvp(foo))')\n    hlo_text = _get_hlo(f)(1.0, True)\n    self.assertIn('jvp(foo)/cond/branch_0_fun/false/div', hlo_text)\n    self.assertIn('jvp(foo)/cond/branch_1_fun/true/mul', hlo_text)\n    self.assertIn('transpose(jvp(foo))/cond/branch_0_fun/false/div', hlo_text)\n    self.assertIn('transpose(jvp(foo))/cond/branch_1_fun/true/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_vmap_of_grad_of_cond_transforms_name_stack(self):\n\n    @functools.partial(jax.vmap, in_axes=(0, None))\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    def f(x, y):\n\n        @jax.named_scope('true')\n        def true_fn(x):\n            return x * x * 2.0\n\n        @jax.named_scope('false')\n        def false_fn(x):\n            return x / x / 2.0\n        return lax.cond(y, true_fn, false_fn, x)\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2.0), True)\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'vmap(jvp(foo))')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'vmap(transpose(jvp(foo)))')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0), True)\n    self.assertIn('vmap(jvp(foo))/cond/branch_0_fun/false/div', hlo_text)\n    self.assertIn('vmap(jvp(foo))/cond/branch_1_fun/true/mul', hlo_text)\n    self.assertIn('vmap(transpose(jvp(foo)))/cond/branch_0_fun/false/div', hlo_text)\n    self.assertIn('vmap(transpose(jvp(foo)))/cond/branch_1_fun/true/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_scan_body_should_not_have_name_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (carry + x, carry + x)\n        return lax.scan(body, x, jnp.arange(5, dtype='float32'))\n    jaxpr = jax.make_jaxpr(f)(jnp.float32(1))\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'foo')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(f)(1.0)\n    self.assertIn('foo/while/body/scan_body', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_vmap_of_scan_should_transform_stack(self):\n\n    @jax.vmap\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (carry + x, carry + x)\n        return lax.scan(body, x, jnp.arange(8.0))\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2.0))\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'vmap(foo)')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0))\n    self.assertIn('vmap(foo)/while/body/scan_body/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_jvp_of_scan_should_transform_stack(self):\n\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (carry + x, carry + x)\n        return lax.scan(body, x, jnp.arange(8, dtype='float32'))\n    g = lambda x, t: jax.jvp(f, (x,), (t,))\n    jaxpr = jax.make_jaxpr(g)(jnp.float32(1), jnp.float32(1))\n    self.assertEqual(str(jaxpr.eqns[0].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(g)(1.0, 1.0)\n    self.assertIn('jvp(foo)/while/body/scan_body/add', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_grad_of_scan_should_transform_stack(self):\n\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (2 * carry * x, carry + x)\n        return lax.scan(body, x, jnp.arange(8.0, dtype='float32'))[0]\n    jaxpr = jax.make_jaxpr(f)(jnp.float32(2))\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'jvp(foo)')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'transpose(jvp(foo))')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(f)(1.0)\n    self.assertIn('jvp(foo)/while/body/scan_body/mul', hlo_text)\n    self.assertIn('transpose(jvp(foo))/while/body/scan_body/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  },
+  {
+    "test_code": "def test_vmap_of_grad_of_scan_should_transform_stack(self):\n\n    @jax.vmap\n    @jax.value_and_grad\n    @jax.named_scope('foo')\n    def f(x):\n\n        @jax.named_scope('scan_body')\n        def body(carry, x):\n            return (carry * x, carry + x)\n        return lax.scan(body, x, jnp.arange(8.0))[0]\n    jaxpr = jax.make_jaxpr(f)(jnp.arange(2.0))\n    self.assertEqual(str(jaxpr.eqns[1].source_info.name_stack), 'vmap(jvp(foo))')\n    self.assertEqual(str(jaxpr.eqns[2].source_info.name_stack), 'vmap(transpose(jvp(foo)))')\n    self.assertEqual(str(jaxpr.eqns[1].params['jaxpr'].eqns[0].source_info.name_stack), 'scan_body')\n    hlo_text = _get_hlo(f)(jnp.arange(2.0))\n    self.assertIn('vmap(jvp(foo))/while/body/scan_body/mul', hlo_text)\n    self.assertIn('vmap(transpose(jvp(foo)))/while/body/scan_body/mul', hlo_text)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/name_stack_test.py",
+    "function": "def _get_hlo(f):\n\n    def wrapped(*args, **kwargs):\n        return jax.jit(f).lower(*args, **kwargs).as_text('hlo', debug_info=True)\n    return wrapped"
+  }
+]

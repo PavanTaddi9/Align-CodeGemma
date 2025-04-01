@@ -1,0 +1,206 @@
+[
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g():\n    return jnp.zeros(n) + x"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g():\n    return jax.lax.cond(True, lambda: data[0], lambda: data[1])"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g():\n    debugger.breakpoint(stdin=stdin, stdout=stdout, backend='cli')"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(a, b):\n    c = jnp.zeros_like(a)\n    _, b, c, _ = for_impl(5, body2, (a, b, c, 0))\n    return (b, c)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g():\n    _, _, attr_tangents = attrs.jvp(f, (), (), [(thing, 'x', 1.0)])\n    (thing_, attr_, tangent_), = attr_tangents\n    self.assertIs(thing, thing_)\n    self.assertEqual(attr_, 'x')\n    return (jax_getattr(thing, 'x'), tangent_)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@pjit\ndef g(y):\n    return jnp.sin(y)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.remat\ndef g(x):\n    jax.jit(lambda: 0 if jnp.add(1, 1) else 0)()\n    return lax.sin(x)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.pmap\ndef g(z):\n    return f(z, z + 77)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(x):\n    z = x * 2\n    return shard_alike(x, z)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.custom_jvp\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(x):\n    if x > 0.0:\n        return x * 2\n    else:\n        return x + 2"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@partial(shard_map, mesh=mesh, in_specs=P('x', 'y'), out_specs=out_spec)\ndef g(x):\n    result = lax.psum(x, axis_name=reduce_along)\n\n    def check_rep(result):\n        self.assertEqual(jax.experimental.shard_map.get_replication(result), set(reduce_along))\n        return result\n    result = check_rep(result)\n    result = jax.vmap(check_rep)(result)\n    return result"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(x):\n    return x"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(x):\n    return jax.pure_callback(lambda x: x, x, x)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(a, b):\n    an, ai = a\n    bn, bi = b\n    which = an >= bn\n    return (jnp.where(which, an, bn), jnp.where(which, ai, bi))"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@partial(jax.profiler.annotate_function, name='aname')\ndef g(x):\n    return x + 2"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@partial(jax.jit, donate_argnums=0, out_shardings=Layout(DLL.AUTO))\ndef g(x):\n    return x * 2"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g():\n    x = x_ref[...] * y_ref[...]\n    y_ref[...] = x * 2\n    x_ref[...] = y_ref[...] + x_ref[...]"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(ys, _):\n    y, _ = ys\n    y = checkpoint_name(jnp.sin(y), 'y')\n    z = checkpoint_name(jnp.sin(y), 'z')\n    z = jax.lax.with_sharding_constraint(z, s)\n    z = z.T\n    w = checkpoint_name(jnp.sin(z), 'w')\n    return ((w.T, jnp.sum(w)), None)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@functools.partial(jax.jit, static_argnums=[1])\ndef g(x, c):\n    return c * jnp.sin(x)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jit\ndef g(z):\n    return self.pmap(lambda x: x[jnp.newaxis] * y)(z)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(y):\n    return y"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(weights, x, h_0, c_0):\n    W_ih, W_hh, b_ih, b_hh = rnn.unpack_lstm_weights(weights, input_size, hidden_size, num_layers, bidirectional)\n    y_ref, h_n_ref, c_n_ref = rnn.lstm_ref(x, h_0, c_0, W_ih, W_hh, b_ih, b_hh, seq_lengths=seq_lengths, input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, dropout=False, bidirectional=bidirectional)\n    seq_length_mask = jnp.tile(jnp.arange(seq_len, dtype=jnp.int32)[None], [batch_size, 1]) < seq_lengths[:, None]\n    loss = jnp.sum(jnp.where(seq_length_mask[..., None], y_ref, 0.0))\n    return (loss, (y_ref, h_n_ref, c_n_ref))"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(x):\n    return x + 4"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(x):\n    return callback_p.bind(x, callback=log_value, effect=log_effect, out_avals=[])"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(x):\n    branch = jax.named_call(lambda x: x)\n    out = jax.lax.cond(True, branch, branch, x)\n    return out"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(x):\n    y0_arr = jnp.array([[x, 0.1], [x, 0.2]])\n    t = jnp.array([0.0, 5.0])\n    y = jax.vmap(lambda y0: odeint(dx_dt, y0, t))(y0_arr)\n    return y[:, -1].sum()"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.custom_vjp\ndef g(x):\n    debug_print('hello: {x}', x=x)\n    return x"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(key1, key2):\n    assert_unconsumed(key1)\n    assert_unconsumed(key2)\n    return jax.random.bits(key1)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.custom_vjp\ndef g(y):\n    return x * y"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(z):\n    with set_xla_metadata(c='d'):\n        return z ** 2 + 1"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "def g(eps):\n    x = jnp.array(1.0)\n    return jax.grad(f)(x, eps)"
+  },
+  {
+    "test_code": "def test_clear_backends(self):\n    g = jax.jit(lambda x, y: x * y)\n    self.assertEqual(g(1, 2), 2)\n    self.assertNotEmpty(xb.get_backend().live_executables())\n    api.clear_backends()\n    self.assertEmpty(xb.get_backend().live_executables())\n    self.assertEqual(g(1, 2), 2)",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/clear_backends_test.py",
+    "function": "@jax.jit\ndef g(x):\n    return x * y"
+  }
+]

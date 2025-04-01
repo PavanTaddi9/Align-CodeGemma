@@ -1,0 +1,8 @@
+[
+  {
+    "test_code": "@jtu.skip_under_pytest('Test must run in an isolated process')\ndef testMockWithSharding(self):\n    mesh = jax.sharding.Mesh(jax.devices(), ('x',))\n\n    @partial(jax.jit, in_shardings=NamedSharding(mesh, P('x')), out_shardings=NamedSharding(mesh, P('x')))\n    def f(x, y):\n        z = x @ y\n        return z @ y\n    shape = (1024, 1024)\n    x = jnp.arange(math.prod(shape)).reshape(shape).astype(np.float32)\n    y = x + 1\n    f_lowered = f.lower(x, y)\n    hlo = f_lowered.compiler_ir()\n    mocked_count = NUM_SHARDS * jax.local_device_count()\n    if config.use_shardy_partitioner.value:\n        self.assertIn('sharding = #sdy.sharding<@mesh, [{\"x\"}, {}]>}', str(hlo))\n    else:\n        self.assertIn(f'sharding = \"{{devices=[{mocked_count},1]<=[{mocked_count}]}}\"', str(hlo))",
+    "assertions": [],
+    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/mock_gpu_test.py",
+    "function": "def lower(self, x, _experimental_lowering_parameters=None):\n    return jax.jit(self.__call__).lower(x, _experimental_lowering_parameters=_experimental_lowering_parameters)"
+  }
+]
