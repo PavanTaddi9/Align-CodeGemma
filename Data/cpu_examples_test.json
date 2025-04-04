@@ -1,8 +1,0 @@
-[
-  {
-    "test_code": "def test_array_attr(self):\n    self.assertEqual(cpu_examples.array_attr(5), jnp.arange(5).sum().astype(jnp.int32))\n    self.assertEqual(cpu_examples.array_attr(3), jnp.arange(3).sum().astype(jnp.int32))",
-    "assertions": [],
-    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/examples/ffi/tests/cpu_examples_test.py",
-    "function": "@jax.custom_jvp\ndef sum(x):\n    return jnp.sum(x, axis=0)"
-  }
-]

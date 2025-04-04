@@ -1,8 +1,0 @@
-[
-  {
-    "test_code": "@jax.default_matmul_precision('float32')\ndef test_einsum_kpmurphy_example(self):\n    N, C, D, K, T = (2, 3, 4, 5, 6)\n    r = self.rng()\n    S = r.randn(N, T, K)\n    W = r.randn(K, D)\n    V = r.randn(D, C)\n    L = np.zeros((N, C))\n    for n in range(N):\n        for c in range(C):\n            s = 0\n            for d in range(D):\n                for k in range(K):\n                    for t in range(T):\n                        s += S[n, t, k] * W[k, d] * V[d, c]\n            L[n, c] = s\n    path = jnp.einsum_path('ntk,kd,dc->nc', S, W, V, optimize='optimal')[0]\n    self.assertAllClose(L, jnp.einsum('ntk,kd,dc->nc', S, W, V, optimize=path), check_dtypes=False)",
-    "assertions": [],
-    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/lax_numpy_einsum_test.py",
-    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
-  }
-]

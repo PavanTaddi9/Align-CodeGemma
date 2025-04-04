@@ -1,8 +1,0 @@
-[
-  {
-    "test_code": "@parameterized.named_parameters(dict(testcase_name='8x128_vs_16x256', total_size=(32, 256), block_size_a=(8, 128), block_size_b=(16, 256), tile_size=(8, 128), transpose_grid=False), dict(testcase_name='transpose_8x128_vs_16x256', total_size=(32, 256), block_size_a=(8, 128), block_size_b=(16, 256), tile_size=(8, 128), transpose_grid=True), dict(testcase_name='8x128_vs_32x128', total_size=(32, 128), block_size_a=(8, 128), block_size_b=(32, 128), tile_size=(8, 128), transpose_grid=False), dict(testcase_name='16x256_vs_32x128', total_size=(32, 256), block_size_a=(16, 256), block_size_b=(32, 128), tile_size=(8, 128), transpose_grid=False))\ndef test_block_shape_invariance(self, total_size, block_size_a, block_size_b, tile_size, transpose_grid):\n    grid_a = tuple((_tot // _blk for _tot, _blk in zip(total_size, block_size_a)))\n    result_a = call_kernel(uniform_kernel, grid_a, transpose_grid, total_size, block_size_a, tile_size)\n    grid_b = tuple((_tot // _blk for _tot, _blk in zip(total_size, block_size_b)))\n    result_b = call_kernel(uniform_kernel, grid_b, transpose_grid, total_size, block_size_b, tile_size)\n    np.testing.assert_array_equal(result_a, result_b)",
-    "assertions": [],
-    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/blocked_sampler_test.py",
-    "function": "def call_kernel(kernel, grid: tuple[int, int], transpose_grid: bool, *args):\n    \"\"\"Calls a kernel over a grid and concatenates results to a single array.\"\"\"\n    if transpose_grid:\n        grid = (grid[1], grid[0])\n    m, n = grid\n    return jnp.concatenate([jnp.concatenate([kernel(i, j, *args) for j in range(n)], axis=1) for i in range(m)], axis=0)"
-  }
-]

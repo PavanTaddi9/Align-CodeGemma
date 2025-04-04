@@ -1,8 +1,0 @@
-[
-  {
-    "test_code": "@jtu.sample_product([dict(m=m, n=n, r=r, c=c) for m, n, r, c in [(4, 3, 1, 1), (5, 2, 0, 0)]], dtype=float_types + complex_types)\ndef testQdwhWithTinyElement(self, m, n, r, c, dtype):\n    \"\"\"Tests qdwh on matrix with zeros and close-to-zero entries.\"\"\"\n    a = jnp.zeros((m, n), dtype=dtype)\n    one = dtype(1.0)\n    tiny_elem = dtype(jnp.finfo(a.dtype).tiny)\n    a = a.at[r, c].set(tiny_elem)\n\n    @jax.jit\n    def lsp_linalg_fn(a):\n        u, h, _, _ = qdwh.qdwh(a)\n        return (u, h)\n    actual_u, actual_h = lsp_linalg_fn(a)\n    expected_u = jnp.zeros((m, n), dtype=dtype)\n    expected_u = expected_u.at[r, c].set(one)\n    with self.subTest('Test u.'):\n        np.testing.assert_array_equal(expected_u, actual_u)\n    expected_h = jnp.zeros((n, n), dtype=dtype)\n    expected_h = expected_h.at[r, c].set(tiny_elem)\n    with self.subTest('Test h.'):\n        np.testing.assert_array_equal(expected_h, actual_h)",
-    "assertions": [],
-    "test_file": "/var/folders/q5/p2sqhr0d6nqb_h8x_fxyxpz80000gn/T/tmp_1jzy6em/jax/tests/qdwh_test.py",
-    "function": "def zeros(shape):\n    if not isinstance(shape, (tuple, list)):\n        shape = (shape,)\n    return lax.broadcast(jnp.float32(0.0), shape)"
-  }
-]
