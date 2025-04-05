@@ -3,7 +3,14 @@ name = "code_exec_server"
 version = "0.1.0"
 edition = "2021"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [dependencies]
-axum = "0.6.18"                     
-serde = { version = "1.0.200", features = ["derive"] }  
-tokio = { version = "1.29.1", features = ["full"] }  
+axum = "0.6.18"
+base64 = "0.21.2"
+lazy_static = "1.4.0"
+nix = { version = "0.28.0", features = ["user"] }
+serde = { version = "1.0.200", features = ["derive"] }
+serde_json = "1.0.116"
+sys-info = "0.9.1"
+tokio = { version = "1.29.1", features = ["full"] }
