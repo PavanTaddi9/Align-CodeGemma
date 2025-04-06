@@ -85,7 +85,6 @@ def grpo_trainer_setup(args: tuple) -> GRPOTrainer:
         reward_funcs=[run_tests_and_reward, reward_based_on_jax_usage],
         args=training_args,
         train_dataset=load_formatted_dataset(script_args.train_path),
-        eval_dataset=load_formatted_dataset(script_args.test_path),
         peft_config=get_peft_config(model_args),
     )
 
