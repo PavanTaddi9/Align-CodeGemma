@@ -42,9 +42,9 @@ def exec_test_batched(server, codes, lang=None, timeout=30, timeout_on_client=Fa
         code, stdin = code_stdin
         try:
             success, _ = exec_test(server, code, timeout, timeout_on_client, stdin=stdin)
-            return 1 if success else 0
+            return 1 if success else -1
         except:
-            return 0
+            return -1
 
     with ThreadPoolExecutor(max_workers=min(32, len(codes))) as executor:
         results = list(executor.map(exec_fn, zip(codes, stdins)))
