@@ -1,6 +1,6 @@
 # Align-CodeGemma: JAX-Aware Code Generation & Alignment
 
-A comprehensive framework for fine-tuning Google's **Gemma-3** to generate high-quality **JAX-based code** for computational tasks. This project implements advanced alignment techniques, execution-time validation, and reward-driven optimization using **GRPO** (Guided Reinforcement with Prompt Objectives).
+A comprehensive framework for fine-tuning Google's **Gemma-3** to generate high-quality **JAX-based code** for computational heavy natural language descriptions. This project implements  alignment techniques, execution-time validation, and reward-driven optimization using **GRPO** (Guided Reinforcement with Prompt Objectives).
 
 ## 🎯 Project Overview
 
@@ -22,23 +22,24 @@ This project addresses the challenge of generating domain-specific JAX code by:
 ```
 Align-CodeGemma/
 ├── datas/                          
-│   |── train_meta.json           
-│      
+│   └── train_meta.json                  # Training metadata
 │
-├── execserver/                    # Code execution and validation system
-│   ├── Dockerfile                 # docker file 
-│   ├── build-run.sh               # shell file
-│   └── code_exec_reqs.py          # server endpoints
+├── execserver/                          # Code execution and validation system
+│   ├── Dockerfile                        # Docker configuration for exec server
+│   ├── build-run.sh                      # Shell script to build and run
+│   └── code_exec_reqs.py                  # Server endpoints for code execution
 │
-├── src/                         
-│   ├── Docker image               # Docker image with pytorch and deepspeed
-│   ├── deepspeed.yaml             # deepspeed configuration
-│   ├── GRPO.yaml                  # grpo configuration
-│   └── prompt_template.py         # prompt template - train
-|   |__ train.py                   
-|   |__ utils.py                                       
-├── .gitattributes
-└── README.md
+├── src/                                 # Source code
+│   ├── Docker image                      # Docker image with PyTorch & DeepSpeed
+│   ├── deepspeed.yaml                     # DeepSpeed configuration
+│   ├── GRPO.yaml                          # GRPO configuration
+│   ├── prompt_template.py                 # Prompt template for training
+│   ├── train.py                           # Main training script
+│   └── utils.py                           # Utility functions
+│
+├── .gitattributes                        # Git configuration for file attributes
+└── README.md                             # Project documentation
+
 ```
 
 ## 🔧 Technical Implementation
