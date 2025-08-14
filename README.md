@@ -2,7 +2,7 @@
 
 A comprehensive framework for fine-tuning Google's **Gemma-3** to generate high-quality **JAX-based code** for computational heavy natural language descriptions. This project implements  alignment techniques, execution-time validation, and reward-driven optimization using **GRPO** (Guided Reinforcement with Prompt Objectives).
 
-## 🎯 Project Overview
+## Project Overview
 
 This project addresses the challenge of generating domain-specific JAX code by:
 - Fine-tuning Gemma-3 4B with specialized alignment techniques
@@ -10,14 +10,14 @@ This project addresses the challenge of generating domain-specific JAX code by:
 - Using reinforcement learning to optimize code quality
 - Developing custom metrics for JAX primitive evaluation
 
-## 🚀 Key Features
+## Key Features
 
 - **GRPO Optimization**: Custom reinforcement learning approach for code generation improvement
 - **Execution Validation**: Real-time code testing and validation pipeline
 - **JAX-Specific Metrics**: Custom evaluation framework for JAX primitive usage
 - **Scalable Architecture**: Docker-based deployment with FastAPI execution server
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 Align-CodeGemma/
@@ -42,7 +42,7 @@ Align-CodeGemma/
 
 ```
 
-## 🔧 Technical Implementation
+##  Technical Implementation
 
 ### Data Processing (`datas/`)
 - **Data Preparation**: Natural language descriptions of high compute intensive tasks
@@ -52,14 +52,14 @@ Align-CodeGemma/
 - **API Framework**: RESTful endpoints for code testing and result aggregation
 - **JAX Analysis**: Automated detection and validation of JAX primitives using regex
 
-## 🏆 Results & Impact
+## Results & Impact
 
 - **Improved Code Quality**: Significant enhancement in JAX-specific code generation accuracy
 - **Functional Correctness**: High success rate in generated code execution and validation
 - **Performance Optimization**: Efficient JAX primitive utilization in generated code
 - **Scalable Framework**: Production-ready system with containerized deployment
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **Model**: Google CodeGemma-3
 - **Framework**: JAX, RESTAPI, Docker
